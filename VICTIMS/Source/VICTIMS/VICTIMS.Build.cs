@@ -14,12 +14,14 @@ public class VICTIMS : ModuleRules
                 "VICTIMS/Public",
                 "VICTIMS/Public/Player",
                 "VICTIMS/Public/System",
+                "VICTIMS/Public/Item",                
             });
 
         PrivateIncludePaths.AddRange(new string[] {
                 "VICTIMS/Private",
                 "VICTIMS/Private/Player",
-                "VICTIMS/Private/System",                
+                "VICTIMS/Private/System",
+                "VICTIMS/Private/Item",                
             });
     }
 }
