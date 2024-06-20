@@ -7,7 +7,10 @@
 		{
 			"Name": "VICTIMS",
 			"Type": "Runtime",
-			"LoadingPhase": "Default"
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
 		}
 	],
 	"Plugins": [
@@ -17,6 +20,15 @@
 			"TargetAllowList": [
 				"Editor"
 			]
+		},
+		{
+			"Name": "YoutubeVideoAudioPlayer",
+			"Enabled": false,
+			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/4102d0282d03463faf9da2932faa3843"
+		},
+		{
+			"Name": "YoutubeStreamingPlugin",
+			"Enabled": false
 		}
 	]
 }
