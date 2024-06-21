@@ -35,6 +35,8 @@ public:
 	UYoutubeStreamingComponent();
 	FHttpModule* Http;
 	FString youtubeUrl;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Title;
 	
 	UFUNCTION(BlueprintCallable, Category = "Youtube Component")
     void GetYoutubeUrls(FString youtube_url);

@@ -33,6 +33,7 @@ void UYoutubeStreamingComponent::OnResponseReceived(FHttpRequestPtr Request, FHt
 	if (FJsonSerializer::Deserialize(Reader, pResponse))
 	{
 		auto video_title = pResponse->GetStringField("title");
+		Title=video_title;
 		auto video_url = pResponse->GetStringField("url");
 
 		OnUrlLoaded.Broadcast(*video_url, *video_title);
