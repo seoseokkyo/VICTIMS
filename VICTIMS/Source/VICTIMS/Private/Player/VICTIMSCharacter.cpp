@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "MainHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -50,6 +51,8 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
+	interactionCheckFrequency = 0.1f;
+	interactionCheckDistance = 225.0f;
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -58,6 +61,20 @@ void AVICTIMSCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	mainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
+}
+
+void AVICTIMSCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// 상호작용 가능 액터 찾기 
+	if (GetWorld()->TimeSince(interactionData.lastInteractionCheckTime) > interactionCheckFrequency)
+	{
+		PerformInteractionCheck();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -80,6 +97,10 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
+
+		EnhancedInputComponent->BindAction(ia_Interact, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::BeginInteract);
+		EnhancedInputComponent->BindAction(ia_Interact, ETriggerEvent::Completed, this, &AVICTIMSCharacter::EndInteract);
+
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Move);
@@ -126,5 +147,131 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+void AVICTIMSCharacter::PerformInteractionCheck()
+{
+	interactionData.lastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+
+	FVector start = GetPawnViewLocation();
+	FVector end = start + (GetViewRotation().Vector() * interactionCheckDistance);
+
+
+	FCollisionQueryParams queryParams;
+	queryParams.AddIgnoredActor(this);
+	FHitResult result;
+
+	float lookDir = FVector::DotProduct(GetActorForwardVector(), GetViewRotation().Vector());
+
+	if (lookDir > 0)
+	{
+
+	// 	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 2.0f);
+		// 라인트레이스 (카메라뷰 기준) 에 검출된 액터가 있을 때 
+		if (GetWorld()->LineTraceSingleByChannel(result, start, end, ECC_Visibility, queryParams))
+		{
+			if (result.GetActor()->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+			{
+				if (result.GetActor() != interactionData.currentInteractable)
+				{
+					// 상호작용 가능 + 상호작용 가능거리 일 때, 그 액터와 상호작용 준비 
+					FoundInteractable(result.GetActor());
+					return;
+				}
+					// 이미 상호작용 가능 액터를 찾은 상태라면(위 조건에 들어가 있는 상태) 더이상 검출시도 X
+				if (result.GetActor() == interactionData.currentInteractable)
+				{
+					return;
+				}
+			}
+		}
+	}
+	NoInteractableFound();
+}
+
+void AVICTIMSCharacter::FoundInteractable(AActor* newInteractable)
+{
+	if (IsInteracting())
+	{
+		EndInteract();
+	}
+	if (interactionData.currentInteractable)
+	{
+		targetInteractable = interactionData.currentInteractable;
+		targetInteractable->EndFocus();
+	}
+	interactionData.currentInteractable = newInteractable;
+	targetInteractable = newInteractable;
+
+	mainHUD->UpdateInteractionWidget(&targetInteractable->interactableData);
+
+	targetInteractable->BeginFocus();
+}
+
+void AVICTIMSCharacter::NoInteractableFound()
+{
+	if (IsInteracting())
+	{
+		GetWorldTimerManager().ClearTimer(timerHandle_Interaction);
+	}
+	if (interactionData.currentInteractable)
+	{
+		if (IsValid(targetInteractable.GetObject()))
+		{
+			targetInteractable->EndFocus();
+		}
+
+		mainHUD->HideInteractionWidget();
+
+		// 상호작용 UI 숨기기 
+		interactionData.currentInteractable = nullptr;
+		targetInteractable = nullptr;
+	}
+}
+
+void AVICTIMSCharacter::BeginInteract()
+{
+	// 상호작용 키 눌렀을 때 
+	// 상호작용 시작 전 다시 한번 상호작용 가능한 조건인지 확인
+	PerformInteractionCheck();
+	if (interactionData.currentInteractable)
+	{
+		if (IsValid(targetInteractable.GetObject()))
+		{
+			targetInteractable->BeginInteract();
+			if (FMath::IsNearlyZero(targetInteractable->interactableData.interactionDuration, 0.1f))
+			{	
+				// 바로 상호작용 
+				Interact();
+			}
+			else 
+			{
+				// 상호작용 걸리는 시간 이후에 상호작용 
+				GetWorldTimerManager().SetTimer(timerHandle_Interaction,
+					this, &AVICTIMSCharacter::Interact,
+					targetInteractable->interactableData.interactionDuration, false);
+			}
+		}
+	}
+}
+
+void AVICTIMSCharacter::EndInteract()
+{
+	// 상호작용 키 눌렀다 뗐을 때 
+	GetWorldTimerManager().ClearTimer(timerHandle_Interaction);
+	if (IsValid(targetInteractable.GetObject()))
+	{
+		targetInteractable->EndInteract();
+	}
+}
+
+void AVICTIMSCharacter::Interact()
+{
+	// 실제 상호작용 
+	GetWorldTimerManager().ClearTimer(timerHandle_Interaction);
+	if (IsValid(targetInteractable.GetObject()))
+	{
+		targetInteractable->Interact(this);
 	}
 }
