@@ -15,13 +15,15 @@ public class VICTIMS : ModuleRules
                 "VICTIMS/Public/Player",
                 "VICTIMS/Public/System",
                 "VICTIMS/Public/Youtube",
+                "VICTIMS/Public/Blackjack",
             });
 
         PrivateIncludePaths.AddRange(new string[] {
                 "VICTIMS/Private",
                 "VICTIMS/Private/Player",
                 "VICTIMS/Private/System",
-                "VICTIMS/Private/Youtube",                
+                "VICTIMS/Private/Youtube",
+                 "VICTIMS/Private/Blackjack",
             });
     }
 }
