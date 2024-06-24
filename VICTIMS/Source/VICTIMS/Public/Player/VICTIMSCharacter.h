@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
+#include "CharacterBase.h"
 #include "InteractionInterface.h"
 #include "VICTIMSCharacter.generated.h"
 
@@ -38,7 +39,7 @@ struct FInteractionData
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
-class AVICTIMSCharacter : public ACharacter
+class AVICTIMSCharacter : public ACharacterBase
 {
 	GENERATED_BODY()
 
@@ -106,6 +107,7 @@ protected:
 	void EndInteract();
 	void Interact();
 
+	void CharacterJump(const FInputActionValue& Value);
 
 protected:
 	// APawn interface
@@ -121,7 +123,23 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	//상호작용 중인지 확인 
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
+	TSubclassOf<class ABaseWeapon> defaultWeapon;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ToggleCombat();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_ToggleCombat();
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
+
+	virtual void DieFunction() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	
 	FORCEINLINE bool IsInteracting() const {return GetWorldTimerManager().IsTimerActive(timerHandle_Interaction);};
 };
 

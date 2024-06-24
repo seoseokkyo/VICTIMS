@@ -10,6 +10,9 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include "CombatComponent.h"
+#include "BaseWeapon.h"
 #include "MainHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -53,6 +56,10 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 
 	interactionCheckFrequency = 0.1f;
 	interactionCheckDistance = 225.0f;
+
+	characterName = TEXT("Player");
+
+
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -64,7 +71,20 @@ void AVICTIMSCharacter::BeginPlay()
 
 	mainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
+	FActorSpawnParameters spawnParam;
+	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	spawnParam.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
+	spawnParam.Owner = this;
+	spawnParam.Instigator = this;
+
+	ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
+
+	if (equipment)
+	{
+		equipment->OnEquipped();
+	}
 }
+
 
 void AVICTIMSCharacter::Tick(float DeltaSeconds)
 {
@@ -76,7 +96,6 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 		PerformInteractionCheck();
 	}
 }
-
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -95,12 +114,11 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		EnhancedInputComponent->BindAction(ia_Interact, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::BeginInteract);
 		EnhancedInputComponent->BindAction(ia_Interact, ETriggerEvent::Completed, this, &AVICTIMSCharacter::EndInteract);
-
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Move);
@@ -274,4 +292,106 @@ void AVICTIMSCharacter::Interact()
 	{
 		targetInteractable->Interact(this);
 	}
+}
+
+float AVICTIMSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	return 0.0f;
+}
+
+void AVICTIMSCharacter::ServerRPC_ToggleCombat_Implementation()
+{
+	motionState = ECharacterMotionState::ToggleCombat;
+
+	combatComponent->bCombatEnable = !combatComponent->bCombatEnable;
+
+	NetMulticastRPC_ToggleCombat();
+}
+
+void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation()
+{
+	auto mainWeaponPtr = combatComponent->GetMainWeapon();
+
+	float animPlayTime = 0.0f;
+
+	if (!combatComponent->bCombatEnable)
+	{
+		if (mainWeaponPtr->exitCombatMontage)
+		{
+			animPlayTime = PlayAnimMontage(mainWeaponPtr->exitCombatMontage, 1.5f);
+
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
+		}
+	}
+	else
+	{
+		if (mainWeaponPtr->enterCombatMontage)
+		{
+			animPlayTime = PlayAnimMontage(mainWeaponPtr->enterCombatMontage, 1.5f);
+
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
+		}
+	}
+
+	FTimerHandle timerHandle;
+
+	GetWorldTimerManager().SetTimer(timerHandle, [&]()
+		{
+			motionState = ECharacterMotionState::Idle;
+
+			GetWorld()->GetTimerManager().ClearTimer(timerHandle);
+
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
+
+		}, animPlayTime, false, 1.0f);
+}
+
+void AVICTIMSCharacter::DieFunction()
+{
+	auto param = GetMesh()->GetCollisionResponseToChannels();
+	param.SetResponse(ECC_Visibility, ECollisionResponse::ECR_Block);
+
+	GetMesh()->SetCollisionResponseToChannels(param);
+
+	if (IsLocallyControlled())
+	{
+		auto pc = Cast<APlayerController>(Controller);
+
+		if (pc)
+		{
+			DisableInput(pc);
+		}
+	}
+
+	motionState = ECharacterMotionState::Die;
+
+	Super::DieFunction();
+}
+
+
+void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+}
+
+
+void AVICTIMSCharacter::CharacterJump(const FInputActionValue& Value)
+{
+	if (motionState != ECharacterMotionState::Idle)
+	{
+		return;
+	}
+
+	Super::Jump();
 }
