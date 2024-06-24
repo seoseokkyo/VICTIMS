@@ -20,8 +20,8 @@ Input       : None.
 Output      : None.
 Return      : None.
 ******************************************************************************/
-void Dealer::setPlayerSet(vector<Player*>& playerSet) {
-	this->playerSet = playerSet;
+void Dealer::setPlayerSet(vector<Player*>& _playerSet) {
+	this->playerSet = _playerSet;
 }
 /* End Function:setPlayerSet  *******************************************************/
 

@@ -8,7 +8,7 @@ public class VICTIMS : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "NavigationSystem", "PhysicsCore", "UMG", "Slate", "SlateCore" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "NavigationSystem", "PhysicsCore", "UMG", "Slate", "SlateCore", "HTTP", "Json", "JsonUtilities" });
 
         PublicIncludePaths.AddRange(new string[] {
                 "VICTIMS/Public",
@@ -19,7 +19,8 @@ public class VICTIMS : ModuleRules
                 "VICTIMS/Public/Combat",
                 "VICTIMS/Public/AnimNotify",
                 "VICTIMS/Public/Inventory",
-                
+                "VICTIMS/Public/Youtube",
+                "VICTIMS/Public/Blackjack",
             });
 
         PrivateIncludePaths.AddRange(new string[] {
@@ -31,7 +32,8 @@ public class VICTIMS : ModuleRules
                 "VICTIMS/Private/Combat",
                 "VICTIMS/Private/AnimNotify",
                 "VICTIMS/Private/Inventory",
-                
+                "VICTIMS/Private/Youtube",
+                "VICTIMS/Private/Blackjack",
             });
     }
 }
