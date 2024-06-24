@@ -90,10 +90,12 @@ void ACardDeck::shuffler()
 	}
 
 
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size+1; i++)
 	{
 		int randIndex = FMath::RandRange(0, size);
-		CardSet[i]->SetActorLocation(FVector(50 + i * 50, 0, 300));
+		CardSet[i]->SetActorLocation(FVector(0, 0, 350 + i * 0.1));
+		CardSet[i]->SetActorRotation(FRotator(90,0,0));
+		CardSet[i]->SetActorScale3D(FVector(0.1,0.1,0.1));
 	}
 }
 
