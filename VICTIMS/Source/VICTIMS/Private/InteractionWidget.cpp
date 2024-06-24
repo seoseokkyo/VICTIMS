@@ -27,17 +27,7 @@ void UInteractionWidget::UpdateWidget(const FInteractableData* interactableData)
 		case EInteractableType::pickUp:
 		keyPressText->SetText(FText::FromString("Press"));
 		interactionProgressBar->SetVisibility(ESlateVisibility::Collapsed);
-
-		if (interactableData->quantity < 2)
-		{
-			quantity->SetVisibility(ESlateVisibility::Collapsed);
-		}
-		else
-		{
-			quantity->SetText(FText::Format(NSLOCTEXT("InteractionWidget", "Quantity", "x{0}"),
-				interactableData->quantity));
-				quantity->SetVisibility(ESlateVisibility::Visible);
-		}
+		actionText->SetText(FText::FromString("PickUp"));
 		break;
 
 		case EInteractableType::nonPlayerCharacter:
@@ -56,8 +46,6 @@ void UInteractionWidget::UpdateWidget(const FInteractableData* interactableData)
 
 	}
 
-	actionText->SetText(interactableData->action);
-	nameText->SetText(interactableData->name);
 
 }
 

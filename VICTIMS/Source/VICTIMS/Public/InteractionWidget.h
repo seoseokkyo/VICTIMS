@@ -25,13 +25,7 @@ public:
 protected:
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
-	UTextBlock* nameText;
-
-	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
 	UTextBlock* actionText;
-
-	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
-	UTextBlock* quantity;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
 	UTextBlock* interactkeyText;
