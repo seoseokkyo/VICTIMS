@@ -49,10 +49,17 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void PlayGame(TArray<class AActor*>PlayCharacterSet);
+
+	UFUNCTION(BlueprintCallable)
+	void EndGame(TArray<class AActor*>PlayCharacterSet);
 	
 	// Player Array
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<AActor*>				PlayerArray;
 
+	//현재 오버랩 되어있는 콜리전.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<UPrimitiveComponent*> PlayerOverlapCollisiosArray;
 	////////위젯/////////////////////////////////////
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBlackjackJoinWidget* joinWidget;
@@ -75,6 +82,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class ABlackjackCard> CardDeck_BP;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bGameStartCountDown=false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float ReadyDuration=3.0f;
 
 
 protected:

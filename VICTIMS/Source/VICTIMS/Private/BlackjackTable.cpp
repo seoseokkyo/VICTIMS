@@ -14,6 +14,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h>
 #include <utility>
 #include "CardDeck.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ABlackjackTable::ABlackjackTable()
@@ -45,7 +46,7 @@ ABlackjackTable::ABlackjackTable()
 
 		auto playerPosCapsuleComp = CreateDefaultSubobject<UCapsuleComponent>(*FString::Printf(TEXT("Player%dCollision"), i + 1));
 		playerPosCapsuleComp->SetupAttachment(playerPosSceneComp);
-		playerPosCapsuleComp->SetRelativeScale3D(FVector(0.2, 0.2, 1.5));
+		playerPosCapsuleComp->SetRelativeScale3D(FVector(1, 1, 1.5));
 
 		PlayerLocs.Add(playerPosSceneComp);
 		PlayerCollisionLocs.Add(playerPosCapsuleComp);
@@ -98,9 +99,14 @@ void ABlackjackTable::BeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 			{
 				if (PlayerArray[i] == nullptr)
 				{
-					PlayerArray[i] = OtherActor;
-					joinWidget->AddToPlayerScreen();
-					GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+					PlayerOverlapCollisiosArray.Add(OverlappedComp);
+					if (!PlayerArray.Contains(OtherActor))
+					{
+						PlayerArray[i] = OtherActor;
+						joinWidget->AddToPlayerScreen();
+						GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
+					}
+					
 				}
 
 				break;
@@ -111,9 +117,14 @@ void ABlackjackTable::BeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 
 void ABlackjackTable::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	joinWidget->RemoveFromParent();
-	GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
-
+	PlayerOverlapCollisiosArray.Remove(OverlappedComponent);
+	//현재 오버랩 되어있는 콜리전이 하나도 없다면,위젯을 지워라
+	if (PlayerOverlapCollisiosArray.Num() == 0)
+		{
+		joinWidget->RemoveFromParent();
+		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
+		}
+	
 	int nums = PlayerLocs.Num();
 
 	for (int i = 0; i < nums; i++)
@@ -134,10 +145,13 @@ void ABlackjackTable::ReadyToPlayGame(AActor* PlayerCharactor)
 {
 	PlayerSet.Add(PlayerCharactor);
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("OnReady")));
+	bGameStartCountDown=true;
+	
 }
 
 void ABlackjackTable::PlayGame(TArray<class AActor*> PlayCharacterSet)
 {
+	joinWidget->RemoveFromParent();
 	int32 playerNum = PlayerArray.Num();
 	for (int i = 0; i < playerNum; i++)
 	{
@@ -155,17 +169,22 @@ void ABlackjackTable::PlayGame(TArray<class AActor*> PlayCharacterSet)
 
 					if (spawnPawn != nullptr)
 					{
+
+						
 						//spawnPawn->SetActorLocation(PlayerLocs[i]->GetComponentLocation() + FVector(0, 0, 150));
-
+						FVector forVecTempXYZ=cardPositions[i]->GetComponentLocation()-PlayerLocs[i]->GetComponentLocation();
+						FVector forVec=FVector(forVecTempXYZ.X, forVecTempXYZ.Y, 0);
+						FRotator forwardRotator = UKismetMathLibrary::MakeRotFromZX(FVector(0,0,1), forVec);
 						//FVector dir = RootComp->GetComponentLocation() - spawnPawn->FollowCamera->GetComponentLocation()-FVector(0,0,50);
-						FVector dir = FVector(0,0,-1);
-						dir.Normalize();
-
-						spawnPawn->FollowCamera->SetWorldRotation(dir.Rotation());
-						spawnPawn->FollowCamera->AddWorldRotation(FRotator(0,90,0));
-						spawnPawn->FollowCamera->SetWorldLocation(RootComp->GetComponentLocation()+FVector(0,0,150));
+						spawnPawn->FollowCamera->SetWorldRotation(forwardRotator);
+						//spawnPawn->FollowCamera->SetWorldLocation(RootComp->GetComponentLocation()+FVector(0,0,150));
+						spawnPawn->FollowCamera->SetWorldLocation(cardPositions[i]->GetComponentLocation() + FVector(0, 0, 150));
 						//PlayerArray[i]->GetActorLocation();
 						//PlayerCollisionLocs[i]->GetComponentLocation();
+						FVector dir = FVector(0, 0, -1);
+						dir.Normalize();
+						//spawnPawn->FollowCamera->SetWorldRotation(dir.Rotation());
+						spawnPawn->FollowCamera->AddRelativeRotation(FRotator(-70, 0, 0));
 
 						PlayerControllerCheck->Possess(spawnPawn);
 
@@ -175,6 +194,12 @@ void ABlackjackTable::PlayGame(TArray<class AActor*> PlayCharacterSet)
 			}
 		}
 	}
+}
+
+void ABlackjackTable::EndGame(TArray<class AActor*> PlayCharacterSet)
+{
+
+
 }
 
 
@@ -209,16 +234,30 @@ void ABlackjackTable::Tick(float DeltaTime)
 
 	if (bIsPlayingnow == false)
 	{
-		if (readyTime < 10)
+		if (bGameStartCountDown)
 		{
-			readyTime = readyTime + DeltaTime;
-		}
-		else
-		{// 본격적인 게임 플레이로 넘겨주고, 변수도 바꿔준다.
-			PlayGame(PlayerSet);
-			bIsPlayingnow = true;
-			readyTime = 0;
-			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("OnPlay")));
+		int32 StartCountSecond=0;
+		int32 StartCountSecondTemp=0;
+			if (readyTime < ReadyDuration)
+			{
+				readyTime = readyTime + DeltaTime;
+				StartCountSecondTemp=readyTime/1;
+				if (StartCountSecondTemp>StartCountSecond)
+				{
+					StartCountSecond=StartCountSecondTemp;
+					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Start After %f Later"), ReadyDuration-StartCountSecond));
+				}
+			}
+			else
+			{// 본격적인 게임 플레이로 넘겨주고, 변수도 바꿔준다.
+				PlayGame(PlayerSet);
+				bIsPlayingnow = true;
+				readyTime = 0;
+				StartCountSecond=0;
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("OnPlay")));
+				bGameStartCountDown=false;
+				
+			}
 		}
 	}
 
