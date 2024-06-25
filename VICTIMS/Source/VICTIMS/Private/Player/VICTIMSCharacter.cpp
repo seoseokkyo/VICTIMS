@@ -90,6 +90,8 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	PrintInfo();
+
 	// 상호작용 가능 액터 찾기 
 	if (GetWorld()->TimeSince(interactionData.lastInteractionCheckTime) > interactionCheckFrequency)
 	{
@@ -125,6 +127,10 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Look);
+
+		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
+		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
+		
 	}
 	else
 	{
@@ -301,61 +307,6 @@ float AVICTIMSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	return 0.0f;
 }
 
-void AVICTIMSCharacter::ServerRPC_ToggleCombat_Implementation()
-{
-	motionState = ECharacterMotionState::ToggleCombat;
-
-	combatComponent->bCombatEnable = !combatComponent->bCombatEnable;
-
-	NetMulticastRPC_ToggleCombat();
-}
-
-void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation()
-{
-	auto mainWeaponPtr = combatComponent->GetMainWeapon();
-
-	float animPlayTime = 0.0f;
-
-	if (!combatComponent->bCombatEnable)
-	{
-		if (mainWeaponPtr->exitCombatMontage)
-		{
-			animPlayTime = PlayAnimMontage(mainWeaponPtr->exitCombatMontage, 1.5f);
-
-			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
-		}
-	}
-	else
-	{
-		if (mainWeaponPtr->enterCombatMontage)
-		{
-			animPlayTime = PlayAnimMontage(mainWeaponPtr->enterCombatMontage, 1.5f);
-
-			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
-		}
-	}
-
-	FTimerHandle timerHandle;
-
-	GetWorldTimerManager().SetTimer(timerHandle, [&]()
-		{
-			motionState = ECharacterMotionState::Idle;
-
-			GetWorld()->GetTimerManager().ClearTimer(timerHandle);
-
-			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
-
-		}, animPlayTime, false, 1.0f);
-}
-
 void AVICTIMSCharacter::DieFunction()
 {
 	auto param = GetMesh()->GetCollisionResponseToChannels();
@@ -394,4 +345,116 @@ void AVICTIMSCharacter::CharacterJump(const FInputActionValue& Value)
 	}
 
 	Super::Jump();
+}
+
+void AVICTIMSCharacter::ToggleCombat(const FInputActionValue& Value)
+{
+	auto mainWeaponPtr = combatComponent->GetMainWeapon();
+	if (IsValid(mainWeaponPtr))
+	{
+		if (motionState == ECharacterMotionState::Idle)
+		{
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
+
+			ServerRPC_ToggleCombat();
+		}
+	}
+}
+
+void AVICTIMSCharacter::LeftClick(const FInputActionValue& Value)
+{
+	if (false == combatComponent->bCombatEnable)
+	{
+		return;
+	}
+
+	if (combatComponent->bAttacking)
+	{
+		combatComponent->bAttackSaved = true;
+	}
+	else
+	{
+		AttackEvent();
+	}
+}
+
+void AVICTIMSCharacter::ServerRPC_ToggleCombat_Implementation()
+{
+	motionState = ECharacterMotionState::ToggleCombat;
+
+	combatComponent->bCombatEnable = !combatComponent->bCombatEnable;
+
+	NetMulticastRPC_ToggleCombat();
+}
+
+void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation()
+{
+	auto mainWeaponPtr = combatComponent->GetMainWeapon();
+
+	float animPlayTime = 0.0f;
+
+	if (!combatComponent->bCombatEnable)
+	{
+		if (mainWeaponPtr->exitCombatMontage)
+		{
+			animPlayTime = PlayAnimMontage(mainWeaponPtr->exitCombatMontage, 1.5f);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
+		}
+	}
+	else
+	{
+		if (mainWeaponPtr->enterCombatMontage)
+		{
+			animPlayTime = PlayAnimMontage(mainWeaponPtr->enterCombatMontage, 1.5f);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
+		}
+	}
+
+	//<< SSK 이거 먹히는지 테스트는 해봐야 됨
+	FTimerHandle timerHandle;
+
+	GetWorldTimerManager().SetTimer(timerHandle, [&]()
+		{
+			motionState = ECharacterMotionState::Idle;
+
+			GetWorld()->GetTimerManager().ClearTimer(timerHandle);
+
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
+
+		}, animPlayTime, false, 1.0f);
+}
+
+void AVICTIMSCharacter::PrintInfo()
+{
+	// localRole
+	FString localRole = UEnum::GetValueAsString(GetLocalRole());
+
+	// remoteRole
+	FString remoteRole = UEnum::GetValueAsString(GetRemoteRole());
+
+	// owner
+	FString owner = GetOwner() ? GetOwner()->GetName() : "";
+
+	// netConn
+	FString netConn = GetNetConnection() ? "Valid" : "Invalid";
+
+	//FString netMode = UEnum::GetValueAsString(GetNetMode());
+
+	FString hasController = Controller ? TEXT("HasController") : TEXT("NoController");
+
+	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
+	FString strSP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::SP));
+
+	//FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, /**netMode,*/ *hasController, *strHP, *strSP);
+
+	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, *hasController, *strHP, *strSP);
+
+	FVector loc = GetActorLocation() + FVector(0, 0, 50);
+	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
 }
