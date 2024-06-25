@@ -61,16 +61,22 @@ public:
 	void print_deck();
 
 	UFUNCTION(BlueprintCallable)
-	int getCard();
+	ABlackjackCard* getCard();
 
 	UFUNCTION(BlueprintCallable)
 	bool is_deck_empty();
+
+	UFUNCTION(BlueprintCallable)
+	void ResetDeck();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TSubclassOf<class ABlackjackCard> BP_CardFactory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* dt_cardInfoDataTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsEmpty=false;
 
 protected:
 	// Called when the game starts or when spawned

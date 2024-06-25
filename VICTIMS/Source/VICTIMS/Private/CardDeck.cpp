@@ -103,14 +103,33 @@ void ACardDeck::print_deck()
 {
 }
 
-int ACardDeck::getCard()
+ABlackjackCard* ACardDeck::getCard()
 {
-	return 0;
+	int lastIndex = CardSet.Num() - 1;
+
+		ABlackjackCard* card = CardSet[lastIndex];
+		CardSet.Remove(card);
+
+		if (lastIndex==0)
+		{
+			bIsEmpty=true;
+		}
+
+		return card;
 }
+
+
 
 bool ACardDeck::is_deck_empty()
 {
-	return false;
+	return bIsEmpty;
+}
+
+void ACardDeck::ResetDeck()
+{
+	CardSet.Empty();
+	init_deck();
+	shuffler();
 }
 
 void ACardDeck::BeginPlay()
