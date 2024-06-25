@@ -6,4 +6,6 @@
 void UBlackjackJoinWidget::SetOwnerActor(AActor* Owner)
 {
 	OwnerPlayer=Owner;
+
+	GetOwningPlayer()->GetPawn();
 }
