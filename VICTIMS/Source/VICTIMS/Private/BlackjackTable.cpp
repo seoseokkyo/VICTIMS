@@ -155,13 +155,15 @@ void ABlackjackTable::PlayGame(TArray<class AActor*> PlayCharacterSet)
 
 					if (spawnPawn != nullptr)
 					{
-						spawnPawn->SetActorLocation(PlayerLocs[i]->GetComponentLocation() + FVector(0, 0, 150));
+						//spawnPawn->SetActorLocation(PlayerLocs[i]->GetComponentLocation() + FVector(0, 0, 150));
 
-						FVector dir = RootComp->GetComponentLocation() - spawnPawn->FollowCamera->GetComponentLocation();
+						//FVector dir = RootComp->GetComponentLocation() - spawnPawn->FollowCamera->GetComponentLocation()-FVector(0,0,50);
+						FVector dir = FVector(0,0,-1);
 						dir.Normalize();
 
 						spawnPawn->FollowCamera->SetWorldRotation(dir.Rotation());
-
+						spawnPawn->FollowCamera->AddWorldRotation(FRotator(0,90,0));
+						spawnPawn->FollowCamera->SetWorldLocation(RootComp->GetComponentLocation()+FVector(0,0,150));
 						//PlayerArray[i]->GetActorLocation();
 						//PlayerCollisionLocs[i]->GetComponentLocation();
 

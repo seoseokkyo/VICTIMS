@@ -20,27 +20,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 Ace = 1, J = 10, Q = 10, K = 10;
 
-
-	////enum class ECardValue
-	////{
-	////	Ace = 1,
-	////	Two,
-	////	Three,
-	////	Four,
-	////	Five,
-	////	Six,
-	////	Seven,
-	////	Eight,
-	////	Nine,
-	////	Ten,
-	////	J = 10,
-	////	Q = 10,
-	////	K = 10,
-	////	ECardValueMax
-	////};
-
-	//int32 Clover=1, Heart=2, Diamond=3, Spade=4;
-
 	//Clover, Heart, Diamond, Spade
 	//Ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
