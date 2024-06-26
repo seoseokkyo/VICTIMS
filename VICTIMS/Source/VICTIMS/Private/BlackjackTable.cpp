@@ -220,9 +220,9 @@ void ABlackjackTable::GetADealerCard()
 	{
 		cardValueTemp = "10";
 	}
-	else if (cardValueTemp == "Ace")
+	else if (cardValueTemp == "A")
 	{
-		cardValueTemp = "1";
+		cardValueTemp = "11";
 	}
 
 	int32 cardScore = FCString::Atoi(*cardValueTemp);
@@ -239,18 +239,14 @@ void ABlackjackTable::GetADealerCard()
 
 		for (int i = 0; i < cardNum; i++)
 		{
-			if (DealerCardSet[i]->cardInfo.cardValue == "ACE")
+			if (DealerCardSet[i]->cardInfo.cardValue == "A")
 			{
 				DealerCardSet[i]->cardInfo.cardValue = "1";
 				dealerScoreSum=0;
 				for (int j=0; j<cardNum;j++)
 				{
-
 					dealerScoreSum= dealerScoreSum+ FCString::Atoi(*DealerCardSet[j]->cardInfo.cardValue);
-
 				}
-
-
 				if (dealerScoreSum < 21)
 				{
 					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %i"), dealerScoreSum),true, true, FColor::Cyan, 10);

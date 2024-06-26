@@ -84,7 +84,6 @@ void ABlackjackPlyaer::GetCard()
 	PlayerCardSet[cardNum - 1]->Flip();
 
 	CalcScore();
-	
 }
 
 void ABlackjackPlyaer::CalcScore()
@@ -95,7 +94,7 @@ FString cardValueTemp= PlayerCardSet[cardNum - 1]->cardInfo.cardValue;
 	{
 		cardValueTemp = "10";
 	}
-	else if (cardValueTemp == "Ace")
+	else if (cardValueTemp == "A")
 	{
 		cardValueTemp = "11";
 	}
@@ -113,15 +112,13 @@ FString cardValueTemp= PlayerCardSet[cardNum - 1]->cardInfo.cardValue;
 
 		for (int i=0; i<cardNum; i++)
 		{
-			if (PlayerCardSet[i]->cardInfo.cardValue == "ACE")
+			if (PlayerCardSet[i]->cardInfo.cardValue == "A")
 				{
 				PlayerCardSet[i]->cardInfo.cardValue = "1";
 				scoreSum = 0;
 					for (int j = 0; j < cardNum; j++)
 					{
-
 						scoreSum = scoreSum + FCString::Atoi(*PlayerCardSet[j]->cardInfo.cardValue);
-
 					}
 
 					if (scoreSum == 21)
