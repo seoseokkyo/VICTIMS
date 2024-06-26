@@ -165,6 +165,8 @@ void ABaseWeapon::OnHitCollisionComponent(FHitResult lastHitStruct)
 
 		TSubclassOf<UDamageType> damageTypeClass = {};
 
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("self : %s"), *hitActor->GetActorNameOrLabel()));
+
 		//<< 이거 damageTypeClass랑 블루프린트의 기본값이랑 차이가 있는지 확인필요
 		UGameplayStatics::ApplyPointDamage(hitActor, weaponDamage, hitFromDirection, lastHitStruct, GetInstigatorController(), this, damageTypeClass);
 	}

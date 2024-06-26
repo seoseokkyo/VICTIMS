@@ -60,6 +60,8 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 {
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
 
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("self : %s"), *GetActorNameOrLabel()));
+
 	if (HitSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
