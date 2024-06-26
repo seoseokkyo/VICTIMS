@@ -7,6 +7,7 @@
 #include "BlackjackCard.h"
 #include "CardDeck.h"
 #include "BlackjackJoinWidget.h"
+#include "CardDeck.h"
 #include "BlackjackTable.generated.h"
 
 UCLASS()
@@ -80,13 +81,43 @@ public:
 	TArray<class AActor*>PlayerSet;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<class ABlackjackCard> CardDeck_BP;
+	TSubclassOf<class ACardDeck> CardDeck_BP;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bGameStartCountDown=false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float ReadyDuration=3.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class ACardDeck* deck;
+
+	struct std::pair<FVector, FRotator > deckPoint;
+
+	struct std::pair<FVector, FRotator > deckWeastPoint;
+
+	////////////////////////////////////////////////////////////////////////////게임 스테이트/////////////////////////////////////////////////////////////////
+	 
+	//딜러카드
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<class ABlackjackCard*> DealerCardSet;
+
+	
+
+	
+	//카드 받을지 말지
+	bool bWnatMoreCard=true;
+	//딜러 카드 합
+	int32 dealerScoreSum;
+	////////////////////1. 카드 두장씩 받기.////////////////////////////
+	UFUNCTION(BlueprintCallable)
+	void GetADealerCard();
+
+
+
+
+
+	
 
 
 protected:

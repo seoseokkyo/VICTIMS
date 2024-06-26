@@ -4,6 +4,7 @@
 #include "CardDeck.h"
 #include "BlackjackCard.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Components/SceneComponent.h>
 
 // Sets default values
 ACardDeck::ACardDeck()
@@ -13,6 +14,8 @@ ACardDeck::ACardDeck()
 
 	FString errorText;
 
+	auto rootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("CardMesh"));
+	SetRootComponent(rootComponent);
 }
 
 void ACardDeck::init_deck()
@@ -36,8 +39,13 @@ void ACardDeck::init_deck()
 		int cardValueTypeSize = temp.size();
 		for (int j = 0; j < cardValueTypeSize; j++)
 		{
-			auto card = GetWorld()->SpawnActor<ABlackjackCard>(BP_CardFactory, param);
+			auto card = GetWorld()->SpawnActor<ABlackjackCard>(BP_CardFactory, GetActorLocation(), GetActorRotation(), param);
+
+			card->AttachToComponent(RootComponent, FAttachmentTransformRules::SnapToTargetIncludingScale);
+
 			card->cardInfo.cardType = (ECardType)i;
+
+			card->SetActorRotation(FRotator(90.0f, 0.0f, 0.0f));
 
 			if (j == 0)
 			{
@@ -76,6 +84,7 @@ void ACardDeck::init_deck()
 			CardSet.Add(card);
 		}
 
+		bIsEmpty = false;
 	}
 
 }
@@ -90,12 +99,12 @@ void ACardDeck::shuffler()
 	}
 
 
-	for (int i = 0; i < size+1; i++)
+	for (int i = 0; i < size + 1; i++)
 	{
 		int randIndex = FMath::RandRange(0, size);
-		CardSet[i]->SetActorLocation(FVector(0, 0, 350 + i * 0.1));
-		CardSet[i]->SetActorRotation(FRotator(90,0,0));
-		CardSet[i]->SetActorScale3D(FVector(0.1,0.1,0.1));
+		CardSet[i]->SetActorRelativeLocation(FVector(0, 0, i * 0.1));
+		CardSet[i]->SetActorRelativeRotation(FRotator(90.0f, 0.0f, 0.0f));
+		CardSet[i]->SetActorRelativeScale3D(FVector(0.1, 0.1, 0.1));
 	}
 }
 
@@ -105,17 +114,20 @@ void ACardDeck::print_deck()
 
 ABlackjackCard* ACardDeck::getCard()
 {
+	if (bIsEmpty)
+		return nullptr;
+
 	int lastIndex = CardSet.Num() - 1;
 
-		ABlackjackCard* card = CardSet[lastIndex];
-		CardSet.Remove(card);
+	ABlackjackCard* card = CardSet[lastIndex];
+	CardSet.Remove(card);
 
-		if (lastIndex==0)
-		{
-			bIsEmpty=true;
-		}
+	if (lastIndex == 0)
+	{
+		bIsEmpty = true;
+	}
 
-		return card;
+	return card;
 }
 
 
@@ -152,7 +164,7 @@ void ACardDeck::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 
-	
+
 
 }
 

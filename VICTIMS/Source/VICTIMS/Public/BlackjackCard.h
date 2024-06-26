@@ -34,6 +34,8 @@ struct FBlackjackCardInfo : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMesh* cardMesh;
+
+	
 };
 
 
@@ -59,5 +61,13 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FBlackjackCardInfo cardInfo;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bOnFlip = false;
+
+	UFUNCTION()
+	void Flip();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float RotTemp = 0;
 };

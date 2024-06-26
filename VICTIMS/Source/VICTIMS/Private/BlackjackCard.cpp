@@ -2,6 +2,7 @@
 
 
 #include "BlackjackCard.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 // Sets default values
 ABlackjackCard::ABlackjackCard()
@@ -26,5 +27,29 @@ void ABlackjackCard::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if(bOnFlip ==true)
+	{
+	
+	if (RotTemp<180)
+	{
+		RotTemp=RotTemp+DeltaTime*300; 
+		AddActorLocalRotation(FRotator(0, DeltaTime * 300, 0));
+	}
+		
+	else
+	{
+		RotTemp=0;
+		bOnFlip=false;
+	}
+	}
+
+
+}
+
+void ABlackjackCard::Flip()
+{
+	
+		bOnFlip = true;
+	
 }
 

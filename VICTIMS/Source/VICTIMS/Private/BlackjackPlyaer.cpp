@@ -5,6 +5,10 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Camera/CameraComponent.h>
 #include <../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputSubsystems.h>
 #include <../../../../../../../Plugins/EnhancedInput/Source/EnhancedInput/Public/EnhancedInputComponent.h>
+#include "BlackjackTable.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Components/SceneComponent.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 // Sets default values
 ABlackjackPlyaer::ABlackjackPlyaer()
@@ -36,21 +40,22 @@ void ABlackjackPlyaer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	//// Add Input Mapping Context
-	//if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	//{
-	//	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-	//	{
-	//		Subsystem->AddMappingContext(DefaultMappingContext, 0);
-	//	}
-	//}
-	//
-	//// Set up action bindings
-	//if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) 
-	//{
-	//	EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlackjackPlyaer::Look);
-	//}
-	//// Looking
+	// Add Input Mapping Context
+	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
+	{
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
+		{
+			Subsystem->AddMappingContext(DefaultMappingContext, 0);
+		}
+	}
+
+	// Set up action bindings
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlackjackPlyaer::Look);
+		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &ABlackjackPlyaer::LeftClickFunction);
+		
+	}
 }
 
 
@@ -60,12 +65,91 @@ void ABlackjackPlyaer::Look(const FInputActionValue& Value)
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	FollowCamera->AddRelativeRotation(FRotator(-LookAxisVector.Y, LookAxisVector.X, 0));
+}
 
+void ABlackjackPlyaer::LeftClickFunction(const FInputActionValue& Value)
+{
+	GetCard();
+}
 
-	//if (Controller != nullptr)
-	//{
-	//	// add yaw and pitch input to controller
-	//	AddControllerYawInput(LookAxisVector.X);
-	//	AddControllerPitchInput(LookAxisVector.Y);
-	//}
+void ABlackjackPlyaer::GetCard()
+{
+	PlayerCardSet.Add(table->deck->getCard());
+
+	int cardNum = PlayerCardSet.Num();
+	PlayerCardSet[cardNum - 1]->
+		SetActorLocation(cardPosition->GetComponentLocation() + FVector((cardNum - 1) * 5, (cardNum - 1) * 3, 0.1 + cardNum * 0.1));
+
+	PlayerCardSet[cardNum - 1]->SetActorRotation(UKismetMathLibrary::MakeRotFromXZ(FVector(0, 0, 1), -1 * cardPosition->GetForwardVector()));
+	PlayerCardSet[cardNum - 1]->Flip();
+
+	CalcScore();
+	
+}
+
+void ABlackjackPlyaer::CalcScore()
+{
+int cardNum = PlayerCardSet.Num();
+FString cardValueTemp= PlayerCardSet[cardNum - 1]->cardInfo.cardValue;
+	if (cardValueTemp=="J"|| cardValueTemp == "Q"|| cardValueTemp == "K")
+	{
+		cardValueTemp = "10";
+	}
+	else if (cardValueTemp == "Ace")
+	{
+		cardValueTemp = "11";
+	}
+
+	int32 cardScore = FCString::Atoi(*cardValueTemp);
+	
+	scoreSum=scoreSum+cardScore;
+	if (scoreSum==21)
+	{
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Player BlackJack!")));
+	}
+
+	else if (scoreSum > 21)
+	{
+
+		for (int i=0; i<cardNum; i++)
+		{
+			if (PlayerCardSet[i]->cardInfo.cardValue == "ACE")
+				{
+				PlayerCardSet[i]->cardInfo.cardValue = "1";
+				scoreSum = 0;
+					for (int j = 0; j < cardNum; j++)
+					{
+
+						scoreSum = scoreSum + FCString::Atoi(*PlayerCardSet[j]->cardInfo.cardValue);
+
+					}
+
+					if (scoreSum == 21)
+					{
+						UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Player BlackJack!")));
+					}
+
+					else if (scoreSum > 21)
+					{
+						UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Bust!")), true, true, FColor::Cyan, 10);
+					}
+
+					else
+					{
+						UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("MyScore : %i"), scoreSum), true, true, FColor::Cyan, 10);
+					}
+
+				}
+			else
+			{
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Bust!")), true, true, FColor::Cyan, 10);
+			}
+		}
+	}
+	
+	else
+	{
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("MyScore : %i"), scoreSum), true, true, FColor::Cyan, 10);
+	}
+	
 }
