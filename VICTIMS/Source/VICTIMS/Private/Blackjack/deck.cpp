@@ -15,7 +15,7 @@ Description : Implementation of deck.h.
 /* Public Global Variables ***************************************************/
 int Ace = 1;
 int J = 10;
-int Q = 10;
+int DeckQ = 10;
 int K = 10;
 vector<int>deck;
 /* End Public Global Variables ***********************************************/
@@ -27,10 +27,10 @@ Output      : Initialized deck.
 Return      : None.
 ******************************************************************************/
 void init_deck() {
-	deck = { Ace,2,3,4,5,6,7,8,9,10,J,Q,K,
-	         Ace,2,3,4,5,6,7,8,9,10,J,Q,K,
-	         Ace,2,3,4,5,6,7,8,9,10,J,Q,K,
-	         Ace,2,3,4,5,6,7,8,9,10,J,Q,K };
+	deck = { Ace,2,3,4,5,6,7,8,9,10,J,DeckQ,K,
+	         Ace,2,3,4,5,6,7,8,9,10,J,DeckQ,K,
+	         Ace,2,3,4,5,6,7,8,9,10,J,DeckQ,K,
+	         Ace,2,3,4,5,6,7,8,9,10,J,DeckQ,K };
 }
 /* End Function:init_deck ****************************************************/
 
