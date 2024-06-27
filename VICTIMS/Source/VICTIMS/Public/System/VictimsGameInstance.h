@@ -22,7 +22,18 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FCharacterStat GetCharacterDataTable(const FString& rowName);
-			
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ConnectToServerAndMoveToNewLevel(APlayerController* PlayerController, const FString& NewLevelName, ETravelType type);
+	
+
+	UFUNCTION()
+	void StreamingLevelTest();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void LoadSubLevel(APlayerController* PlayerController, const FString& LevelName);
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MySettings")
 	UDataTable* dt_characerStatDataTable;
 };
