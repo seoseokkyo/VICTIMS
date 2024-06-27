@@ -161,8 +161,6 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
-	FORCEINLINE bool IsInteracting() const {return GetWorldTimerManager().IsTimerActive(timerHandle_Interaction);};
-	
 		// 상호작용 가능범위 판별 
 	UFUNCTION()
 	void OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

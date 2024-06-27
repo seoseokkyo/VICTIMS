@@ -97,10 +97,8 @@ void AVICTIMSCharacter::BeginPlay()
 	
 	if (IsLocallyControlled())
 	{
-
 		MainPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 		HUD = Cast<AMainHUD>(MainPlayerController->GetHUD());
-
 	}
 }
 
