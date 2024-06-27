@@ -33,20 +33,28 @@ void UVictimsGameInstance::StreamingLevelTest()
 
 	// ULevelStreaming 객체 생성
 	//ULevelStreaming* LevelStreaming = ULevelStreaming::NewLevelStreaming(LevelPackageName, LevelPackageName, FName(*LevelName), FTransform::Identity);
+
+    int mapsNum = GetWorld()->GetStreamingLevels().Num();
+    ULevelStreaming* LevelStreamingPersistent = NewObject<ULevelStreaming>(GetWorld(), ULevelStreaming::StaticClass(), FName(FString::Printf(TEXT("Map_%d"), mapsNum)));
+
+    
+
+    GetWorld()->AddStreamingLevel(LevelStreamingPersistent);
 }
 
-void UVictimsGameInstance::ConnectToServerAndMoveToNewLevel_Implementation(APlayerController* PlayerController, const FString& NewLevelName)
+void UVictimsGameInstance::ConnectToServerAndMoveToNewLevel_Implementation(APlayerController* PlayerController, const FString& NewLevelName, ETravelType type)
 {
     FString ServerAddress = "192.168.0.147"; // 서버 주소
     int32 ServerPort = 7777; // 서버 포트
     FString DefaultLevelName = "/Game/Maps/DefaultLevel"; // 서버의 기본 레벨
 
     // 서버에 접속
-    FString URL = FString::Printf(TEXT("%s:%d"), *ServerAddress, ServerPort);
+    //FString URL = FString::Printf(TEXT("%s:%d"), *ServerAddress, ServerPort);
 
 	bool bCheck = PlayerController->HasAuthority();
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("PlayerController->HasAuthority : %s"), bCheck ? TEXT("TRUE") : TEXT("FALSE")));
 
+    FString URL = FString::Printf(TEXT("192.168.0.147/Game/%s"), *NewLevelName);
     //if (PlayerController)
     //{
     //    PlayerController->ClientTravel(URL, ETravelType::TRAVEL_Absolute);
@@ -58,8 +66,8 @@ void UVictimsGameInstance::ConnectToServerAndMoveToNewLevel_Implementation(APlay
     if (PlayerController)
     {
 		//ServerAddress.Append(NewLevelName);
-        PlayerController->ClientTravel(ServerAddress, ETravelType::TRAVEL_Partial);
-
+        PlayerController->ClientTravel(NewLevelName, type);
+        
 		bCheck = PlayerController->HasAuthority();
 
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("PlayerController->HasAuthority : %s"), bCheck ? TEXT("TRUE") : TEXT("FALSE")));
@@ -95,7 +103,7 @@ void UVictimsGameInstance::LoadSubLevel_Implementation(APlayerController* Player
         World->SetStreamingLevels(arrayTest);
 
         // 클라이언트에게 새로운 레벨 로드 요청
-        PlayerController->ClientTravel(LevelName, ETravelType::TRAVEL_Relative);
+        PlayerController->ClientTravel(LevelName, ETravelType::TRAVEL_Absolute);
     }
     else
     {

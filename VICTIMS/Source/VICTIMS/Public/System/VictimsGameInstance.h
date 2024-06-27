@@ -24,7 +24,7 @@ public:
 	FCharacterStat GetCharacterDataTable(const FString& rowName);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void ConnectToServerAndMoveToNewLevel(APlayerController* PlayerController, const FString& NewLevelName);
+	void ConnectToServerAndMoveToNewLevel(APlayerController* PlayerController, const FString& NewLevelName, ETravelType type);
 	
 
 	UFUNCTION()
