@@ -10,6 +10,8 @@
 #include "CardDeck.h"
 #include "BlackjackTable.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FGameReady)
+
 UCLASS()
 class VICTIMS_API ABlackjackTable : public AActor
 {
@@ -50,6 +52,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void PlayGame(TArray<class AActor*>PlayCharacterSet);
+
+	UFUNCTION(BlueprintCallable)
+	void BetMoney(TArray<class AActor*>PlayCharacterSet);
 
 	UFUNCTION(BlueprintCallable)
 	void EndGame(TArray<class AActor*>PlayCharacterSet);
@@ -97,26 +102,74 @@ public:
 	struct std::pair<FVector, FRotator > deckWeastPoint;
 
 	////////////////////////////////////////////////////////////////////////////게임 스테이트/////////////////////////////////////////////////////////////////
-	 
+	FGameReady gameReadyDelegate;
+
+
 	//딜러카드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<class ABlackjackCard*> DealerCardSet;
 
-	
+	TArray<class ABlackjackPlyaer*> blackjackPlayerSet;
 
 	
 	//카드 받을지 말지
 	bool bWnatMoreCard=true;
 	//딜러 카드 합
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 dealerScoreSum;
 	////////////////////1. 카드 두장씩 받기.////////////////////////////
+
+
 	UFUNCTION(BlueprintCallable)
 	void GetADealerCard();
 
+	UFUNCTION(BlueprintCallable)
+	void FlipADealerCard();
+
+	UFUNCTION(BlueprintCallable)
+	void CheckCard(ABlackjackCard* card);
+
+	UFUNCTION(BlueprintCallable)
+	void CalcScore(FString AddValue);
+
+	UFUNCTION(BlueprintCallable)
+	void ChooseAceValue(ABlackjackCard* AceCard);
+
+	UFUNCTION(BlueprintCallable)
+	void SetAceTo1(ABlackjackCard* card);
+
+	UFUNCTION(BlueprintCallable)
+	void SetAceTo11(ABlackjackCard* card);
+	//////////////승 패 판단 
+	UFUNCTION(BlueprintCallable)
+	void Lose(ABlackjackPlyaer* player);
+
+	UFUNCTION(BlueprintCallable)
+	void PlayerBlackJack(ABlackjackPlyaer* player);
+
+	UFUNCTION(BlueprintCallable)
+	void PlayerStand(ABlackjackPlyaer* player, int32 playerScore);
+
+	UFUNCTION(BlueprintCallable)
+	void DealerCardOpen(ABlackjackPlyaer* player, int32 playerScore);
+	///////////////////////게임이 끝나고/////////////////
+	UFUNCTION(BlueprintCallable)
+	void InitialiseGame();
+
+	UFUNCTION(BlueprintCallable)
+	void UnpossesPlayer();
 
 
+	UFUNCTION(BlueprintCallable)
+	void Win(ABlackjackPlyaer* player);
 
+	UFUNCTION(BlueprintCallable)
+	void Push(ABlackjackPlyaer* player);
+	
+	void SetWidget(class UBlajackMainWidget* widget);
 
+	class UBlajackMainWidget* playerMainWidget = nullptr;
 	
 
 

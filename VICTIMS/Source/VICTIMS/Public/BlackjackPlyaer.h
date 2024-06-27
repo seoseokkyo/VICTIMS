@@ -1,15 +1,16 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Pawn.h"
+//#include "BlajackMainWidget.h"
+//#include "GameFramework/Pawn.h"
 #include "BlackjackPlyaer.generated.h"
 
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
+class UPickAceValueUserWidget;
+class UBlajackMainWidget;
 
 UCLASS()
 class VICTIMS_API ABlackjackPlyaer : public APawn
@@ -50,20 +51,57 @@ public:
 
 	void LeftClickFunction(const FInputActionValue& Value);
 
-	void GetCard();
+	UFUNCTION(BlueprintCallable)
+	void GetCard(); 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<class ABlackjackCard*> PlayerCardSet;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class ABlackjackTable* table;
 
 	UPROPERTY()
 	class USceneComponent* cardPosition;
 
 	UFUNCTION(BlueprintCallable)
-	void CalcScore();
+	void CalcScore(FString AddValue);
 
-	UPROPERTY()
+	UFUNCTION(BlueprintCallable)
+	void CheckCard(ABlackjackCard* card);
+
+	UFUNCTION(BlueprintCallable)
+	void ChooseAceValue(ABlackjackCard* AceCard);
+
+	UFUNCTION(BlueprintCallable)
+	void SetAceTo1(ABlackjackCard* card);
+
+	UFUNCTION(BlueprintCallable)
+	void SetAceTo11(ABlackjackCard* card);
+
+	UFUNCTION(BlueprintCallable)
+	void Stand();
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 scoreSum=0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int32 DealerScore=0;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UPickAceValueUserWidget* AceWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> AceWidget_BP;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UBlajackMainWidget* MainWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<UUserWidget> MainWidget_BP;
+
+
+	class AVICTIMSCharacter* originPlayer;
+	
 };

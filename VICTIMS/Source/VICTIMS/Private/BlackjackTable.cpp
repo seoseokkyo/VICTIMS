@@ -15,6 +15,7 @@
 #include <utility>
 #include "CardDeck.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "BlajackMainWidget.h"
 
 // Sets default values
 ABlackjackTable::ABlackjackTable()
@@ -79,8 +80,8 @@ ABlackjackTable::ABlackjackTable()
 		cardPositions.Add(CardPointComp);
 	}
 	//덱과 버리는 위치 지정
-	deckPoint=std::make_pair(FVector(-41.75f,71.99f,14.77f), FRotator(0.0f,-113.30f,0.0f));
-	deckWeastPoint=std::make_pair(FVector(39.956839,75.689062,14.770671), FRotator(0.0f,-64.966086,0.0f));
+	deckPoint = std::make_pair(FVector(-41.75f, 71.99f, 14.77f), FRotator(0.0f, -113.30f, 0.0f));
+	deckWeastPoint = std::make_pair(FVector(39.956839, 75.689062, 14.770671), FRotator(0.0f, -64.966086, 0.0f));
 }
 //////////////////////////오버랩 이벤트//////////////////////////
 void ABlackjackTable::BeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -109,7 +110,7 @@ void ABlackjackTable::BeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 						joinWidget->AddToPlayerScreen();
 						GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(true);
 					}
-					
+
 				}
 
 				break;
@@ -120,14 +121,17 @@ void ABlackjackTable::BeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* 
 
 void ABlackjackTable::EndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (OtherActor == nullptr)
+		return;
+
 	PlayerOverlapCollisiosArray.Remove(OverlappedComponent);
 	//현재 오버랩 되어있는 콜리전이 하나도 없다면,위젯을 지워라
 	if (PlayerOverlapCollisiosArray.Num() == 0)
-		{
+	{
 		joinWidget->RemoveFromParent();
 		GetWorld()->GetFirstPlayerController()->SetShowMouseCursor(false);
-		}
-	
+	}
+
 	int nums = PlayerLocs.Num();
 
 	for (int i = 0; i < nums; i++)
@@ -149,10 +153,14 @@ void ABlackjackTable::ReadyToPlayGame(AActor* PlayerCharactor)
 {
 	PlayerSet.Add(PlayerCharactor);
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("OnReady")));
-	bGameStartCountDown=true;
-	
-}
+	bGameStartCountDown = true;
 
+}
+void ABlackjackTable::BetMoney(TArray<class AActor*> PlayCharacterSet)
+{
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("BetMoney")));
+	PlayGame(PlayerSet);
+}
 void ABlackjackTable::PlayGame(TArray<class AActor*> PlayCharacterSet)
 {
 	joinWidget->RemoveFromParent();
@@ -173,9 +181,9 @@ void ABlackjackTable::PlayGame(TArray<class AActor*> PlayCharacterSet)
 
 					if (spawnPawn != nullptr)
 					{
-						FVector forVecTempXYZ=cardPositions[i]->GetComponentLocation()-PlayerLocs[i]->GetComponentLocation();
-						FVector forVec=FVector(forVecTempXYZ.X, forVecTempXYZ.Y, 0);
-						FRotator forwardRotator = UKismetMathLibrary::MakeRotFromZX(FVector(0,0,1), forVec);
+						FVector forVecTempXYZ = cardPositions[i]->GetComponentLocation() - PlayerLocs[i]->GetComponentLocation();
+						FVector forVec = FVector(forVecTempXYZ.X, forVecTempXYZ.Y, 0);
+						FRotator forwardRotator = UKismetMathLibrary::MakeRotFromZX(FVector(0, 0, 1), forVec);
 						spawnPawn->FollowCamera->SetWorldRotation(forwardRotator);
 						spawnPawn->FollowCamera->SetWorldLocation(cardPositions[i]->GetComponentLocation() + FVector(0, 0, 150));
 						FVector dir = FVector(0, 0, -1);
@@ -184,13 +192,22 @@ void ABlackjackTable::PlayGame(TArray<class AActor*> PlayCharacterSet)
 
 						spawnPawn->table = this;
 						spawnPawn->cardPosition = cardPositions[i];
+						spawnPawn->originPlayer = playerCheck;
 
 						PlayerControllerCheck->Possess(spawnPawn);
 
+						blackjackPlayerSet.Add(spawnPawn);
+
 						spawnPawn->GetCard();
 						spawnPawn->GetCard();
 
+						SetWidget(spawnPawn->MainWidget);
+
+						//한장 받고
 						GetADealerCard();
+						//하나 까고
+						FlipADealerCard();
+						//하나는 받고 안깐다
 						GetADealerCard();
 
 					}
@@ -199,6 +216,7 @@ void ABlackjackTable::PlayGame(TArray<class AActor*> PlayCharacterSet)
 		}
 	}
 }
+
 ///////////////////////////////////////////////////////////////////////////////카드 게임 스테이트/////////////////////////////////////////////////////
 void ABlackjackTable::EndGame(TArray<class AActor*> PlayCharacterSet)
 {
@@ -212,23 +230,38 @@ void ABlackjackTable::GetADealerCard()
 {
 	DealerCardSet.Add(deck->getCard());
 	int cardNum = DealerCardSet.Num();
-	DealerCardSet[cardNum-1]->SetActorLocation(GetActorLocation()+FVector((cardNum-1)*5,(cardNum-1)*3,15+cardNum*0.1)+GetActorRightVector()*20);
-	DealerCardSet[cardNum - 1]->Flip();
+	DealerCardSet[cardNum - 1]->SetActorLocation(GetActorLocation() + FVector((cardNum - 1) * 5, (cardNum - 1) * 3, 15 + cardNum * 0.1) + GetActorRightVector() * 20);
+}
+void ABlackjackTable::FlipADealerCard()
+{
+	int LastCardNum = DealerCardSet.Num() - 1;
+	DealerCardSet[LastCardNum]->Flip();
+	CheckCard(DealerCardSet[LastCardNum]);
+}
 
-	FString cardValueTemp = DealerCardSet[cardNum - 1]->cardInfo.cardValue;
+
+void ABlackjackTable::CheckCard(ABlackjackCard* card)
+{
+	FString cardValueTemp = card->cardInfo.cardValue;
 	if (cardValueTemp == "J" || cardValueTemp == "Q" || cardValueTemp == "K")
 	{
 		cardValueTemp = "10";
+		CalcScore(cardValueTemp);
 	}
 	else if (cardValueTemp == "A")
 	{
-		cardValueTemp = "11";
+		ChooseAceValue(card);
 	}
+	else
+	{
+		CalcScore(cardValueTemp);
+	}
+}
 
-	int32 cardScore = FCString::Atoi(*cardValueTemp);
-
+void ABlackjackTable::CalcScore(FString AddValue)
+{
+	int32 cardScore = FCString::Atoi(*AddValue);
 	dealerScoreSum = dealerScoreSum + cardScore;
-
 	if (dealerScoreSum == 21)
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Dealer BlackJack!")));
@@ -236,41 +269,178 @@ void ABlackjackTable::GetADealerCard()
 
 	else if (dealerScoreSum > 21)
 	{
-
-		for (int i = 0; i < cardNum; i++)
-		{
-			if (DealerCardSet[i]->cardInfo.cardValue == "A")
-			{
-				DealerCardSet[i]->cardInfo.cardValue = "1";
-				dealerScoreSum=0;
-				for (int j=0; j<cardNum;j++)
-				{
-					dealerScoreSum= dealerScoreSum+ FCString::Atoi(*DealerCardSet[j]->cardInfo.cardValue);
-				}
-				if (dealerScoreSum < 21)
-				{
-					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %i"), dealerScoreSum),true, true, FColor::Cyan, 10);
-				}
-				else if (dealerScoreSum == 21)
-				{
-					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Dealer BlackJack!")), true, true, FColor::Cyan, 10);
-				}
-				else
-				{
-					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerBust!")), true, true, FColor::Cyan, 10);
-				}
-			}
-			else
-			{
-				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerBust!")), true, true, FColor::Cyan, 10);
-			}
-		}
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %iBust!"), dealerScoreSum), true, true, FColor::Cyan, 10);
 	}
 	else
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %i"), dealerScoreSum), true, true, FColor::Cyan, 10);
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %i "), dealerScoreSum), true, true, FColor::Cyan, 10);
 	}
 
+	if (playerMainWidget != nullptr)
+	{
+		if (playerMainWidget->dealerScoreDelegate.IsBound())
+		{
+			playerMainWidget->dealerScoreDelegate.Execute(dealerScoreSum);
+		}
+		else
+		{
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("playerMainWidget->dealerScoreDelegate is not bound")));
+		}
+	}
+}
+
+void ABlackjackTable::ChooseAceValue(ABlackjackCard* AceCard)
+{
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("AceOn")));
+	if (dealerScoreSum + 11 > 21)
+	{
+		SetAceTo1(AceCard);
+	}
+	else
+	{
+		SetAceTo11(AceCard);
+
+	}
+}
+
+void ABlackjackTable::SetAceTo1(ABlackjackCard* card)
+{
+	card->cardInfo.cardValue = "1";
+	CalcScore("1");
+}
+
+void ABlackjackTable::SetAceTo11(ABlackjackCard* card)
+{
+	card->cardInfo.cardValue = "11";
+	CalcScore("11");
+}
+
+void ABlackjackTable::PlayerBlackJack(ABlackjackPlyaer* player)
+{
+	FlipADealerCard();
+
+	if (dealerScoreSum == 21)
+	{
+		Push(player);
+	}
+	else
+	{
+		Win(player);
+	}
+
+}
+
+void ABlackjackTable::PlayerStand(ABlackjackPlyaer* player, int32 playerScore)
+{
+	DealerCardOpen(player, playerScore);
+}
+
+void ABlackjackTable::DealerCardOpen(ABlackjackPlyaer* player, int32 playerScore)
+{
+	FlipADealerCard();
+
+	if (dealerScoreSum < 17)
+	{
+		FTimerHandle timerHandle;
+		GetWorld()->GetTimerManager().SetTimer(timerHandle, [&]() {
+
+			GetADealerCard();
+			DealerCardOpen(player, playerScore);
+
+
+			}, 0.7f, false);
+
+	}
+
+	else if (dealerScoreSum == 21)
+	{
+		Lose(player);
+	}
+
+	else
+	{
+		if (playerScore > dealerScoreSum)
+		{
+			Win(player);
+		}
+		else if (playerScore < dealerScoreSum)
+			if (dealerScoreSum > 21)
+			{
+				Win(player);
+			}
+			else
+			{
+				Lose(player);
+			}
+		else
+		{
+			Push(player);
+		}
+	}
+
+
+}
+
+void ABlackjackTable::InitialiseGame()
+{
+
+	FTimerHandle timerHandle;
+	GetWorld()->GetTimerManager().SetTimer(timerHandle, [&]() {
+
+		UnpossesPlayer();
+
+		playerMainWidget->RemoveFromParent();
+		//DealerCardSet.Empty();
+		dealerScoreSum = 0;
+		bIsPlayingnow = false;
+		readyTime = 0;
+		//PlayerArray.Empty();
+		deck->init_deck();
+		deck->shuffler();
+
+		}, 2.0f, false);
+
+
+}
+
+void ABlackjackTable::UnpossesPlayer()
+{
+	int playerNum = blackjackPlayerSet.Num();
+	for (int i = 0; i < playerNum; i++)
+	{
+		auto controller = blackjackPlayerSet[i]->GetController();
+
+		if (controller)
+		{
+			controller->UnPossess();
+			controller->Possess(blackjackPlayerSet[i]->originPlayer);
+		}
+	}
+}
+
+void ABlackjackTable::Win(ABlackjackPlyaer* player)
+{
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Win!")), true, true, FColor::Cyan, 10);
+	InitialiseGame();
+}
+
+void ABlackjackTable::Push(ABlackjackPlyaer* player)
+{
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Push!")), true, true, FColor::Cyan, 10);
+	InitialiseGame();
+}
+
+void ABlackjackTable::Lose(ABlackjackPlyaer* player)
+{
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Lose!")), true, true, FColor::Cyan, 10);
+	InitialiseGame();
+}
+
+void ABlackjackTable::SetWidget(UBlajackMainWidget* widget)
+{
+	playerMainWidget = widget;
 }
 
 
@@ -288,10 +458,10 @@ void ABlackjackTable::BeginPlay()
 	FActorSpawnParameters param;
 	param.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	param.TransformScaleMethod = ESpawnActorScaleMethod::OverrideRootScale;
-	
+
 	//시작 할 때 카드 덱을 정해진 장소에 스폰함.
 	auto cardDeck = GetWorld()->SpawnActor<ACardDeck>(CardDeck_BP, param);
-	cardDeck->SetActorLocation(GetActorLocation()+deckPoint.first);
+	cardDeck->SetActorLocation(GetActorLocation() + deckPoint.first);
 	cardDeck->SetActorRotation(deckPoint.second);
 
 	deck = cardDeck;
@@ -306,32 +476,32 @@ void ABlackjackTable::Tick(float DeltaTime)
 	{
 		if (bGameStartCountDown)
 		{
-		int32 StartCountSecond=0;
-		int32 StartCountSecondTemp=0;
+			int32 StartCountSecond = 0;
+			int32 StartCountSecondTemp = 0;
 			if (readyTime < ReadyDuration)
 			{
 				readyTime = readyTime + DeltaTime;
-				StartCountSecondTemp=readyTime/1;
-				if (StartCountSecondTemp>StartCountSecond)
+				StartCountSecondTemp = readyTime / 1;
+				if (StartCountSecondTemp > StartCountSecond)
 				{
-					StartCountSecond=StartCountSecondTemp;
-					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Start After %f Later"), ReadyDuration-StartCountSecond));
+					StartCountSecond = StartCountSecondTemp;
+					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Start After %f Later"), ReadyDuration - StartCountSecond));
 				}
 			}
 			else
 			{// 본격적인 게임 플레이로 넘겨주고, 변수도 바꿔준다.
-				PlayGame(PlayerSet);
+				BetMoney(PlayerSet);
 				bIsPlayingnow = true;
 				readyTime = 0;
-				StartCountSecond=0;
+				StartCountSecond = 0;
 				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("OnPlay")));
-				bGameStartCountDown=false;
-				
+				bGameStartCountDown = false;
+
 			}
 		}
 	}
 
 
-	
+
 }
 

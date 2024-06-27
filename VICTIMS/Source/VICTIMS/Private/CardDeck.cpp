@@ -27,7 +27,15 @@ void ACardDeck::init_deck()
 
 	std::vector<int> temp = { Ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K };
 
+	if (CardSet.Num() > 0)
+	{
+		for (auto card : CardSet)
+		{
+			card->Destroy();
+		}
+	}
 
+	CardSet.Reset(0);
 
 	for (int i = 0; i < (int)ECardType::ECardTypeMax; i++)
 	{

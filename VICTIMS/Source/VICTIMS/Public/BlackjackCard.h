@@ -68,6 +68,7 @@ public:
 	UFUNCTION()
 	void Flip();
 
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float RotTemp = 0;
 };

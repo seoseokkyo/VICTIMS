@@ -9,6 +9,9 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/SceneComponent.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/GameFramework/Pawn.h>
+#include "PickAceValueUserWidget.h"
+#include "BlajackMainWidget.h"
 
 // Sets default values
 ABlackjackPlyaer::ABlackjackPlyaer()
@@ -26,6 +29,14 @@ void ABlackjackPlyaer::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+	AceWidget = CreateWidget<UPickAceValueUserWidget>(GetWorld(), AceWidget_BP);
+	MainWidget = CreateWidget<UBlajackMainWidget>(GetWorld(), MainWidget_BP);
+
+	MainWidget->AddToViewport();
+
+	MainWidget->SetPlayer(this);
+	MainWidget->SetDealer(table);
 }
 
 // Called every frame
@@ -53,7 +64,7 @@ void ABlackjackPlyaer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ABlackjackPlyaer::Look);
-		EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &ABlackjackPlyaer::LeftClickFunction);
+		//EnhancedInputComponent->BindAction(LeftClickAction, ETriggerEvent::Started, this, &ABlackjackPlyaer::LeftClickFunction);
 		
 	}
 }
@@ -83,70 +94,89 @@ void ABlackjackPlyaer::GetCard()
 	PlayerCardSet[cardNum - 1]->SetActorRotation(UKismetMathLibrary::MakeRotFromXZ(FVector(0, 0, 1), -1 * cardPosition->GetForwardVector()));
 	PlayerCardSet[cardNum - 1]->Flip();
 
-	CalcScore();
+	CheckCard(PlayerCardSet[cardNum - 1]);
 }
 
-void ABlackjackPlyaer::CalcScore()
+void ABlackjackPlyaer::CheckCard(ABlackjackCard* card)
 {
-int cardNum = PlayerCardSet.Num();
-FString cardValueTemp= PlayerCardSet[cardNum - 1]->cardInfo.cardValue;
-	if (cardValueTemp=="J"|| cardValueTemp == "Q"|| cardValueTemp == "K")
+	FString cardValueTemp = card->cardInfo.cardValue;
+	if (cardValueTemp == "J" || cardValueTemp == "Q" || cardValueTemp == "K")
 	{
 		cardValueTemp = "10";
+		CalcScore(cardValueTemp);
 	}
 	else if (cardValueTemp == "A")
 	{
-		cardValueTemp = "11";
+		ChooseAceValue(card);
 	}
+	else
+	{
+		CalcScore(cardValueTemp);
+	}
+}
 
-	int32 cardScore = FCString::Atoi(*cardValueTemp);
-	
+void ABlackjackPlyaer::ChooseAceValue(ABlackjackCard* AceCard)
+{
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("AceOn")));
+
+	AceWidget->SetBlackJackPlayer(this);
+	AceWidget->SetAceCard(AceCard);
+	AceWidget->AddToViewport();
+
+}
+
+void ABlackjackPlyaer::SetAceTo1(ABlackjackCard* card)
+{
+	card->cardInfo.cardValue="1";
+	CalcScore("1");
+}
+
+void ABlackjackPlyaer::SetAceTo11(ABlackjackCard* card)
+{
+	card->cardInfo.cardValue = "11";
+	CalcScore("11");
+}
+
+void ABlackjackPlyaer::Stand()
+{
+
+	table->PlayerStand(this, scoreSum);
+
+}
+
+
+
+void ABlackjackPlyaer::CalcScore(FString AddValue)
+{
+	int32 cardScore = FCString::Atoi(*AddValue);
 	scoreSum=scoreSum+cardScore;
 	if (scoreSum==21)
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Player BlackJack!")));
+		table->PlayerBlackJack(this);
 	}
 
 	else if (scoreSum > 21)
 	{
-
-		for (int i=0; i<cardNum; i++)
-		{
-			if (PlayerCardSet[i]->cardInfo.cardValue == "A")
-				{
-				PlayerCardSet[i]->cardInfo.cardValue = "1";
-				scoreSum = 0;
-					for (int j = 0; j < cardNum; j++)
-					{
-						scoreSum = scoreSum + FCString::Atoi(*PlayerCardSet[j]->cardInfo.cardValue);
-					}
-
-					if (scoreSum == 21)
-					{
-						UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Player BlackJack!")));
-					}
-
-					else if (scoreSum > 21)
-					{
-						UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Bust!")), true, true, FColor::Cyan, 10);
-					}
-
-					else
-					{
-						UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("MyScore : %i"), scoreSum), true, true, FColor::Cyan, 10);
-					}
-
-				}
-			else
-			{
-				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Bust!")), true, true, FColor::Cyan, 10);
-			}
-		}
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("MyScore : %iBust!"), scoreSum), true, true, FColor::Cyan, 10);
+		table->Lose(this);
 	}
-	
 	else
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("MyScore : %i"), scoreSum), true, true, FColor::Cyan, 10);
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("MyScore : %i "), scoreSum), true, true, FColor::Cyan, 10);
 	}
-	
+
+	if (MainWidget != nullptr)
+	{
+		if (MainWidget->playerScoreDelegate.IsBound())
+		{
+			MainWidget->playerScoreDelegate.Execute(scoreSum);
+		}
+		else
+		{
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("playerMainWidget->playerScoreDelegate is not bound")));
+		}
+	}
 }
+
+
