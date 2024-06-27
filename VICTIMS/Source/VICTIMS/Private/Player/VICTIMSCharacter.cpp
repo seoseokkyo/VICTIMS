@@ -19,6 +19,7 @@
 #include "AVICTIMSPlayerController.h"
 #include "InteractionInterface.h"
 #include "PickUp.h"
+#include "HousingComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -73,7 +74,7 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 
 	characterName = TEXT("Player");
 
-
+	HousingComponent = CreateDefaultSubobject<UHousingComponent>(TEXT("HousingComp"));
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -99,6 +100,11 @@ void AVICTIMSCharacter::BeginPlay()
 	{
 		MainPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 		HUD = Cast<AMainHUD>(MainPlayerController->GetHUD());
+	}
+	
+	if (HousingComponent)
+	{
+		HousingComponent->Camera = FollowCamera; // 초기화 시 카메라 컴포넌트를 할당
 	}
 }
 
@@ -490,4 +496,12 @@ void AVICTIMSCharacter::PrintInfo()
 
 	FVector loc = GetActorLocation() + FVector(0, 0, 50);
 	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
+}
+
+void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
+{
+	if (TargetComponent)
+	{
+		TargetComponent->DestroyComponent();
+	}
 }
