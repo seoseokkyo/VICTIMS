@@ -11,7 +11,6 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Net/UnrealNetwork.h>
-
 #include <Kismet/GameplayStatics.h>
 
 // Sets default values
@@ -59,8 +58,6 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
-
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("self : %s"), *GetActorNameOrLabel()));
 
 	if (HitSound)
 	{
