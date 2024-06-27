@@ -15,38 +15,41 @@ class VICTIMS_API AMainHUD : public AHUD
 	GENERATED_BODY()
 
 public:
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
-	TSubclassOf<UMainMenu> mainMenu_wbp;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
-	TSubclassOf<UInteractionWidget> interaction_wbp;
+	TSubclassOf<UMainMenu> MainMenuClass;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<UInteractionWidget> InteractionWidgetClass;
 
 	bool bIsMenuVisible;
-
-	//==========================================================================
-
 	
+	//======================================================================================
+	// FUNCTIONS
+	//======================================================================================
 	AMainHUD();
 
 	void DisplayMenu();
 	void HideMenu();
+	void ToggleMenu();
 	
 	void ShowInteractionWidget() const;
 	void HideInteractionWidget() const;
-	void UpdateInteractionWidget(const FInteractableData* interactableData) const;
-
+	void UpdateInteractionWidget(const FInteractableData* InteractableData) const;
+	
 protected:
 
 	UPROPERTY()
-	UMainMenu* mainMenu;
+	TObjectPtr<UMainMenu> MainMenuWidget;
 
 	UPROPERTY()
-	UInteractionWidget* interactionWidget;
+	TObjectPtr<UInteractionWidget> InteractionWidget;
 
+	UPROPERTY()
+	TObjectPtr<UUserWidget> CrosshairWidget;
+	
+	//======================================================================================
+	// FUNCTIONS
+	//======================================================================================
 	virtual void BeginPlay() override;
-
-	
-
-	
 };

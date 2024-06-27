@@ -6,70 +6,87 @@
 
 AMainHUD::AMainHUD()
 {
-
 }
 
 void AMainHUD::BeginPlay()
 {
-	Super::BeginPlay();
-
-	if (mainMenu_wbp)
+	if (MainMenuClass)
 	{
-		mainMenu = CreateWidget<UMainMenu>(GetWorld(), mainMenu_wbp);
-		mainMenu->AddToViewport(5);
-		mainMenu->SetVisibility(ESlateVisibility::Collapsed);
+		MainMenuWidget = CreateWidget<UMainMenu>(GetWorld(), MainMenuClass);
+		MainMenuWidget->AddToViewport(5);
+		MainMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	if (interaction_wbp)
+
+	if (InteractionWidgetClass)
 	{
-		interactionWidget = CreateWidget<UInteractionWidget>(GetWorld(), interaction_wbp);
-		interactionWidget->AddToViewport(-1);
-		interactionWidget->SetVisibility(ESlateVisibility::Collapsed);
+		InteractionWidget = CreateWidget<UInteractionWidget>(GetWorld(), InteractionWidgetClass);
+		InteractionWidget->AddToViewport(-1);
+		InteractionWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
+
 void AMainHUD::DisplayMenu()
 {
-	if (mainMenu)
+	if (MainMenuWidget)
 	{
 		bIsMenuVisible = true;
-		mainMenu->SetVisibility(ESlateVisibility::Visible);
+		MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void AMainHUD::HideMenu()
 {
-	if (mainMenu)
+	if (MainMenuWidget)
 	{
 		bIsMenuVisible = false;
-		mainMenu->SetVisibility(ESlateVisibility::Collapsed);
+		MainMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void AMainHUD::ToggleMenu()
+{
+	if (bIsMenuVisible)
+	{
+		HideMenu();
+
+		const FInputModeGameOnly InputMode;
+		GetOwningPlayerController()->SetInputMode(InputMode);
+		GetOwningPlayerController()->SetShowMouseCursor(false);
+	}
+	else
+	{
+		DisplayMenu();
+		const FInputModeGameAndUI InputMode;
+		GetOwningPlayerController()->SetInputMode(InputMode);
+		GetOwningPlayerController()->SetShowMouseCursor(true);
 	}
 }
 
 void AMainHUD::ShowInteractionWidget() const
 {
-	if (interactionWidget)
+	if (InteractionWidget)
 	{
-		interactionWidget->SetVisibility(ESlateVisibility::Visible);
+		InteractionWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void AMainHUD::HideInteractionWidget() const
 {
-	if (interactionWidget)
+	if (InteractionWidget)
 	{
-		interactionWidget->SetVisibility(ESlateVisibility::Collapsed);
+		InteractionWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 
-void AMainHUD::UpdateInteractionWidget(const FInteractableData* interactableData) const
+void AMainHUD::UpdateInteractionWidget(const FInteractableData* InteractableData) const
 {
-	if (interactionWidget)
+	if (InteractionWidget)
 	{
-		if (interactionWidget->GetVisibility() == ESlateVisibility::Collapsed)
+		if (InteractionWidget->GetVisibility() == ESlateVisibility::Collapsed)
 		{
-			interactionWidget->SetVisibility(ESlateVisibility::Visible);
+			InteractionWidget->SetVisibility(ESlateVisibility::Visible);
 		}
-		
- 			interactionWidget->UpdateWidget(interactableData);
+
+		InteractionWidget->UpdateWidget(InteractableData);
 	}
 }
-

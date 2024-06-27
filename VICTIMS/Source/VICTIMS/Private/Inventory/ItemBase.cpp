@@ -1,32 +1,56 @@
 
 
 #include "ItemBase.h"
+#include "InventoryComponent.h"
 
-
-UItemBase::UItemBase()
+UItemBase::UItemBase() : bIsCopy(false), bIsPickup(false)
 {
 
 }
 
-void UItemBase::SetQuantity(const int32 newQuantity)
+void UItemBase::ResetItemFlags()
 {
+	this->bIsCopy = false;
+	this->bIsPickup = false;
+}
 
-	if (newQuantity != quantity)
-	{   // 적재보관 가능/불가능 조건으로 적재개수 제한걸기
-		quantity = FMath::Clamp(newQuantity, 0, numericData.bIsStackable ? numericData.maxStackCount : 1);
-		/*
-		if(owningInventory)
+UItemBase* UItemBase::CreateItemCopy() const
+{
+	UItemBase* ItemCopy = NewObject<UItemBase>(StaticClass());
+
+	ItemCopy->ID = this->ID;
+	ItemCopy->Quantity = this->Quantity;
+	ItemCopy->ItemQuality = this->ItemQuality;
+	ItemCopy->ItemType = this->ItemType;
+	ItemCopy->TextData = this->TextData;
+	ItemCopy->NumericData = this->NumericData;
+	ItemCopy->ItemStatistics = this->ItemStatistics;
+	ItemCopy->AssetData = this->AssetData;
+
+	ItemCopy->bIsCopy = true;
+
+	return ItemCopy;
+}
+
+void UItemBase::SetQuantity(const int32 NewQuantity)
+{
+	if (NewQuantity != this->Quantity)
+	{
+		Quantity = FMath::Clamp(NewQuantity, 0, this->NumericData.bIsStackable ? this->NumericData.maxStackSize : 1);
+		if (this->OwningInventory)
 		{
-			if(quantity <= 0)
+			if (this->Quantity <= 0)
 			{
-				owningInventory->RemoveItem(this);
+				this->OwningInventory->RemoveSingleInstanceOfItem(this);
 			}
 		}
-		*/
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ItemBase OwningInventory was null (item may be a pickup)."));
+		}
 	}
 }
 
-void UItemBase::Use(class AVICTIMSCharacter* character)
+void UItemBase::Use(AVICTIMSCharacter* PlayerCharacter)
 {
-
 }

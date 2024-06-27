@@ -8,50 +8,56 @@
 void UInteractionWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
-
-	interactionProgressBar->PercentDelegate.BindUFunction(this, "UpdateInteractionProgress");
+	InteractionProgressBar->PercentDelegate.BindUFunction(this, "UpdateInteractionProgress");
 }
-
 void UInteractionWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	keyPressText->SetText(FText::FromString("Press"));
-	currentInteractionDuration = 0.0f;
+	KeyPressText->SetText(FText::FromString("Press"));
+	CurrentInteractionDuration = 0.0f;
 }
-
-void UInteractionWidget::UpdateWidget(const FInteractableData* interactableData)
+void UInteractionWidget::UpdateWidget(const FInteractableData* InteractableData) const
 {
-	switch (interactableData->interactableType)
+	switch (InteractableData->InteractableType)
 	{
-		case EInteractableType::pickUp:
-		keyPressText->SetText(FText::FromString("Press"));
-		interactionProgressBar->SetVisibility(ESlateVisibility::Collapsed);
-		actionText->SetText(FText::FromString("PickUp"));
+	case EInteractableType::Pickup:
+		KeyPressText->SetText(FText::FromString("Press"));
+		InteractionProgressBar->SetVisibility(ESlateVisibility::Collapsed);
+
+		if (InteractableData->Quantity < 2)
+		{
+			QuantityText->SetVisibility(ESlateVisibility::Collapsed);
+		}
+		else
+		{
+			QuantityText->SetText(FText::Format(FText::FromString("x{0}"), InteractableData->Quantity));
+			QuantityText->SetVisibility(ESlateVisibility::Visible);
+		}
 		break;
 
-		case EInteractableType::nonPlayerCharacter:
+	case EInteractableType::NonPlayerCharacter:
 		break;
 
-		case EInteractableType::device:
+	case EInteractableType::Device:
 		break;
 
-		case EInteractableType::toggle:
+	case EInteractableType::Toggle:
 		break;
 
-		case EInteractableType::container:
+	case EInteractableType::Container:
+		break;
+	case EInteractableType::Store:
 		break;
 
-		default: ;
-
+	default:;
 	}
-
-
+	ActionText->SetText(InteractableData->Action);
+	NameText->SetText(InteractableData->Name);
 }
 
 float UInteractionWidget::UpdateInteractionProgress()
 {
 	return 0.0f;
 }
-
 

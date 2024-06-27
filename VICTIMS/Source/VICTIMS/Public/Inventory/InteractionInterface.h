@@ -8,13 +8,14 @@
 class AVICTIMSCharacter;
 
 UENUM()
-enum class EInteractableType : uint8
-{
-	pickUp				UMETA(DisplayName = "PickUp"),
-	nonPlayerCharacter	UMETA(DisplayName = "NonPlayerCharacter"),
-	device				UMETA(DisplayName = "Device"),
-	toggle				UMETA(DisplayName = "Toggle"),
-	container			UMETA(DisplayName = "Container")
+enum class EInteractableType : uint8									// 상호작용 종류
+{	
+	Pickup					UMETA(DisplayName = "PickUp"),					// 줍기
+	Store					UMETA(DisplayName = "Store"),					// 상점
+	Device					UMETA(DisplayName = "Device"),					// 디바이스 (아마 맵 상호작용으로 사용?)
+	Toggle					UMETA(DisplayName = "Toggle"),					// 토글
+	Container				UMETA(DisplayName = "Container"),				// 보관함 
+	NonPlayerCharacter		UMETA(DisplayName = "NonPlayerCharacter")		// 기타 상황
 };
 
 USTRUCT()
@@ -22,48 +23,39 @@ struct FInteractableData
 {
 	GENERATED_USTRUCT_BODY()
 
-	FInteractableData() :
-	interactableType(EInteractableType::pickUp),
-	name(FText::GetEmpty()),
-	action(FText::GetEmpty()),
-	quantity(0),
-	interactionDuration(0.0f)
-	{
-
-	};
-
-	UPROPERTY(EditInstanceOnly)
-	EInteractableType interactableType;
-
-	UPROPERTY(EditInstanceOnly)
-	FText name;
-
-	UPROPERTY(EditInstanceOnly)
-	FText action;
-
-	UPROPERTY(EditInstanceOnly)
-	int8 quantity;
-
-	UPROPERTY(EditInstanceOnly)
-	float interactionDuration; // 상호작용 걸리는 시간
-
+	FInteractableData() :							// 줍는 아이템 필요정보 
+		InteractableType(EInteractableType::Pickup),
+		Name(FText::GetEmpty()),
+		Action(FText::GetEmpty()),
+		Quantity(0),
+		InteractionDuration(0.0f){};
+				
+	UPROPERTY(EditInstanceOnly)						// 상호작용 정보 모음
+	EInteractableType InteractableType;
+	UPROPERTY(EditInstanceOnly)						// 이름 
+	FText Name;
+	UPROPERTY(EditInstanceOnly)						// 상호작용 액션 
+	FText Action;
+	UPROPERTY(EditInstanceOnly)						// 줍는 아이템 - 개수 
+	int8 Quantity;
+	UPROPERTY(EditInstanceOnly)						// 상호작용 완료까지 걸리는 시간 
+	float InteractionDuration;
 };
 UINTERFACE(MinimalAPI)
 class UInteractionInterface : public UInterface
 {
 	GENERATED_BODY()
 };
-
-class VICTIMS_API IInteractionInterface
+class VICTIMS_API IInteractionInterface	
 {
 	GENERATED_BODY()
 
-public:
+public:												// 상호작용 과정 
 	virtual void BeginFocus();
 	virtual void EndFocus();
 	virtual void BeginInteract();
 	virtual void EndInteract();
-	virtual void Interact(class AVICTIMSCharacter* playerCharacter);
+	virtual void Interact(AVICTIMSCharacter* PlayerCharacter);
 
-	FInteractableData interactableData;
+	FInteractableData InteractableData;
 };

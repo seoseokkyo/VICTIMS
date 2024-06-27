@@ -14,37 +14,36 @@ UCLASS()
 class VICTIMS_API UInteractionWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 public:
-
 	UPROPERTY(VisibleAnywhere, Category = "Interaction Widget | Player Reference")
-	AVICTIMSCharacter* playerReference;
+	AVICTIMSCharacter* PlayerReference;
 
-	void UpdateWidget(const FInteractableData* interactableData);
+	void UpdateWidget(const FInteractableData* InteractableData) const;				// 위젯 내용 업데이트
 
 protected:
+	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
+	TObjectPtr<UTextBlock> NameText;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
-	UTextBlock* actionText;
+	TObjectPtr<UTextBlock> ActionText;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
-	UTextBlock* interactkeyText;
+	TObjectPtr<UTextBlock> QuantityText;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
-	UTextBlock* keyPressText;
+	TObjectPtr<UTextBlock> KeyPressText;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
-	UProgressBar* interactionProgressBar;
+	TObjectPtr<UProgressBar> InteractionProgressBar;
 
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")
-	float currentInteractionDuration;
+	float CurrentInteractionDuration;
 
 	UFUNCTION(Category = "Interaction Widget | Interactable Data")
 	float UpdateInteractionProgress();
-
+	
 	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
-
-
 	
 };
