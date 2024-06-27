@@ -9,31 +9,30 @@
 #include "InteractionInterface.h"
 #include "VICTIMSCharacter.generated.h"
 
+class AVICTIMSPlayerController;
+class AMainHUD;
+class UItemBase;
+class IInteractionInterface;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
-class AMainHUD;
 
 USTRUCT()
-struct FInteractionData
+struct FInteractionData						// 상호작용 관련 필요 요소
 {
 	GENERATED_USTRUCT_BODY()
 
-	FInteractionData() : currentInteractable(nullptr), lastInteractionCheckTime(0.0f)
-	{
-
-	};
-
-	UPROPERTY()
-	AActor* currentInteractable;
+	FInteractionData() :
+		CurrentInteractable(nullptr),
+		LastInteractionCheckTime(0.0f){};
 
 	UPROPERTY()
-	float lastInteractionCheckTime;
-
+	TObjectPtr<AActor> CurrentInteractable;
+	UPROPERTY()
+	float LastInteractionCheckTime;
 };
-
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -68,14 +67,51 @@ class AVICTIMSCharacter : public ACharacterBase
 	UInputAction* LookAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ia_Interact;
+	UInputAction* InteractAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleMenuAction;
 
 
 public:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)			// 상호작용 가능범위 
+	class USphereComponent* interactableRange;	
+	
+	bool bInteracting;									// 상호작용 가능한지 확인
+//=====================================================================================================
+//  FUNCTION
+//=====================================================================================================
+
+	FORCEINLINE bool IsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandle_Interaction); };
+	FORCEINLINE class UInventoryComponent* GetInventory() const { return PlayerInventory; };	// 인벤토리 가져오기
+
+	void UpdateInteractionWidget() const;				// 상호작용 위젯 업데이트
+	void DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop);		// 아이템 버리기
+
 	AVICTIMSCharacter();
 	
-
 protected:
+	UPROPERTY()
+	AMainHUD* HUD;
+	UPROPERTY()
+	AVICTIMSPlayerController* MainPlayerController;
+//=====================================================================================================
+// 상호작용 관련 
+//=====================================================================================================
+
+	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
+	TScriptInterface<IInteractionInterface> TargetInteractable;
+	UPROPERTY(VisibleAnywhere, Category= "Character | Inventory")
+	UInventoryComponent* PlayerInventory;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Character | Interaction")
+	float InteractionCheckDistance = 2.0f;
+	float InteractionCheckFrequency;
+	FTimerHandle TimerHandle_Interaction;
+	FInteractionData InteractionData;
+
+//=====================================================================================================
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -83,29 +119,6 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	UPROPERTY()
-	AMainHUD* mainHUD;
-
-
-	//==========================================================================
-	// Interaction
-	//==========================================================================
-
-	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
-	TScriptInterface<IInteractionInterface> targetInteractable;
-
-	float interactionCheckFrequency; // 상호작용 반복주기 
-	float interactionCheckDistance;  // 상호작용 가능범위 
-	
-	FTimerHandle timerHandle_Interaction;
-	FInteractionData interactionData;
-
-	void PerformInteractionCheck();
-	void FoundInteractable(AActor* newInteractable);
-	void NoInteractableFound();
-	void BeginInteract();
-	void EndInteract();
-	void Interact();
 
 	void CharacterJump(const FInputActionValue& Value);
 
@@ -118,11 +131,19 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	void ToggleMenu();
+	
+	void FoundInteractable(AActor* NewInteractable);
+	void NoInteractableFound();
+	void BeginInteract();
+	void EndInteract();
+	void Interact();
+
 public:
 	/** Returns CameraBoom subobject **/
-	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
+	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; };
 	/** Returns FollowCamera subobject **/
-	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; };
 
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
@@ -141,5 +162,12 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	
 	FORCEINLINE bool IsInteracting() const {return GetWorldTimerManager().IsTimerActive(timerHandle_Interaction);};
+	
+		// 상호작용 가능범위 판별 
+	UFUNCTION()
+	void OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+	void OnEndOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
 };
 

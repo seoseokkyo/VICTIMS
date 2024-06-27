@@ -13,7 +13,12 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include "CombatComponent.h"
 #include "BaseWeapon.h"
+#include "Components/SphereComponent.h"
 #include "MainHUD.h"
+#include "InventoryComponent.h"
+#include "AVICTIMSPlayerController.h"
+#include "InteractionInterface.h"
+#include "PickUp.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -54,8 +59,17 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	interactionCheckFrequency = 0.1f;
-	interactionCheckDistance = 225.0f;
+
+	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
+	PlayerInventory->SetSlotsCapacity(20);
+
+	interactableRange = CreateDefaultSubobject<USphereComponent>(TEXT("Interactable Range"));
+	interactableRange -> SetupAttachment(RootComponent);
+	interactableRange -> SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	interactableRange -> SetRelativeScale3D(FVector(4));
+	interactableRange->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlapInteractableRange);
+
+	InteractionCheckFrequency = 0.1;
 
 	characterName = TEXT("Player");
 
@@ -68,9 +82,6 @@ void AVICTIMSCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-
-	mainHUD = Cast<AMainHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-
 	FActorSpawnParameters spawnParam;
 	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	spawnParam.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
@@ -83,6 +94,14 @@ void AVICTIMSCharacter::BeginPlay()
 	{
 		equipment->OnEquipped();
 	}
+	
+	if (IsLocallyControlled())
+	{
+
+		MainPlayerController = Cast<AVICTIMSPlayerController>(GetController());
+		HUD = Cast<AMainHUD>(MainPlayerController->GetHUD());
+
+	}
 }
 
 
@@ -90,11 +109,6 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// 상호작용 가능 액터 찾기 
-	if (GetWorld()->TimeSince(interactionData.lastInteractionCheckTime) > interactionCheckFrequency)
-	{
-		PerformInteractionCheck();
-	}
 }
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -102,6 +116,7 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Add Input Mapping Context
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -117,8 +132,10 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
-		EnhancedInputComponent->BindAction(ia_Interact, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::BeginInteract);
-		EnhancedInputComponent->BindAction(ia_Interact, ETriggerEvent::Completed, this, &AVICTIMSCharacter::EndInteract);
+
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::BeginInteract);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AVICTIMSCharacter::EndInteract);
+		EnhancedInputComponent->BindAction(ToggleMenuAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleMenu);
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Move);
@@ -168,107 +185,106 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AVICTIMSCharacter::PerformInteractionCheck()
+void AVICTIMSCharacter::Interact()
 {
-	interactionData.lastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
 
-	FVector start = GetPawnViewLocation();
-	FVector end = start + (GetViewRotation().Vector() * interactionCheckDistance);
-
-
-	FCollisionQueryParams queryParams;
-	queryParams.AddIgnoredActor(this);
-	FHitResult result;
-
-	float lookDir = FVector::DotProduct(GetActorForwardVector(), GetViewRotation().Vector());
-
-	if (lookDir > 0)
+	if (IsValid(TargetInteractable.GetObject()))
 	{
+		TargetInteractable->Interact(this);
+	}
+}
 
-	// 	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.0f, 0, 2.0f);
-		// 라인트레이스 (카메라뷰 기준) 에 검출된 액터가 있을 때 
-		if (GetWorld()->LineTraceSingleByChannel(result, start, end, ECC_Visibility, queryParams))
-		{
-			if (result.GetActor()->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
-			{
-				if (result.GetActor() != interactionData.currentInteractable)
-				{
-					// 상호작용 가능 + 상호작용 가능거리 일 때, 그 액터와 상호작용 준비 
-					FoundInteractable(result.GetActor());
-					return;
-				}
-					// 이미 상호작용 가능 액터를 찾은 상태라면(위 조건에 들어가 있는 상태) 더이상 검출시도 X
-				if (result.GetActor() == interactionData.currentInteractable)
-				{
-					return;
-				}
-			}
+void AVICTIMSCharacter::OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+
+	if (OtherActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	{
+		if (OtherActor != InteractionData.CurrentInteractable)
+		{	// 오버랩된 액터중 상호작용 가능한 액터가 있다면 상호작용 가능한 액터 찾음 함수 호출
+			FoundInteractable(OtherActor);
+			return;
 		}
+		if (OtherActor == InteractionData.CurrentInteractable)
+		{
+			return;
+		}
+
 	}
 	NoInteractableFound();
 }
 
-void AVICTIMSCharacter::FoundInteractable(AActor* newInteractable)
+void AVICTIMSCharacter::OnEndOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	// 상호작용 안되게 어떻게 해야하지........ 흠 
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		TargetInteractable->EndInteract();
+	}
+}
+void AVICTIMSCharacter::ToggleMenu()
+{
+	
+}
+void AVICTIMSCharacter::FoundInteractable(AActor* NewInteractable)
 {
 	if (IsInteracting())
 	{
 		EndInteract();
 	}
-	if (interactionData.currentInteractable)
+	if (InteractionData.CurrentInteractable)
 	{
-		targetInteractable = interactionData.currentInteractable;
-		targetInteractable->EndFocus();
+		TargetInteractable = InteractionData.CurrentInteractable;
+		TargetInteractable->EndFocus();
 	}
-	interactionData.currentInteractable = newInteractable;
-	targetInteractable = newInteractable;
+	InteractionData.CurrentInteractable = NewInteractable;
+	TargetInteractable = NewInteractable;
 
-	mainHUD->UpdateInteractionWidget(&targetInteractable->interactableData);
-
-	targetInteractable->BeginFocus();
+	HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
+	TargetInteractable->BeginFocus();
 }
 
 void AVICTIMSCharacter::NoInteractableFound()
 {
 	if (IsInteracting())
 	{
-		GetWorldTimerManager().ClearTimer(timerHandle_Interaction);
+		GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
 	}
-	if (interactionData.currentInteractable)
+	if (InteractionData.CurrentInteractable)
 	{
-		if (IsValid(targetInteractable.GetObject()))
+		if (IsValid(TargetInteractable.GetObject()))
 		{
-			targetInteractable->EndFocus();
+			TargetInteractable->EndFocus();
+			EndInteract();
 		}
-
-		mainHUD->HideInteractionWidget();
-
-		// 상호작용 UI 숨기기 
-		interactionData.currentInteractable = nullptr;
-		targetInteractable = nullptr;
+		HUD->HideInteractionWidget();
+		InteractionData.CurrentInteractable = nullptr;
+		TargetInteractable = nullptr;
 	}
 }
 
 void AVICTIMSCharacter::BeginInteract()
 {
-	// 상호작용 키 눌렀을 때 
-	// 상호작용 시작 전 다시 한번 상호작용 가능한 조건인지 확인
-	PerformInteractionCheck();
-	if (interactionData.currentInteractable)
+	if (InteractionData.CurrentInteractable)
 	{
-		if (IsValid(targetInteractable.GetObject()))
+		if (IsValid(TargetInteractable.GetObject()))
 		{
-			targetInteractable->BeginInteract();
-			if (FMath::IsNearlyZero(targetInteractable->interactableData.interactionDuration, 0.1f))
-			{	
-				// 바로 상호작용 
+			TargetInteractable->BeginInteract();
+
+			if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f))
+			{
 				Interact();
 			}
-			else 
+			else
 			{
-				// 상호작용 걸리는 시간 이후에 상호작용 
-				GetWorldTimerManager().SetTimer(timerHandle_Interaction,
-					this, &AVICTIMSCharacter::Interact,
-					targetInteractable->interactableData.interactionDuration, false);
+				GetWorldTimerManager().SetTimer(TimerHandle_Interaction,
+					this,
+					&AVICTIMSCharacter::Interact,
+					TargetInteractable->InteractableData.InteractionDuration,
+					false);
 			}
 		}
 	}
@@ -276,21 +292,42 @@ void AVICTIMSCharacter::BeginInteract()
 
 void AVICTIMSCharacter::EndInteract()
 {
-	// 상호작용 키 눌렀다 뗐을 때 
-	GetWorldTimerManager().ClearTimer(timerHandle_Interaction);
-	if (IsValid(targetInteractable.GetObject()))
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+
+	if (IsValid(TargetInteractable.GetObject()))
 	{
-		targetInteractable->EndInteract();
+		TargetInteractable->EndInteract();
+	}
+}
+void AVICTIMSCharacter::UpdateInteractionWidget() const
+{
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
 	}
 }
 
-void AVICTIMSCharacter::Interact()
+void AVICTIMSCharacter::DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop)
 {
-	// 실제 상호작용 
-	GetWorldTimerManager().ClearTimer(timerHandle_Interaction);
-	if (IsValid(targetInteractable.GetObject()))
+	if (PlayerInventory->FindMatchingItem(ItemToDrop))
 	{
-		targetInteractable->Interact(this);
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.bNoFail = true;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		const FVector SpawnLocation{ GetActorLocation() + (GetActorForwardVector() * 50.0f) };
+		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
+
+		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
+
+		APickUp* Pickup = GetWorld()->SpawnActor<APickUp>(APickUp::StaticClass(), SpawnTransform, SpawnParams);
+
+		Pickup->InitializeDrop(ItemToDrop, RemovedQuantity);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Item to drop was somehow null!"));
 	}
 }
 
