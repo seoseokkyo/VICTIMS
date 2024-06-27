@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
-#include "InteractionInterface.h"
 #include "VICTIMSCharacter.generated.h"
 
 class USpringArmComponent;
@@ -13,26 +12,6 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
-class AMainHUD;
-
-USTRUCT()
-struct FInteractionData
-{
-	GENERATED_USTRUCT_BODY()
-
-	FInteractionData() : currentInteractable(nullptr), lastInteractionCheckTime(0.0f)
-	{
-
-	};
-
-	UPROPERTY()
-	AActor* currentInteractable;
-
-	UPROPERTY()
-	float lastInteractionCheckTime;
-
-};
-
 
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -65,9 +44,9 @@ class AVICTIMSCharacter : public ACharacter
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
-
+	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ia_Interact;
+	UInputAction* ia_Interact;	
 
 
 public:
@@ -75,37 +54,14 @@ public:
 	
 
 protected:
-
+	
+	void Interact();
+	
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
 
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
-
-	UPROPERTY()
-	AMainHUD* mainHUD;
-
-
-	//==========================================================================
-	// Interaction
-	//==========================================================================
-
-	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
-	TScriptInterface<IInteractionInterface> targetInteractable;
-
-	float interactionCheckFrequency; // 상호작용 반복주기 
-	float interactionCheckDistance;  // 상호작용 가능범위 
-	
-	FTimerHandle timerHandle_Interaction;
-	FInteractionData interactionData;
-
-	void PerformInteractionCheck();
-	void FoundInteractable(AActor* newInteractable);
-	void NoInteractableFound();
-	void BeginInteract();
-	void EndInteract();
-	void Interact();
-
 
 protected:
 	// APawn interface
@@ -121,7 +77,6 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
-	//상호작용 중인지 확인 
-	FORCEINLINE bool IsInteracting() const {return GetWorldTimerManager().IsTimerActive(timerHandle_Interaction);};
+
 };
 

@@ -8,13 +8,14 @@
 class AVICTIMSCharacter;
 
 UENUM()
-enum class EInteractableType : uint8
-{
-	pickUp				UMETA(DisplayName = "PickUp"),
-	nonPlayerCharacter	UMETA(DisplayName = "NonPlayerCharacter"),
-	device				UMETA(DisplayName = "Device"),
-	toggle				UMETA(DisplayName = "Toggle"),
-	container			UMETA(DisplayName = "Container")
+enum class EInteractableType : uint8									// 상호작용 종류
+{	
+	PickUp					UMETA(DisplayName = "PickUp"),					// 줍기
+	Store					UMETA(DisplayName = "Store"),					// 상점
+	Device					UMETA(DisplayName = "Device"),					// 디바이스 (아마 맵 상호작용으로 사용?)
+	Toggle					UMETA(DisplayName = "Toggle"),					// 토글
+	Container				UMETA(DisplayName = "Container"),				// 보관함 
+	NonPlayerCharacter		UMETA(DisplayName = "NonPlayerCharacter")		// 기타 상황
 };
 
 USTRUCT()
@@ -23,30 +24,25 @@ struct FInteractableData
 	GENERATED_USTRUCT_BODY()
 
 	FInteractableData() :
-	interactableType(EInteractableType::pickUp),
-	name(FText::GetEmpty()),
-	action(FText::GetEmpty()),
-	quantity(0),
-	interactionDuration(0.0f)
+		InteractableType(EInteractableType::Pickup),
+		Name(FText::GetEmpty()),
+		Action(FText::GetEmpty()),
+		Quantity(0),
+		InteractionDuration(0.0f)
 	{
-
 	};
-
 	UPROPERTY(EditInstanceOnly)
-	EInteractableType interactableType;
-
+	EInteractableType InteractableType;
 	UPROPERTY(EditInstanceOnly)
-	FText name;
-
+	FText Name;
 	UPROPERTY(EditInstanceOnly)
-	FText action;
-
+	FText Action;
+	// used only for pickups
 	UPROPERTY(EditInstanceOnly)
-	int8 quantity;
-
+	int8 Quantity;
+	// used for things like valves, doors, etc. that require an interaction timer
 	UPROPERTY(EditInstanceOnly)
-	float interactionDuration; // 상호작용 걸리는 시간
-
+	float InteractionDuration;
 };
 UINTERFACE(MinimalAPI)
 class UInteractionInterface : public UInterface
@@ -54,16 +50,10 @@ class UInteractionInterface : public UInterface
 	GENERATED_BODY()
 };
 
+
 class VICTIMS_API IInteractionInterface
 {
 	GENERATED_BODY()
 
 public:
-	virtual void BeginFocus();
-	virtual void EndFocus();
-	virtual void BeginInteract();
-	virtual void EndInteract();
-	virtual void Interact(class AVICTIMSCharacter* playerCharacter);
-
-	FInteractableData interactableData;
 };

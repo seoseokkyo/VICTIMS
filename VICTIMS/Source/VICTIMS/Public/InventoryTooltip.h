@@ -3,11 +3,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "InteractionWidget.generated.h"
+#include "InventoryTooltip.generated.h"
 
 
 UCLASS()
-class VICTIMS_API UInteractionWidget : public UUserWidget
+class VICTIMS_API UInventoryTooltip : public UUserWidget
 {
 	GENERATED_BODY()
 	
