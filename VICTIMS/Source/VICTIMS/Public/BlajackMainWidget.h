@@ -53,6 +53,25 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsChoiceTime=false;
 
+	//UFUNCTION(BlueprintImplementableEvent)
+	//void Win();
+	//
+	//UFUNCTION(BlueprintImplementableEvent)
+	//void Lose();
+	//
+	//UFUNCTION(BlueprintImplementableEvent)
+	//void Push();
+	//
+	//UFUNCTION(BlueprintImplementableEvent)
+	//void AllResultHidden();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsWin=false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIslose=false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIspush=false;
+
 	FPlayerScoreDelegate playerScoreDelegate;
 	FDealerScroeDelegate dealerScoreDelegate;
 };

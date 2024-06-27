@@ -30,6 +30,10 @@ public:
 
 	TArray<struct FBlackjackCardInfo*> CardInfos;
 
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<class ABlackjackCard*> AllCardSet;
+
 	UFUNCTION(BlueprintCallable)
 	void init_deck();
 

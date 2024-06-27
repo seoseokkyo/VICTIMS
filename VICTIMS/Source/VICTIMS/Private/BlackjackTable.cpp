@@ -262,20 +262,20 @@ void ABlackjackTable::CalcScore(FString AddValue)
 {
 	int32 cardScore = FCString::Atoi(*AddValue);
 	dealerScoreSum = dealerScoreSum + cardScore;
-	if (dealerScoreSum == 21)
-	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Dealer BlackJack!")));
-	}
-
-	else if (dealerScoreSum > 21)
-	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %iBust!"), dealerScoreSum), true, true, FColor::Cyan, 10);
-	}
-	else
-	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %i "), dealerScoreSum), true, true, FColor::Cyan, 10);
-	}
-
+			//if (dealerScoreSum == 21)
+			//{
+			//	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Dealer BlackJack!")));
+			//}
+			//
+			//else if (dealerScoreSum > 21)
+			//{
+			//	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %iBust!"), dealerScoreSum), true, true, FColor::Cyan, 10);
+			//}
+			//else
+			//{
+			//	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %i "), dealerScoreSum), true, true, FColor::Cyan, 10);
+			//}
+			//
 	if (playerMainWidget != nullptr)
 	{
 		if (playerMainWidget->dealerScoreDelegate.IsBound())
@@ -291,7 +291,7 @@ void ABlackjackTable::CalcScore(FString AddValue)
 
 void ABlackjackTable::ChooseAceValue(ABlackjackCard* AceCard)
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("AceOn")));
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("AceOn")));
 	if (dealerScoreSum + 11 > 21)
 	{
 		SetAceTo1(AceCard);
@@ -333,6 +333,7 @@ void ABlackjackTable::PlayerBlackJack(ABlackjackPlyaer* player)
 void ABlackjackTable::PlayerStand(ABlackjackPlyaer* player, int32 playerScore)
 {
 	DealerCardOpen(player, playerScore);
+	
 }
 
 void ABlackjackTable::DealerCardOpen(ABlackjackPlyaer* player, int32 playerScore)
@@ -354,12 +355,14 @@ void ABlackjackTable::DealerCardOpen(ABlackjackPlyaer* player, int32 playerScore
 
 	else if (dealerScoreSum == 21)
 	{
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerBlackJack")));
 		Lose(player);
 	}
 
 	else
 	{
 		if (playerScore > dealerScoreSum)
+		//if(player->scoreSum>dealerScoreSum)
 		{
 			Win(player);
 		}
@@ -369,7 +372,9 @@ void ABlackjackTable::DealerCardOpen(ABlackjackPlyaer* player, int32 playerScore
 				Win(player);
 			}
 			else
-			{
+			{	
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Win DealerScore %i"),dealerScoreSum));
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Win PlayerScore %i"), playerScore));
 				Lose(player);
 			}
 		else
@@ -390,15 +395,20 @@ void ABlackjackTable::InitialiseGame()
 		UnpossesPlayer();
 
 		playerMainWidget->RemoveFromParent();
-		//DealerCardSet.Empty();
+
+		//가상함수 사용해보면 안되려나..?
+		//playerMainWidget->AllResultHidden();
+		playerMainWidget->bIsWin = false;
+		playerMainWidget->bIslose = false;
+		playerMainWidget->bIspush = false;
+		DealerCardSet.Empty();
 		dealerScoreSum = 0;
 		bIsPlayingnow = false;
 		readyTime = 0;
-		//PlayerArray.Empty();
 		deck->init_deck();
 		deck->shuffler();
 
-		}, 2.0f, false);
+		}, 5.0f, false);
 
 
 }
@@ -423,6 +433,8 @@ void ABlackjackTable::Win(ABlackjackPlyaer* player)
 
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Win!")), true, true, FColor::Cyan, 10);
 	InitialiseGame();
+	//playerMainWidget->Win();
+	playerMainWidget ->bIsWin=true;
 }
 
 void ABlackjackTable::Push(ABlackjackPlyaer* player)
@@ -430,24 +442,19 @@ void ABlackjackTable::Push(ABlackjackPlyaer* player)
 
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Push!")), true, true, FColor::Cyan, 10);
 	InitialiseGame();
+	//playerMainWidget->Push();
+	playerMainWidget ->bIspush=true;
 }
 
 void ABlackjackTable::Lose(ABlackjackPlyaer* player)
 {
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Lose!")), true, true, FColor::Cyan, 10);
 	InitialiseGame();
-}
-
-void ABlackjackTable::SetWidget(UBlajackMainWidget* widget)
-{
-	playerMainWidget = widget;
+	//playerMainWidget->Lose();
+	playerMainWidget -> bIslose=true;
 }
 
 
-
-
-
-// Called when the game starts or when spawned
 void ABlackjackTable::BeginPlay()
 {
 	Super::BeginPlay();
@@ -471,7 +478,7 @@ void ABlackjackTable::BeginPlay()
 void ABlackjackTable::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DealerScore : %i "), dealerScoreSum), true, true, FColor::Cyan, 10);
 	if (bIsPlayingnow == false)
 	{
 		if (bGameStartCountDown)

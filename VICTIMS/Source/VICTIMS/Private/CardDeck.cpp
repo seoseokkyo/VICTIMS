@@ -27,16 +27,20 @@ void ACardDeck::init_deck()
 
 	std::vector<int> temp = { Ace, 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K };
 
-	if (CardSet.Num() > 0)
+	if (AllCardSet.Num() > 0)
 	{
-		for (auto card : CardSet)
+		for (auto card : AllCardSet)
 		{
-			card->Destroy();
+			if (card)
+			{
+				card->Destroy();
+			}
+			
 		}
 	}
 
 	CardSet.Reset(0);
-
+	AllCardSet.Empty();
 	for (int i = 0; i < (int)ECardType::ECardTypeMax; i++)
 	{
 		// 0 : Clover , 1 : Heart, 2 : Diamond, 3 : Spade
@@ -90,6 +94,7 @@ void ACardDeck::init_deck()
 			}
 
 			CardSet.Add(card);
+			AllCardSet.Add(card);
 		}
 
 		bIsEmpty = false;

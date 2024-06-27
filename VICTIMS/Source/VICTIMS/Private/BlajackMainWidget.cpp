@@ -31,3 +31,19 @@ void UBlajackMainWidget::SetDealerScore(int32 value)
 {
 	DealerScore->SetText(FText::FromString(FString::FromInt(value)));
 }
+
+//void UBlajackMainWidget::Win()
+//{
+//}
+//
+//void UBlajackMainWidget::Lose()
+//{
+//}
+//
+//void UBlajackMainWidget::Push()
+//{
+//}
+//
+//void UBlajackMainWidget::AllResultHidden()
+//{
+//}

@@ -108,7 +108,6 @@ public:
 	//딜러카드
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<class ABlackjackCard*> DealerCardSet;
-
 	TArray<class ABlackjackPlyaer*> blackjackPlayerSet;
 
 	
@@ -117,7 +116,7 @@ public:
 	//딜러 카드 합
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int32 dealerScoreSum;
+	int32 dealerScoreSum=0;
 	////////////////////1. 카드 두장씩 받기.////////////////////////////
 
 
@@ -166,9 +165,14 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Push(ABlackjackPlyaer* player);
-	
-	void SetWidget(class UBlajackMainWidget* widget);
 
+	UFUNCTION(BlueprintCallable)
+	void SetWidget(class UBlajackMainWidget* widget)
+	{
+		playerMainWidget = widget;
+	}
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UBlajackMainWidget* playerMainWidget = nullptr;
 	
 
