@@ -7,7 +7,7 @@
 
 
 UCLASS()
-class VICTIMS_API AAVICTIMSPlayerController : public APlayerController
+class VICTIMS_API AVICTIMSPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 	

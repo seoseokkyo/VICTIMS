@@ -10,8 +10,15 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Components/SphereComponent.h"
+#include "MainHUD.h"
+#include "InventoryComponent.h"
+#include "AVICTIMSPlayerController.h"
+#include "InteractionInterface.h"
+#include "PickUp.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
+
 
 //////////////////////////////////////////////////////////////////////////
 // AVICTIMSCharacter
@@ -52,6 +59,17 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
+	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
+	PlayerInventory->SetSlotsCapacity(20);
+
+	interactableRange = CreateDefaultSubobject<USphereComponent>(TEXT("Interactable Range"));
+	interactableRange -> SetupAttachment(RootComponent);
+	interactableRange -> SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	interactableRange -> SetRelativeScale3D(FVector(4));
+	interactableRange->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlapInteractableRange);
+
+	InteractionCheckFrequency = 0.1;
 }
 
 void AVICTIMSCharacter::BeginPlay()
@@ -59,19 +77,27 @@ void AVICTIMSCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
+	if (IsLocallyControlled())
+	{
+
+	MainPlayerController = Cast<AVICTIMSPlayerController>(GetController());
+	HUD = Cast<AMainHUD>(MainPlayerController->GetHUD());
+
+	}
 }
 
 void AVICTIMSCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-}
 
+}
 //////////////////////////////////////////////////////////////////////////
 // Input
 
 void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	// Add Input Mapping Context
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
@@ -93,28 +119,14 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Look);
 
-		EnhancedInputComponent->BindAction(ia_Interact, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Interact);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::BeginInteract);
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AVICTIMSCharacter::EndInteract);
+		EnhancedInputComponent->BindAction(ToggleMenuAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleMenu);
+
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-	}
-}
-
-void AVICTIMSCharacter::Interact()
-{
-	FVector start = FollowCamera->GetComponentLocation();
-	FVector end = start + FollowCamera->GetForwardVector();
-
-	FHitResult result;
-	FCollisionQueryParams params;
-	params.AddIgnoredActor(this);
-	if (GetWorld()->LineTraceSingleByChannel(result, start, end, ECollisionChannel::ECC_Visibility, params))
-	{
-		if (AActor* actor = result.GetActor())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("%s"), *actor->GetName());
-		}
 	}
 }
 
@@ -151,5 +163,152 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+
+
+void AVICTIMSCharacter::Interact()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		TargetInteractable->Interact(this);
+	}
+}
+
+void AVICTIMSCharacter::OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+
+	if (OtherActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+	{
+		if (OtherActor != InteractionData.CurrentInteractable)
+		{	// 오버랩된 액터중 상호작용 가능한 액터가 있다면 상호작용 가능한 액터 찾음 함수 호출
+			FoundInteractable(OtherActor);
+			return;
+		}
+		if (OtherActor == InteractionData.CurrentInteractable)
+		{
+			return;
+		}
+
+	}
+	NoInteractableFound();
+}
+
+void AVICTIMSCharacter::OnEndOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	// 상호작용 안되게 어떻게 해야하지........ 흠 
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		TargetInteractable->EndInteract();
+	}
+}
+void AVICTIMSCharacter::ToggleMenu()
+{
+	
+}
+void AVICTIMSCharacter::FoundInteractable(AActor* NewInteractable)
+{
+	if (IsInteracting())
+	{
+		EndInteract();
+	}
+	if (InteractionData.CurrentInteractable)
+	{
+		TargetInteractable = InteractionData.CurrentInteractable;
+		TargetInteractable->EndFocus();
+	}
+	InteractionData.CurrentInteractable = NewInteractable;
+	TargetInteractable = NewInteractable;
+
+	HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
+	TargetInteractable->BeginFocus();
+}
+
+void AVICTIMSCharacter::NoInteractableFound()
+{
+	if (IsInteracting())
+	{
+		GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+	}
+	if (InteractionData.CurrentInteractable)
+	{
+		if (IsValid(TargetInteractable.GetObject()))
+		{
+			TargetInteractable->EndFocus();
+			EndInteract();
+		}
+		HUD->HideInteractionWidget();
+		InteractionData.CurrentInteractable = nullptr;
+		TargetInteractable = nullptr;
+	}
+}
+
+void AVICTIMSCharacter::BeginInteract()
+{
+	if (InteractionData.CurrentInteractable)
+	{
+		if (IsValid(TargetInteractable.GetObject()))
+		{
+			TargetInteractable->BeginInteract();
+
+			if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f))
+			{
+				Interact();
+			}
+			else
+			{
+				GetWorldTimerManager().SetTimer(TimerHandle_Interaction,
+					this,
+					&AVICTIMSCharacter::Interact,
+					TargetInteractable->InteractableData.InteractionDuration,
+					false);
+			}
+		}
+	}
+}
+
+void AVICTIMSCharacter::EndInteract()
+{
+	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		TargetInteractable->EndInteract();
+	}
+}
+void AVICTIMSCharacter::UpdateInteractionWidget() const
+{
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
+	}
+}
+
+void AVICTIMSCharacter::DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop)
+{
+	if (PlayerInventory->FindMatchingItem(ItemToDrop))
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.bNoFail = true;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		const FVector SpawnLocation{ GetActorLocation() + (GetActorForwardVector() * 50.0f) };
+		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
+
+		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
+
+		APickUp* Pickup = GetWorld()->SpawnActor<APickUp>(APickUp::StaticClass(), SpawnTransform, SpawnParams);
+
+		Pickup->InitializeDrop(ItemToDrop, RemovedQuantity);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Item to drop was somehow null!"));
 	}
 }

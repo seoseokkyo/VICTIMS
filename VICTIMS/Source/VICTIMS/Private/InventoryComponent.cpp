@@ -36,14 +36,14 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemBase* inputItem)
 			return FItemAddResult::AddedAll(InitialRequestedAddAmount, FText::Format(
 				FText::FromString("Successfully added {0} {1} to the inventory."),
 				InitialRequestedAddAmount,
-				inputItem->TextData.Name));
+				inputItem->TextData.name));
 		}
 
 		if (StackableAmountAdded < InitialRequestedAddAmount && StackableAmountAdded > 0)
 		{
 			return FItemAddResult::AddedPartial(StackableAmountAdded, FText::Format(
 				FText::FromString("Partial amount of {0} added to the inventory. Number added = {1}"),
-				inputItem->TextData.Name,
+				inputItem->TextData.name,
 				StackableAmountAdded));
 		}
 
@@ -51,7 +51,7 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemBase* inputItem)
 		{
 			return FItemAddResult::AddedNone(FText::Format(
 				FText::FromString("Couldn't add {0} to the inventory. No remaining inventory slots, or invalid item."),
-				inputItem->TextData.Name));
+				inputItem->TextData.name));
 		}
 	}
 
@@ -75,7 +75,7 @@ UItemBase* UInventoryComponent::FindNextItemByID(UItemBase* itemIn) const
 {
 	if (itemIn)
 	{
-		if (const TArray<TObjectPtr<UItemBase>>::ElementType* Result = InventoryContents.FindByKey(ItemIn))
+		if (const TArray<TObjectPtr<UItemBase>>::ElementType* Result = InventoryContents.FindByKey(itemIn))
 		{
 			return *Result;
 		}
@@ -130,12 +130,12 @@ FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* ItemIn)
 	{
 		return FItemAddResult::AddedNone(FText::Format(
 			FText::FromString("Could not add {0} to the inventory. All inventory slots are full."),
-			ItemIn->TextData.Name));
+			ItemIn->TextData.name));
 	}
 
 	AddNewItem(ItemIn, 1);
 	return FItemAddResult::AddedAll(1, FText::Format(
-	FText::FromString("Successfully added a single {0} to the inventory."), ItemIn->TextData.Name));
+	FText::FromString("Successfully added a single {0} to the inventory."), ItemIn->TextData.name));
 }
 
 int32 UInventoryComponent::HandleStackableItems(UItemBase* ItemIn, int32 RequestedAddAmount)
@@ -167,7 +167,7 @@ int32 UInventoryComponent::HandleStackableItems(UItemBase* ItemIn, int32 Request
 
 int32 UInventoryComponent::CalculateNumberForFullStack(const UItemBase* StackableItem, int32 InitialRequestedAddAmount) const
 {	
-	const int32 AddAmountToMakeFullStack = StackableItem->NumericData.MaxStackSize - StackableItem->Quantity;
+	const int32 AddAmountToMakeFullStack = StackableItem->NumericData.maxStackSize - StackableItem->Quantity;
 	return FMath::Min(InitialRequestedAddAmount, AddAmountToMakeFullStack);
 }
 
