@@ -14,6 +14,7 @@
 #include "CombatComponent.h"
 #include "BaseWeapon.h"
 #include "MainHUD.h"
+#include "HousingComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -60,6 +61,7 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	characterName = TEXT("Player");
 
 
+	HousingComponent = CreateDefaultSubobject<UHousingComponent>(TEXT("HousingComp"));
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 }
@@ -82,6 +84,11 @@ void AVICTIMSCharacter::BeginPlay()
 	if (equipment)
 	{
 		equipment->OnEquipped();
+	}
+
+	if (HousingComponent)
+	{
+		HousingComponent->Camera = FollowCamera; // 초기화 시 카메라 컴포넌트를 할당
 	}
 }
 
@@ -394,4 +401,13 @@ void AVICTIMSCharacter::CharacterJump(const FInputActionValue& Value)
 	}
 
 	Super::Jump();
+}
+
+
+void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
+{
+	if (TargetComponent)
+	{
+		TargetComponent->DestroyComponent();
+	}
 }

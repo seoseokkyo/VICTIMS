@@ -125,6 +125,13 @@ public:
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
 	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Build")
+    class UHousingComponent* HousingComponent;
+
+	UFUNCTION(BlueprintCallable, Category = "Build")
+	void DestroyComponent(UActorComponent* TargetComponent);
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;
 

@@ -21,6 +21,7 @@ public class VICTIMS : ModuleRules
                 "VICTIMS/Public/Inventory",
                 "VICTIMS/Public/Youtube",
                 "VICTIMS/Public/Blackjack",
+                "VICTIMS/Public/Build",
             });
 
         PrivateIncludePaths.AddRange(new string[] {
@@ -34,6 +35,7 @@ public class VICTIMS : ModuleRules
                 "VICTIMS/Private/Inventory",
                 "VICTIMS/Private/Youtube",
                 "VICTIMS/Private/Blackjack",
+                "VICTIMS/Private/Build",                
             });
     }
 }
