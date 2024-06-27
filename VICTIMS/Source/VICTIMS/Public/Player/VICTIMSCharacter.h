@@ -72,6 +72,12 @@ class AVICTIMSCharacter : public ACharacterBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ToggleMenuAction;
 
+	// ToggleCombat(있는경우 사용)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ia_ToggleCombat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ia_LeftClickAction;
 
 public:
 	
@@ -121,6 +127,12 @@ protected:
 
 
 	void CharacterJump(const FInputActionValue& Value);
+	void ToggleCombat(const FInputActionValue& Value);
+
+	void LeftClick(const FInputActionValue& Value);
+
+	void PrintInfo();
+
 
 protected:
 	// APawn interface
