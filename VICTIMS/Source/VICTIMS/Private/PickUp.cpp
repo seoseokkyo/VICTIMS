@@ -76,7 +76,11 @@ void APickUp::Interact(AVICTIMSCharacter* PlayerCharacter)
 
 void APickUp::UpdateInteractableData()
 {
-
+	InstanceInteractableData.InteractableType = EInteractableType::Pickup;
+	InstanceInteractableData.Action = ItemReference->TextData.interactionText;
+	InstanceInteractableData.Name = ItemReference->TextData.name;
+	InstanceInteractableData.Quantity = ItemReference->Quantity;
+	InteractableData = InstanceInteractableData;
 }
 
 void APickUp::TakePickup(const AVICTIMSCharacter* Taker)

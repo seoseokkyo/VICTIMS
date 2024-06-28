@@ -95,6 +95,16 @@ public:
 	UFUNCTION(Category = "Inventory")															// 보관 가능한 슬롯 세팅
 	FORCEINLINE void SetSlotsCapacity(const int32 NewSlotsCapacity) { InventorySlotsCapacity = NewSlotsCapacity; };
 
+	UFUNCTION()										// 아이템사용 
+	void UseItem(const UItemBase* useItem);
+	UFUNCTION()
+	void EquipClothItem(const FItemData useItem);		// 옷 아이템
+	UFUNCTION()
+	void EquipWeaponItem(const FItemData useItem);		// 무기 아이템
+	UFUNCTION()
+	void UseConsumableItem(const FItemData useItem);	// 소비 아이템
+	UFUNCTION()
+	void UseFurnitureItem(const FItemData useItem);	// 가구 아이템
 
 protected:
 

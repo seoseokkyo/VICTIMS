@@ -123,6 +123,31 @@ void UInventoryComponent::SplitExistingStack(UItemBase* ItemIn, const int32 Amou
 }
 
 
+void UInventoryComponent::UseItem(const UItemBase* useItem)
+{
+	
+}
+
+void UInventoryComponent::EquipClothItem(const FItemData useItem)
+{
+
+}
+
+void UInventoryComponent::EquipWeaponItem(const FItemData useItem)
+{
+
+}
+
+void UInventoryComponent::UseConsumableItem(const FItemData useItem)
+{
+
+}
+
+void UInventoryComponent::UseFurnitureItem(const FItemData useItem)
+{
+
+}
+
 FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* ItemIn)
 {
 	// 만약 빈 슬롯이 없을 경우 추가 X
@@ -160,7 +185,9 @@ int32 UInventoryComponent::HandleStackableItems(UItemBase* ItemIn, int32 Request
 		// 새로 보관할 슬롯을 찾아야 할 경우
 	if (InventoryContents.Num() + 1 <= InventorySlotsCapacity)
 	{	
-		return RequestedAddAmount - AmountToDistribute;
+		ItemIn->SetQuantity(AmountToDistribute);
+		AddNewItem(ItemIn->CreateItemCopy(), AmountToDistribute);
+		return AmountToDistribute;
 	}
 	return 0;
 }
