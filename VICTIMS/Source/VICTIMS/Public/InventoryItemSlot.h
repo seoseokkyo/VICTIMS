@@ -5,6 +5,8 @@
 #include "Blueprint/UserWidget.h"
 #include "InventoryItemSlot.generated.h"
 
+class AVICTIMSPlayerController;
+class UInventoryComponent;
 class UInventoryTooltip;
 class UDragItemVisual;
 class UItemBase;
@@ -21,7 +23,13 @@ class VICTIMS_API UInventoryItemSlot : public UUserWidget
 public:
 	// 아이템 설정 + 정보 가져오기 
 	FORCEINLINE void SetItemReference(UItemBase* ItemIn) { ItemReference = ItemIn; };
-	FORCEINLINE UItemBase* GetItemReference() const { return ItemReference; }
+	FORCEINLINE UItemBase* GetItemReference() const { return ItemReference; };
+
+	UPROPERTY(VisibleAnywhere, Category="Inventory Slot")
+	AVICTIMSPlayerController* playerController;
+
+	UPROPERTY(EditDefaultsOnly, Category="Inventory Slot")
+	UInventoryComponent* owningInventory;
 
 	UPROPERTY(EditDefaultsOnly, Category="Inventory Slot")
 	TSubclassOf<UDragItemVisual> DragItemVisualClass;

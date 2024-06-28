@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "HUDInterface.h"
 #include "InventoryComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);					// 인벤토리 replicate
@@ -57,7 +58,7 @@ struct FItemAddResult																			// 아이템 추가 결과 (에러 / 성공)
 	}
 };
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class VICTIMS_API UInventoryComponent : public UActorComponent
+class VICTIMS_API UInventoryComponent : public UActorComponent, public IHUDInterface
 {
 	GENERATED_BODY()
 
@@ -96,7 +97,7 @@ public:
 	FORCEINLINE void SetSlotsCapacity(const int32 NewSlotsCapacity) { InventorySlotsCapacity = NewSlotsCapacity; };
 
 	UFUNCTION()										// 아이템사용 
-	void UseItem(const UItemBase* useItem);
+	void UseItem(const FItemData useItem);
 	UFUNCTION()
 	void EquipClothItem(const FItemData useItem);		// 옷 아이템
 	UFUNCTION()

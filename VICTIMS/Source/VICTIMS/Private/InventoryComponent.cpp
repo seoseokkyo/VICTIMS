@@ -2,6 +2,7 @@
 
 #include "InventoryComponent.h"
 #include "ItemBase.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -123,9 +124,25 @@ void UInventoryComponent::SplitExistingStack(UItemBase* ItemIn, const int32 Amou
 }
 
 
-void UInventoryComponent::UseItem(const UItemBase* useItem)
+void UInventoryComponent::UseItem(const FItemData useItem)
 {
-	
+	switch (useItem.itemType)				// 아이템 타입에 맞는 사용함수 호출 
+	{
+	case EItemType::cloth:
+		EquipClothItem(useItem);
+		break;
+	case EItemType::weapon:
+		EquipWeaponItem(useItem);
+		break;
+	case EItemType::consumable:
+		UseConsumableItem(useItem);
+		break;
+	case EItemType::furniture:
+		UseFurnitureItem(useItem);
+		break;
+	default:
+		break;
+	}
 }
 
 void UInventoryComponent::EquipClothItem(const FItemData useItem)
@@ -173,6 +190,9 @@ int32 UInventoryComponent::HandleStackableItems(UItemBase* ItemIn, int32 Request
 		// 적재보관 가능개수까지 얼마나 추가될 수 있는지 계산
 		const int32 AmountToMakeFullStack = CalculateNumberForFullStack(ExistingItemStack, AmountToDistribute);
 
+		AmountToDistribute--;
+		ItemIn->SetQuantity(ExistingItemStack->Quantity++);
+
 		if (AmountToDistribute <= 0)
 		{
 			// 아이템 추가 broadcast
@@ -195,6 +215,9 @@ int32 UInventoryComponent::HandleStackableItems(UItemBase* ItemIn, int32 Request
 int32 UInventoryComponent::CalculateNumberForFullStack(const UItemBase* StackableItem, int32 InitialRequestedAddAmount) const
 {	
 	const int32 AddAmountToMakeFullStack = StackableItem->NumericData.maxStackSize - StackableItem->Quantity;
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("InitialRequestedAddAmount : %d, AddAmountToMakeFullStack : %d"), InitialRequestedAddAmount, AddAmountToMakeFullStack));
+
 	return FMath::Min(InitialRequestedAddAmount, AddAmountToMakeFullStack);
 }
 
