@@ -69,6 +69,7 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	interactableRange -> SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	interactableRange -> SetRelativeScale3D(FVector(4));
 	interactableRange->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlapInteractableRange);
+	interactableRange->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlapInteractableRange);
 
 	InteractionCheckFrequency = 0.1;
 
@@ -205,38 +206,46 @@ void AVICTIMSCharacter::Interact()
 
 void AVICTIMSCharacter::OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
-
 	if (OtherActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
-		if (OtherActor != InteractionData.CurrentInteractable)
-		{	// 오버랩된 액터중 상호작용 가능한 액터가 있다면 상호작용 가능한 액터 찾음 함수 호출
+		bInteracting = true;
+		if (OtherActor != InteractionData.CurrentInteractable)		// 첫 상호작용인 액터 ( 상호작용 가능 판별 )
+		{
 			FoundInteractable(OtherActor);
 			return;
 		}
-		if (OtherActor == InteractionData.CurrentInteractable)
+		if (OtherActor == InteractionData.CurrentInteractable)		// 이미 상호작용 가능 판별난 액터
 		{
 			return;
 		}
-
-	}
-	NoInteractableFound();
+	}	
 }
 
 void AVICTIMSCharacter::OnEndOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	// 상호작용 안되게 어떻게 해야하지........ 흠 
-	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+	bInteracting = false;
 
-	if (IsValid(TargetInteractable.GetObject()))
+	NoInteractableFound();
+
+	if (IsInteracting())
 	{
-		TargetInteractable->EndInteract();
+		GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
+	}
+	if (InteractionData.CurrentInteractable)
+	{
+		if (IsValid(TargetInteractable.GetObject()))
+		{
+			TargetInteractable->EndFocus();
+		}
+		InteractionData.CurrentInteractable = nullptr;
+		TargetInteractable = nullptr;
 	}
 }
 void AVICTIMSCharacter::ToggleMenu()
 {
-	
+	 HUD->ToggleMenu();
 }
+
 void AVICTIMSCharacter::FoundInteractable(AActor* NewInteractable)
 {
 	if (IsInteracting())

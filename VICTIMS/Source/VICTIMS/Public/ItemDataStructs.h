@@ -58,7 +58,7 @@ struct FItemNumericData							// 아이템 보관 개수 정보
 
 	UPROPERTY(EditAnywhere)
 	int32 maxStackSize;								// 최대 적재가능 개수
-	UPROPERTY()
+	UPROPERTY(EditAnywhere)
 	bool bIsStackable;								// 적재보관 가능 여부 판별
 };
 
