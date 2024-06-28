@@ -99,3 +99,9 @@ bool UInventoryItemSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDr
 	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
 }
+
+FReply UInventoryItemSlot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	
+	return Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
+}

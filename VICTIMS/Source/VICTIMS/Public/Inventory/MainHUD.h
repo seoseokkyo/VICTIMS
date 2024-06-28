@@ -22,7 +22,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UInteractionWidget> InteractionWidgetClass;
 
-	bool bIsMenuVisible;
+	bool bIsMenuVisible = false;
 	
 	//======================================================================================
 	// FUNCTIONS

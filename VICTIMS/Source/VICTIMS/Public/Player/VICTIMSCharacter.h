@@ -144,7 +144,7 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 	void ToggleMenu();
-	
+
 	void FoundInteractable(AActor* NewInteractable);
 	void NoInteractableFound();
 	void BeginInteract();
