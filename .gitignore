@@ -76,3 +76,8 @@
 
 # LogFiles
 *.log
+
+# Maps
+**/Maps/*
+**/JunkerTown/*
+**/AmericanGasStation/*
