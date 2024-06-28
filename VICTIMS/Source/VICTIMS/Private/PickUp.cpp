@@ -118,6 +118,7 @@ void APickUp::TakePickup(const AVICTIMSCharacter* Taker)
 	}
 }
 
+#if WITH_EDITOR
 void APickUp::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
@@ -133,3 +134,6 @@ void APickUp::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 		}
 	}
 }
+#else
+
+#endif

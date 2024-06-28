@@ -56,6 +56,9 @@ protected:
 
 	void TakePickup(const AVICTIMSCharacter* Taker);
 
+#if WITH_EDITOR
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#else
 
+#endif
 };
