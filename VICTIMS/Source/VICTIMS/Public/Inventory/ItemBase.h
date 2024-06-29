@@ -3,6 +3,9 @@
 
 #include "CoreMinimal.h"
 #include "ItemDataStructs.h"
+#include "EEquipmentSlot.h"
+#include "Engine/DataTable.h"
+#include "FContainerInfo.h"
 #include "VICTIMSCharacter.h"
 #include "ItemBase.generated.h"
 
@@ -39,6 +42,9 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	FItemAssetData AssetData;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	EEquipmentSlot equipmentSlot;
 
 	bool bIsCopy;
 	bool bIsPickup;

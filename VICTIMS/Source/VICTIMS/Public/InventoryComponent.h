@@ -4,11 +4,14 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "HUDInterface.h"
+#include "EEquipmentSlot.h"
+#include "FSlotStructure.h"
 #include "InventoryComponent.generated.h"
 
 DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated);					// 인벤토리 replicate
 
 class UItemBase;
+class UDataTable;
 
 UENUM(BlueprintType)												// 아이템 추가 여부 
 enum class EItemAddResult : uint8
@@ -64,10 +67,28 @@ class VICTIMS_API UInventoryComponent : public UActorComponent, public IHUDInter
 
 public:	
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "NumberOfRows", Category = "Inventory UI"))
+	uint8 NumberOfRowsInventory = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (DisplayName = "SlotsPerRow", Category = "Inventory UI"))
+	uint8 SlotsPerRowInventory = 0;
+
+	uint8 NumberOfSlotsOnHotbar = 0;
+
+	TArray<FSlotStructure> Inventory;
+
+	UPROPERTY()
+	UDataTable* itemDB;
+
 	FOnInventoryUpdated onInventoryUpdated;
 
 //======================================================================================
 // FUNCTIONS
+// 
+// 
+ 
+
+
 //======================================================================================	
 
 	UInventoryComponent();
