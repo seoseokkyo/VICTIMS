@@ -18,6 +18,4 @@ class VICTIMS_API IHUDInterface
 
 public:
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	void UseInventoryItem(const TObjectPtr<UItemBase> item);
 };

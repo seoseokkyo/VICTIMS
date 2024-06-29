@@ -25,7 +25,7 @@ void UInventoryItemSlot::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	playerController = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
+//	playerController = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
 
 	if (ItemReference)						// 아이템 희귀도에 따라 border 색 변경 
 	{
@@ -106,6 +106,6 @@ bool UInventoryItemSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDr
 FReply UInventoryItemSlot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	// 더블클릭 한 아이템 사용 
-	IHUDInterface::Execute_UseInventoryItem(playerController, ItemReference);
+//	IHUDInterface::Execute_UseInventoryItem(playerController, ItemReference);
 	return Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
 }

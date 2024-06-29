@@ -26,13 +26,8 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)	
 	AVICTIMSCharacter* victimsPlayer;
 
-	UPROPERTY()
-	TObjectPtr<UItemBase> item;
-
-
 	// ========================================================================================================
 	// 인터페이스 
 	// ========================================================================================================
 
-	virtual void UseInventoryItem_Implementation(const TObjectPtr<UItemBase> _item) override;
 };

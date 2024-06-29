@@ -10,7 +10,3 @@ AVICTIMSPlayerController::AVICTIMSPlayerController()
 	inventoryComponent->SetIsReplicated(true);
 }
 
-void AVICTIMSPlayerController::UseInventoryItem_Implementation(const TObjectPtr<UItemBase> _item)
-{
-	inventoryComponent->UseItem(_item);
-}
