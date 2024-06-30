@@ -85,41 +85,7 @@ void APickUp::UpdateInteractableData()
 
 void APickUp::TakePickup(const AVICTIMSCharacter* Taker)
 {
-	if (!IsPendingKillPending())
-	{
-		if (ItemReference)
-		{
-			if (UInventoryComponent* PlayerInventory = Taker->GetInventory())
-			{
-				const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
 
-				switch (AddResult.operationResult)
-				{
-				case EItemAddResult::IAR_NoItemAdded:
-					break;
-				case EItemAddResult::IAR_PartialAmountItemAdded:
-					UpdateInteractableData();
-					Taker->UpdateInteractionWidget();
-					break;
-				case EItemAddResult::IAR_AllItemAdded:
-					Destroy();
-					break;
-				default:
-					break;
-				}
-
-				UE_LOG(LogTemp, Warning, TEXT("%s"), *AddResult.resultMessage.ToString());
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Player inventory component is null!"));
-			}
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Pickup internal item reference was somehow null!"));
-		}
-	}
 }
 
 #if WITH_EDITOR

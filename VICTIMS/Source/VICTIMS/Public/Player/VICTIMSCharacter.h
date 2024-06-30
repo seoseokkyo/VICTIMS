@@ -34,7 +34,6 @@ struct FInteractionData						// 상호작용 관련 필요 요소
 	float LastInteractionCheckTime;
 };
 
-
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
@@ -85,6 +84,58 @@ public:
 	class USphereComponent* interactableRange;	
 	
 	bool bInteracting;									// 상호작용 가능한지 확인
+
+//========================================================================================================
+// 장비 관련
+//========================================================================================================
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* MainWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Head;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Top;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Bottom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Feet;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = "OnRep_MainWeaponMesh", meta = (DisplayName = "Weapon Mesh", Category = "Inventory|Equipment"))
+	USkeletalMesh* MainWeaponMesh;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = "OnRep_MainHeadMesh", meta = (DisplayName = "Main Head Mesh", Category = "Inventory|Equipment"))
+	USkeletalMesh* HeadMesh;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = "OnRep_MainTopMesh", meta = (DisplayName = "Main Top Mesh", Category = "Inventory|Equipment"))
+	USkeletalMesh* TopMesh;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = "OnRep_MainBottomMesh", meta = (DisplayName = "Main Bototm Mesh", Category = "Inventory|Equipment"))
+	USkeletalMesh* BottomMesh;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing = "OnRep_MainFeetMesh", meta = (DisplayName = "Main Feet Mesh", Category = "Inventory|Equipment"))
+	USkeletalMesh* FeetMesh;
+
+
+	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainWeaponMesh"))
+	void OnRep_MainWeaponMesh();
+
+	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainHeadMesh"))
+	void OnRep_MainHeadMesh();
+
+	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainTopMesh"))
+	void OnRep_MainTopMesh();
+
+	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainBottomMesh"))
+	void OnRep_MainBottomMesh();
+
+	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainFeetMesh"))
+	void OnRep_MainFeetMesh();
+
+
 //=====================================================================================================
 //  FUNCTION
 //=====================================================================================================

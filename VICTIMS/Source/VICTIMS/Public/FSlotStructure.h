@@ -4,6 +4,7 @@
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
 #include "ItemDataStructs.h"
+#include "EEquipmentSlot.h"
 #include "FSlotStructure.generated.h"
 
 struct FReturnTupleBoolInt

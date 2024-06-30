@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "EEquipmentSlot.h"
 #include "ItemDataStructs.generated.h"
 
 UENUM()
@@ -94,5 +95,6 @@ struct FItemData : public FTableRowBase
 	FItemNumericData numericData;
 	UPROPERTY(EditAnywhere, Category = "Item Data")
 	FItemAssetData assetData;
-
+	UPROPERTY(EditAnywhere, Category = "Item Data")
+	EEquipmentSlot equipmentSlot;
 };

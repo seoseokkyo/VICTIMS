@@ -1,111 +1,297 @@
 
 
 #include "InventoryItemSlot.h"
-#include "Itembase.h"
-#include "InventoryTooltip.h"
-#include "DragItemVisual.h"
 #include "ItemDragDropOperation.h"
+#include "DragItemVisual.h"
+#include "MainHUD.h"
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "AVICTIMSPlayerController.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
-#include "HUDInterface.h"
+#include "ItemDataStructs.h"
+#include "InventoryTooltip.h"
+#include "Components/CanvasPanel.h"
+#include "Components/MenuAnchor.h"
+#include "MainMenu.h"
 
-void UInventoryItemSlot::NativeOnInitialized()
-{
-	Super::NativeOnInitialized();
-	if (ToolTipClass)
-	{
-		UInventoryTooltip* ToolTip = CreateWidget<UInventoryTooltip>(this, ToolTipClass);
-		ToolTip->InventorySlotBeingHovered = this;
-		SetToolTip(ToolTip);
-	}
-}
 
 void UInventoryItemSlot::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-//	playerController = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
+}
 
-	if (ItemReference)						// 아이템 희귀도에 따라 border 색 변경 
+void UInventoryItemSlot::OpenSlotMenu()
+{
+	if (SlotStructure.amount > 0)
 	{
-		switch (ItemReference->ItemQuality)
+		slotMenuAnchor->Open(true);
+	}
+}
+
+void UInventoryItemSlot::CloseSlotMenu()
+{
+	slotMenuAnchor->Close();
+
+}
+
+void UInventoryItemSlot::SetSlotIndex(uint8 Index)
+{
+	InventorySlotIndex = Index;
+}
+
+void UInventoryItemSlot::SetSlotStructure(const FSlotStructure& SlotToSet)
+{
+	SlotStructure = SlotToSet;
+}
+
+void UInventoryItemSlot::UpdateSlot(const FSlotStructure& NewSlotStructure)
+{
+	SetSlotStructure(NewSlotStructure);
+	UpdateSlotInfo();
+}
+
+void UInventoryItemSlot::DisplayTooltip()
+{
+	GetToolTip()->SetVisibility(ESlateVisibility::Visible);
+
+}
+
+void UInventoryItemSlot::HideTooltip()
+{
+	GetToolTip()->SetVisibility(ESlateVisibility::Hidden);
+
+}
+void UInventoryItemSlot::ToggleTooltip()
+{
+	if (IsValid(GetToolTip()))
+	{
+		if (HasItem())
 		{
-		case EItemQuality::common:
-			ItemBorder->SetBrushColor(FLinearColor::Gray);
-			break;
-		case EItemQuality::better:
-			ItemBorder->SetBrushColor(FLinearColor::White);
-			break;
-		case EItemQuality::unique:
-			ItemBorder->SetBrushColor(FLinearColor(0.0f, 0.51f, 0.169f));
-			break;
-		default:;
-		}
-											
-		ItemIcon->SetBrushFromTexture(ItemReference->AssetData.icon);
-																		// 적재보관 가능한 경우 보관개수 표시 
-		if (ItemReference->NumericData.bIsStackable)
-		{
-			ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity));
+			DisplayTooltip();
 		}
 		else
-		{																// 적재보관 안될 경우 보관개수 표시 X
-			ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
+		{
+			HideTooltip();
 		}
 	}
+}
+void UInventoryItemSlot::UpdateSlotInfo()
+{
+	if (!HasItem() || (InventorySlotIndex < (uint8)EEquipmentSlot::Count && NativeFromInventory))
+	{
+		amountTextBlock->SetText(FText::FromString(""));
+	}
+	else
+	{
+		amountTextBlock->SetText(FText::AsNumber(SlotStructure.amount));
+	}
+
+	icon->SetBrushFromTexture(SlotStructure.itemStructure.assetData.icon);
+}
+
+void UInventoryItemSlot::UseItem()
+{
+	if (HasItem())
+	{
+		IHUDInterface::Excute_UI_UseInventoryItem(PlayerController, InventorySlotIndex);
+	}
+	CloseSlotMenu();
+}
+
+bool UInventoryItemSlot::IsUnequipping(const uint8& LocalDraggedSlotIndex)
+{
+	const uint8 numberOfEntries = (uint8)EEquipmentSlot::Count;
+	if (LocalDraggedSlotIndex < numberOfEntries)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool UInventoryItemSlot::IsEquipping(const uint8& InventorySlot)
+{
+	const uint8 numberOfEntries = (uint8)EEquipmentSlot::Count;
+	if (InventorySlot < numberOfEntries)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool UInventoryItemSlot::HasItem()
+{
+	return SlotStructure.amount > 0 ? true : false;
 }
 
 FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
-
-	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
-	{																				// 마우스 좌클릭 -> 드래그 
-		return Reply.Handled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
+	if (InMouseEvent.GetEffectingButton() == EKeys::RightMouseButton)
+	{
+		if (HasItem())
+		{
+			if (!slotMenuAnchor->IsOpen())
+			{
+				HideTooltip();
+				playerController->menuAnchorIndex = InventorySlotIndex;
+				OpenSlotMenu();
+			}
+			return FReply::Handled();
+		}
 	}
-	return Reply.Unhandled();
+	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		LeftMouseButtonClickedOnce = true;
+		return CustomDetectDrag(InMouseEvent, this, EKeys::LeftMouseButton);
+	}
+
+	return FReply::Unhandled();
 }
 
 void UInventoryItemSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseLeave(InMouseEvent);
+	LeftMouseButtonClickedOnce = false;
+	ToggleTooltip();
+}
+
+FReply UInventoryItemSlot::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	return FReply::Handled();
 }
 
 void UInventoryItemSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry, InMouseEvent, OutOperation);
-
-	if (DragItemVisualClass)
+	if (HasItem())
 	{
-		const TObjectPtr<UDragItemVisual> DragVisual = CreateWidget<UDragItemVisual>(this, DragItemVisualClass);
-		DragVisual->ItemIcon->SetBrushFromTexture(ItemReference->AssetData.icon);
-		DragVisual->ItemBorder->SetBrushColor(ItemBorder->GetBrushColor());
+		HideTooltip();
 
-		ItemReference->NumericData.bIsStackable
-			? DragVisual->ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity))
-			: DragVisual->ItemQuantity->SetVisibility(ESlateVisibility::Collapsed);
+		UDragItemVisual* dragVisual = CreateWidget<UDragItemVisual>(this, itemDragVisualClass);
+		UItemDragDropOperation* dragDropOperation = NewObject<UItemDragDropOperation>();
 
-		UItemDragDropOperation* DragItemOperation = NewObject<UItemDragDropOperation>();
-		DragItemOperation->SourceItem = ItemReference;
-		DragItemOperation->SourceInventory = ItemReference->OwningInventory;
+		dragDropOperation->DefaultDragVisual = dragVisual;
+		dragDropOperation->Pivot = EDragPivot::MouseDown;
 
-		DragItemOperation->DefaultDragVisual = DragVisual;
-		DragItemOperation->Pivot = EDragPivot::TopLeft;
+		dragDropOperation->DraggedSlotInformation = SlotStructure;
+		dragDropOperation->DraggedSlotIndex = InventorySlotIndex;
 
-		OutOperation = DragItemOperation;
+		if (NativeFromInventory)
+		{
+			dragDropOperation->IsDraggedFromInventory = true;
+		}
+		if (NativeFromContainer)
+		{
+			dragDropOperation->IsDraggedFromContainer = true;
+		}
+
+		OutOperation = dragDropOperation;
+	}
+	else
+	{
+		OutOperation = nullptr;
 	}
 }
 
 bool UInventoryItemSlot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	return Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
 
+	UItemDragDropOperation* DragDropOperation = Cast<UItemDragDropOperation>(InOperation);
+	if (!IsValid(DragDropOperation) || DragDropOperation->DraggedSlotInformaion.amount <= 0)
+	{
+		return false;
+	}
+	const uint8 LocalDraggedSlot = DragDropOperation->DraggedSlotIndex;
+
+	if (DragDropOperation->IsDraggedfromInventory)
+	{
+		if (NativeFromContainer)
+		{
+			if (IsUnequipping(LocalDraggedSlot))
+			{
+				IHUDInterface::Execute_UI_UnEquipToContainer(PlayerController, LocalDraggedSlot, InventorySlotIndex);
+				return true;
+			}
+			IHUDInterface::Execute_UI_DepositContainerItem(PlayerController, LocalDraggedSlot, InventorySlotIndex);
+			return true;
+		}
+
+		if (IsUnequipping(LocalDraggedSlot))
+		{
+			IHUDInterface::Execute_UI_UnEquipInventoryItem(PlayerController, LocalDraggedSlot, InventorySlotIndex);
+			return true;
+		}
+		if (IsEquipping(LocalDraggedSlot))
+		{
+			IHUDInterface::Execute_UI_EquipInventoryItem(PlayerController, LocalDraggedSlot, InventorySlotIndex);
+			return true;
+		}
+
+		bool bSplit = false;
+		if (bSplit)
+		{
+		}
+		IHUDInterface::Execute_UI_MoveInventoryItem(PlayerController, LocalDraggedSlot, InventorySlotIndex);
+		HideTooltip();
+
+		return true;
+	}
+	if (DragDropOperation->IsDraggedFromContainer)
+	{
+		if (NativeFromInventory)
+		{
+			bool bSplit = false;
+			if (bSplit)
+			{
+				return true;
+			}
+			IHUDInterface::Execute_UI_TakeContainerItem(PlayerController, LocalDraggedSlot, InventorySlotIndex);
+			CloseSlotMenu();
+			return true;
+		}
+	}
+	return false;
+}
+
+void UInventoryItemSlot::NativeOnDragCancelled(const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
+{
+	Super::NativeOnDragCancelled(InDragDropEvent, InOperation);
+}
+
+FReply UInventoryItemSlot::CustomDetectDrag(const FPointerEvent& InMouseEvent, UWidget* WidgetDetectingDrag, FKey DragKey)
+{
+	if (InMouseEvent.GetEffectingButton() == DragKey)
+	{
+		FEventReply reply;
+		reply.NativeReply = FReply::Handled();
+
+		if (WidgetDetectingDrag)
+		{
+			TSharedPtr<SWidget> slateWidgetDetectingDrag = WidgetDetectingDrag->GetCachedWidget();
+			if (slateWidgetDetectingDrag.IsValid())
+			{
+				reply.NativeReply = reply.NativeReply.DetectDrag(slateWidgetDetectingDrag.ToSharedRef(), DragKey);
+				return reply.NativeReply;
+			}
+		}
+	}
+	return FReply::Unhandled();
 }
 
 FReply UInventoryItemSlot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
-	// 더블클릭 한 아이템 사용 
-//	IHUDInterface::Execute_UseInventoryItem(playerController, ItemReference);
+	if (LeftMouseButtonClickedOnce)
+	{
+		UseItem();
+		LeftMouseButtonClickedOnce = false;
+	}
 	return Super::NativeOnMouseButtonDoubleClick(InGeometry, InMouseEvent);
+}
+
+void UInventoryItemSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+	ToggleeTooltip();
 }

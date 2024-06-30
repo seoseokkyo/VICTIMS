@@ -5,13 +5,11 @@
 #include "Blueprint/UserWidget.h"
 #include "InventoryPanel.generated.h"
 
-
-
 class UInventoryItemSlot;
 class UInventoryComponent;
 class AVICTIMSCharacter;
-class UWrapBox;
-class UGridPanel;
+class UUniformGridPanel;
+class UDragItemVisual;
 class UTextBlock;
 
 UCLASS()
@@ -20,25 +18,19 @@ class VICTIMS_API UInventoryPanel : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	UFUNCTION()
-	void RefreshInventory();
 
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UWrapBox> InventoryWrapBox;
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UTextBlock> CapacityInfo;
-
-	UPROPERTY()
-	TObjectPtr<AVICTIMSCharacter> PlayerCharacter;
-	UPROPERTY()
-	TObjectPtr<UInventoryComponent> InventoryReference;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (BindWidget))
+	UUniformGridPanel* InventoryGridPanel;
 	
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UInventoryItemSlot> InventorySlotClass;
+	TArray<UInventoryItemSlot*> inventorySlotsArray;
+
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* Gold_Amount;
+
+	void UpdateGoldAmount();
 	
 protected:
 
-	void SetInfoText() const;
 	virtual void NativeOnInitialized() override;
-	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 };

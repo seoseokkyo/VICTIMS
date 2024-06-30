@@ -16,10 +16,12 @@
 #include "Components/SphereComponent.h"
 #include "MainHUD.h"
 #include "InventoryComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "AVICTIMSPlayerController.h"
 #include "InteractionInterface.h"
 #include "PickUp.h"
 #include "HousingComponent.h"
+#include "Net/UnrealNetwork.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -62,7 +64,6 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 
 
 	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
-	PlayerInventory->SetSlotsCapacity(20);
 
 	interactableRange = CreateDefaultSubobject<USphereComponent>(TEXT("Interactable Range"));
 	interactableRange -> SetupAttachment(RootComponent);
@@ -72,6 +73,23 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	interactableRange->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlapInteractableRange);
 
 	InteractionCheckFrequency = 0.1;
+
+	MainWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
+	MainWeapon->SetupAttachment(GetMesh());
+	Head = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Head"));
+	Head->SetupAttachment(GetMesh());
+	Top = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Top"));
+	Top->SetupAttachment(GetMesh());
+	Bottom = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Bottom"));
+	Bottom->SetupAttachment(GetMesh());
+	Feet = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Feet"));
+	Feet->SetupAttachment(GetMesh());
+
+	MainWeaponMesh = nullptr;
+	HeadMesh = nullptr;
+	TopMesh = nullptr;
+	BottomMesh = nullptr;
+	FeetMesh = nullptr;
 
 	characterName = TEXT("Player");
 
@@ -158,6 +176,16 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 }
 
+void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AVICTIMSCharacter, MainWeaponMesh);
+	DOREPLIFETIME(AVICTIMSCharacter, HeadMesh);
+	DOREPLIFETIME(AVICTIMSCharacter, TopMesh);
+	DOREPLIFETIME(AVICTIMSCharacter, BottomMesh);
+	DOREPLIFETIME(AVICTIMSCharacter, FeetMesh);
+}
 void AVICTIMSCharacter::Move(const FInputActionValue& Value)
 {
 	// input is a Vector2D
@@ -316,6 +344,31 @@ void AVICTIMSCharacter::EndInteract()
 		TargetInteractable->EndInteract();
 	}
 }
+void AVICTIMSCharacter::OnRep_MainWeaponMesh()
+{
+	MainWeapon->SetSkeletalMesh(MainWeaponMesh);
+	MainWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "MainWeapon");
+}
+void AVICTIMSCharacter::OnRep_MainHeadMesh()
+{
+	Head->SetSkeletalMesh(HeadMesh);
+	Head->SetLeaderPoseComponent(GetMesh());
+}
+void AVICTIMSCharacter::OnRep_MainTopMesh()
+{
+	Top->SetSkeletalMesh(TopMesh);
+	Top->SetLeaderPoseComponent(GetMesh());
+}
+void AVICTIMSCharacter::OnRep_MainBottomMesh()
+{
+	Bottom->SetSkeletalMesh(BottomMesh);
+	Bottom->SetLeaderPoseComponent(GetMesh());
+}
+void AVICTIMSCharacter::OnRep_MainFeetMesh()
+{
+	Feet->SetSkeletalMesh(FeetMesh);
+	Feet->SetLeaderPoseComponent(GetMesh());
+}
 void AVICTIMSCharacter::UpdateInteractionWidget() const
 {
 	if (IsValid(TargetInteractable.GetObject()))
@@ -326,26 +379,7 @@ void AVICTIMSCharacter::UpdateInteractionWidget() const
 
 void AVICTIMSCharacter::DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop)
 {
-	if (PlayerInventory->FindMatchingItem(ItemToDrop))
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.bNoFail = true;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-		const FVector SpawnLocation{ GetActorLocation() + (GetActorForwardVector() * 50.0f) };
-		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
-
-		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
-
-		APickUp* Pickup = GetWorld()->SpawnActor<APickUp>(APickUp::StaticClass(), SpawnTransform, SpawnParams);
-
-		Pickup->InitializeDrop(ItemToDrop, RemovedQuantity);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Item to drop was somehow null!"));
-	}
 }
 
 float AVICTIMSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -376,15 +410,6 @@ void AVICTIMSCharacter::DieFunction()
 
 	Super::DieFunction();
 }
-
-
-void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-}
-
-
 void AVICTIMSCharacter::CharacterJump(const FInputActionValue& Value)
 {
 	if (motionState != ECharacterMotionState::Idle)
