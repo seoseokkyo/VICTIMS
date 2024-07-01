@@ -20,6 +20,12 @@ class VICTIMS_API UInventoryManagerComponent : public UActorComponent
 public:	
 	UInventoryManagerComponent();
 
+	UPROPERTY(Replicated, EditAnywhere,BlueprintReadWrite)
+	TArray<uint8> AttributesArray;
+	
+	UPROPERTY()
+	UDataTable* ItemDB;
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION()
@@ -47,6 +53,7 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "UserInterface")
 	UMainMenu* mainLayoutUI; 
 
+	
 	UFUNCTION(Category = "Manager|Public")			
 	void TryToAddItemToInventory(UInventoryComponent* Inventory, FSlotStructure& InventoryItem, bool& bOutSuccess);	// 아이템 추가
 
@@ -72,6 +79,11 @@ public:
 	void Server_UseContainer(AActor* Container);																	// 서버_보관함 열기
 	UFUNCTION(Server, Reliable)																						
 	void Server_CloseContainer();																					// 서버_보관함 닫기
+
+	UFUNCTION(Server, Reliable)
+	void Server_EquipFromContainer(uint8 FromInventorySlot, uint8 ToInventorySlot);
+	UFUNCTION(Server, Reliable)
+	void Server_UnEquipToContainer(uint8 FromInventorySlot, uint8 ToInventorySlot);
 
 	UFUNCTION(Client, Reliable)																						// 클라_보관함 열기
 	void Client_OpenContainer(FContainerInfo ContainerProperties, const TArray<FSlotStructure>& InContainerInventory, const TArray<FSlotStructure>& InPlayerInventory);

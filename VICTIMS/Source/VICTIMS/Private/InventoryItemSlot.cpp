@@ -95,7 +95,7 @@ void UInventoryItemSlot::UseItem()
 {
 	if (HasItem())
 	{
-		IHUDInterface::Excute_UI_UseInventoryItem(PlayerController, InventorySlotIndex);
+		IHUDInterface::Execute_UI_UseInventoryItem(PlayerController, InventorySlotIndex);
 	}
 	CloseSlotMenu();
 }
@@ -134,7 +134,7 @@ FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, 
 			if (!slotMenuAnchor->IsOpen())
 			{
 				HideTooltip();
-				playerController->menuAnchorIndex = InventorySlotIndex;
+				playerController->MenuAnchorIndex = InventorySlotIndex;
 				OpenSlotMenu();
 			}
 			return FReply::Handled();
@@ -293,5 +293,5 @@ FReply UInventoryItemSlot::NativeOnMouseButtonDoubleClick(const FGeometry& InGeo
 void UInventoryItemSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
-	ToggleeTooltip();
+	ToggleTooltip();
 }

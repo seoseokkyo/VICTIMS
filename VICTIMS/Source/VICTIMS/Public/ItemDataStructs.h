@@ -16,6 +16,7 @@ enum class EItemQuality : uint8					// Èñ±Íµµ
 UENUM()
 enum class EItemType : uint8					// ¾ÆÀÌÅÛ Á¾·ù ´ëºÐ·ù
 {
+	currency	UMETA(DisplayName = "Currency"),	// µ·
 	cloth		UMETA(DisplayName = "Cloth"),		// ¿Ê
 	weapon		UMETA(DisplayName = "Weapon"),		// ¹«±â
 	consumable  UMETA(DisplayName = "Consumable"),  // ¼Òºñ

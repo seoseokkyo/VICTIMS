@@ -6,8 +6,10 @@
 #include "MainHUD.generated.h"
 
 struct FInteractableData;
+class UDataTable;
 class UInteractionWidget;
 class UMainMenu;
+enum ELayout;
 
 UCLASS()
 class VICTIMS_API AMainHUD : public AHUD
@@ -21,33 +23,27 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
 	TSubclassOf<UInteractionWidget> InteractionWidgetClass;
-
-	bool bIsMenuVisible = false;
 	
 	//======================================================================================
 	// FUNCTIONS
 	//======================================================================================
 	AMainHUD();
 
-	void DisplayMenu();
-	void HideMenu();
-	void ToggleMenu();
-	
+	void ToggleMenu(const ELayout layout);
+		
 	void ShowInteractionWidget() const;
 	void HideInteractionWidget() const;
 	void UpdateInteractionWidget(const FInteractableData* InteractableData) const;
 	
+	
+	UPROPERTY()
+	UMainMenu* MainMenuWidget;
+	UPROPERTY()
+	UInteractionWidget* InteractionWidget;
+
+
 protected:
 
-	UPROPERTY()
-	TObjectPtr<UMainMenu> MainMenuWidget;
-
-	UPROPERTY()
-	TObjectPtr<UInteractionWidget> InteractionWidget;
-
-	UPROPERTY()
-	TObjectPtr<UUserWidget> CrosshairWidget;
-	
 	//======================================================================================
 	// FUNCTIONS
 	//======================================================================================

@@ -3,6 +3,11 @@
 #include "MainHUD.h"
 #include "MainMenu.h"
 #include "InteractionWidget.h"
+#include "ContainerPanel.h"
+#include "HotbarPanel.h"
+#include "InventoryPanel.h"
+#include "ProfilePanel.h"
+#include "InventoryManagerComponent.h"
 
 AMainHUD::AMainHUD()
 {
@@ -14,7 +19,7 @@ void AMainHUD::BeginPlay()
 	{
 		MainMenuWidget = CreateWidget<UMainMenu>(GetWorld(), MainMenuClass);
 		MainMenuWidget->AddToViewport(5);
-		MainMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
+		MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 
 	if (InteractionWidgetClass)
@@ -25,40 +30,35 @@ void AMainHUD::BeginPlay()
 	}
 }
 
-void AMainHUD::DisplayMenu()
+void AMainHUD::ToggleMenu(const ELayout layout)
 {
-	if (MainMenuWidget)
+	if(layout == ELayout::Inventory)
 	{
-		bIsMenuVisible = true;
-		MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
+		if (MainMenuWidget->Inventory)
+		{
+			MainMenuWidget->Inventory->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
-}
-
-void AMainHUD::HideMenu()
-{
-	if (MainMenuWidget)
+	else if (layout == ELayout::Container)
 	{
-		bIsMenuVisible = false;
-		MainMenuWidget->SetVisibility(ESlateVisibility::Collapsed);
+		if (MainMenuWidget->Container)
+		{
+			MainMenuWidget->Container->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
-}
-
-void AMainHUD::ToggleMenu()
-{
-	if (bIsMenuVisible)
+	else if (layout == ELayout::Equipment)
 	{
-		HideMenu();
-
-		const FInputModeGameOnly InputMode;
-		GetOwningPlayerController()->SetInputMode(InputMode);
-		GetOwningPlayerController()->SetShowMouseCursor(false);
+		if (MainMenuWidget->Profile)
+		{
+			MainMenuWidget->Profile->SetVisibility(ESlateVisibility::Visible);
+		}
 	}
-	else
+	else if (layout == ELayout::Store)
 	{
-		DisplayMenu();
-		const FInputModeGameAndUI InputMode;
-		GetOwningPlayerController()->SetInputMode(InputMode);
-		GetOwningPlayerController()->SetShowMouseCursor(true);
+// 		if(MainMenuWidget->Store)
+// 		{
+// 			MainMenuWidget->Store->ToggleMenu();
+// 		}
 	}
 }
 

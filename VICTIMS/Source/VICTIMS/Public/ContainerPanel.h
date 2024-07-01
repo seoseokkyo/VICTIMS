@@ -16,8 +16,6 @@ public:
 
 	void SetTextToContainer(ESlateVisibility inVisibility);
 
-	virtual void OnButtonQuitClicked();
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta=(BindWidget))
 	class UUniformGridPanel* ContainerGridPanel;
 

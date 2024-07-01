@@ -13,11 +13,4 @@ void UContainerPanel::SetTextToContainer(ESlateVisibility inVisibility)
 {
 }
 
-void UContainerPanel::OnButtonQuitClicked()
-{
-	if (IsValid(Controller))
-	{
-	//	Controller->InventoryManagerComponent->Server_CloseContainer();
-	}
-}
 
