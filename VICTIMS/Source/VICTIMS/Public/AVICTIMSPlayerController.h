@@ -6,6 +6,7 @@
 #include "HUDInterface.h"
 #include "AVICTIMSPlayerController.generated.h"
 
+struct FSlotStructure;
 class UInventoryManagerComponent;
 class UEquipmentComponent;
 class UDatatable;

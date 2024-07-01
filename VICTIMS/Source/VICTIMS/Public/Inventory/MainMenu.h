@@ -73,8 +73,8 @@ public:
 	UHotbarPanel* Hotbar;
 	TSubclassOf<UHotbarPanel> wbp_hotbar;
 
-	UPROPERTY(EditAnywhere,BlueprintReadWrite)
-	UInventoryItemSlot* slot;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UInventoryItemSlot* slotWidget;
 	UPROPERTY(EditAnywhere,BlueprintReadWrite)
 	TSubclassOf<UInventoryItemSlot> wbp_itemSlot;
 

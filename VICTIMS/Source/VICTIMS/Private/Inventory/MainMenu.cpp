@@ -41,7 +41,7 @@ void UMainMenu::NativeConstruct()
 	{
 		Hotbar->SetVisibility(ESlateVisibility::Visible);
 	}
-	slot = CreateWidget<UInventoryItemSlot>(wbp_itemSlot);
+	slotWidget = CreateWidget<UInventoryItemSlot>(wbp_itemSlot);
 	hotbarSlot = CreateWidget<UHotbarItemSlot>(wbp_hotbarSlot);
 }
 

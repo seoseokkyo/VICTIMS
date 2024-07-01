@@ -22,9 +22,6 @@ public:
 
 	UPROPERTY(Replicated, EditAnywhere,BlueprintReadWrite)
 	TArray<uint8> AttributesArray;
-	
-	UPROPERTY()
-	UDataTable* ItemDB;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -53,7 +50,12 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "UserInterface")
 	UMainMenu* mainLayoutUI; 
 
-	
+	UFUNCTION(Client, Reliable)
+	void Client_SetAttributes(const TArray<uint8>& InAttributesArray);
+
+	UFUNCTION()
+	void SetAttributes(const TArray<uint8>& InAttributesArray);
+
 	UFUNCTION(Category = "Manager|Public")			
 	void TryToAddItemToInventory(UInventoryComponent* Inventory, FSlotStructure& InventoryItem, bool& bOutSuccess);	// 아이템 추가
 
@@ -179,7 +181,7 @@ private:
 	FSlotStructure GetHotbarSlotItem(const uint8& HotbarSlot);														// 퀵슬롯인벤 아이템 데이터 받아오기
 
 	UPROPERTY()
-	UDataTable* ItemDB; // 아이템 데이터테이블 변수 
+	UDataTable* itemDB; // 아이템 데이터테이블 변수 
 
 	UFUNCTION(Category = "Helper")
 	uint8 GetEquipmentSlotByType(EEquipmentSlot EquipmentSlot);								// 장비타입으로 장비슬롯 세팅
@@ -208,10 +210,7 @@ private:
 	void EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot);
 	UFUNCTION(Category = "Manager|Private|Equipment")										// 아이템 탈착
 	void UnEquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,UInventoryComponent* ToInventory, uint8 ToInventorySlot);
-	UFUNCTION(Category = "Manager|Private")													// 아이템 버리는 위치 지정
-	void RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform);
-	UFUNCTION(Category = "Manager|Private|Inventory")										// 아이템 버리기
-	void DropItem(UInventoryComponent* Inventory, uint8 InventorySlot);
+
 
 	UFUNCTION(Category = "Manager|Private|Inventory")										// 아이템 옮기기
 	void MoveItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot);

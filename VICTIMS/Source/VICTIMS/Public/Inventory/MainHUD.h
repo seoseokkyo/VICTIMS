@@ -9,7 +9,7 @@ struct FInteractableData;
 class UDataTable;
 class UInteractionWidget;
 class UMainMenu;
-enum ELayout;
+enum class ELayout;
 
 UCLASS()
 class VICTIMS_API AMainHUD : public AHUD
