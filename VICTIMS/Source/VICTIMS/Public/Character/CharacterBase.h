@@ -24,7 +24,10 @@ enum class ECharacterMotionState : int8
 	Defence,
 	Hit,
 	Jump,
-	Die
+	Die,
+	Move,
+	AttackDelay,
+	RETURN
 };
 
 class UAnimMontage;
@@ -82,6 +85,12 @@ public:
 	virtual bool CanReceiveDamage_Implementation() override;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_HitReact();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_HitReact();
 
 	FName pelvisBoneName = TEXT("Pelvis");
 

@@ -22,7 +22,7 @@ enum class EEnemyState : uint8
 	DIE			
 };
 
-
+class UAIPerceptionComponent;
 
 UCLASS()
 class VICTIMS_API ANormalZombie : public ACharacterBase
@@ -34,18 +34,10 @@ protected:
 
 public:
 	ANormalZombie();
+
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-	UPROPERTY(Replicated, EditAnywhere, Category = "MySettings")
-	EEnemyState enemyState = EEnemyState::IDLE;
-
-	//UPROPERTY(EditAnywhere, Category = "MySettings")
-	//class UStaticMeshComponent* swordComp;
-
-	//UPROPERTY(EditAnywhere, Category = "MySettings")
-	//class UBoxComponent* boxComp;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	float traceSpeed = 450.0f;
@@ -62,14 +54,6 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	float returnSpeed = 500.0f;
 
-	UPROPERTY(EditAnywhere, Category = "MySettings")
-	int32 EnemyMaxHP = 100.0f;
-
-	UPROPERTY(EditAnywhere, Category = "MySettings")
-	int32 EnemyCurrentHP = EnemyMaxHP;
-
-	void OnDamaged(int32 dmg);
-
 	void SearchPlayer();
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
@@ -80,6 +64,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class UAnimMontage* HitReact_Montage;
+
 
 	// ป๓ลย
 	void Idle();
@@ -106,7 +91,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;
 
-
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_DieFunction();
 
@@ -114,7 +98,6 @@ public:
 	void NetMulticastRPC_DieFunction();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-
 
 
 private:

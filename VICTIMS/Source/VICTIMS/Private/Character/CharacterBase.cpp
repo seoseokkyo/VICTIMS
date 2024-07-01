@@ -64,6 +64,15 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
 	}
 
+	if (hitReaction)
+	{
+		motionState = ECharacterMotionState::Hit;
+
+		float animTime = PlayAnimMontage(hitReaction, 1.0f);
+
+
+	}
+
 	// µð¹ö±×
 	if (0)
 	{
@@ -79,6 +88,27 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	}
 
 	return 0.0f;
+}
+
+void ACharacterBase::ServerRPC_HitReact_Implementation()
+{
+	motionState = ECharacterMotionState::Hit;
+
+	NetMulticastRPC_HitReact();
+}
+
+void ACharacterBase::NetMulticastRPC_HitReact_Implementation()
+{
+	motionState = ECharacterMotionState::Hit;
+
+	float animTime = PlayAnimMontage(hitReaction, 1.0f);
+
+	FTimerHandle hnd;
+	GetWorldTimerManager().SetTimer(hnd, [&](){
+
+		motionState = ECharacterMotionState::Idle;
+
+	}, animTime, false);
 }
 
 void ACharacterBase::ContinueAttack_Implementation()

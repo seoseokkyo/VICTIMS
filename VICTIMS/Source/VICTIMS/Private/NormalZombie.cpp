@@ -10,7 +10,7 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include <Kismet/KismetMathLibrary.h>
 #include "Item/BaseWeapon.h"
-
+#include "NormalZombieController.h"
 
 // Sets default values
 ANormalZombie::ANormalZombie()
@@ -34,7 +34,7 @@ void ANormalZombie::BeginPlay()
 	aiCon = GetAIController();
 
 	// 기본 상태를 IDLE 상태로 초기화한다.
-	enemyState = EEnemyState::IDLE;
+	motionState = ECharacterMotionState::Idle;
 
 	FActorSpawnParameters spawnParam;
 	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -61,44 +61,49 @@ void ANormalZombie::Tick(float DeltaTime)
 
 	if (bDead)
 	{
-		if (enemyState != EEnemyState::DIE)
+		if (motionState != ECharacterMotionState::Die)
 		{
-			enemyState = EEnemyState::DIE;
+			motionState = ECharacterMotionState::Die;
 		}
 
 		return;
 	}
 
-	switch (enemyState)
+	switch (motionState)
 	{
-	case EEnemyState::IDLE:
+	case ECharacterMotionState::Idle:
 		Idle();
 		break;
-	case EEnemyState::MOVE:
-		MoveTotaget();
+	case ECharacterMotionState::ToggleCombat:
 		break;
-	case EEnemyState::ATTACK:
+	case ECharacterMotionState::Attack:
 		Attack();
 		break;
-	case EEnemyState::ATTACKDELAY:
-		AttackDelay();
+	case ECharacterMotionState::Defence:
 		break;
-	case EEnemyState::RETURN:
-
+	case ECharacterMotionState::Hit:
 		break;
-	case EEnemyState::DAMAGED:
-
+	case ECharacterMotionState::Jump:
 		break;
-	case EEnemyState::DIE:
+	case ECharacterMotionState::Die:
 		if (bDead == false)
 		{
 			Die();
 		}
 		break;
+	case ECharacterMotionState::Move:
+		MoveTotaget();
+		break;
+	case ECharacterMotionState::AttackDelay:
+		AttackDelay();
+		break;
+	case ECharacterMotionState::RETURN:
+
+		break;
 	default:
 		break;
 	}
-
+	
 	// 공격전 회전
 	if (bLookTarget)
 	{
@@ -106,7 +111,6 @@ void ANormalZombie::Tick(float DeltaTime)
 		{
 			rotTime += DeltaTime;
 			SetActorRotation(FMath::Lerp(rotStart, rotTarget, rotTime));
-			//UE_LOG(LogTemp, Warning, TEXT("111111111111111"));
 		}
 		else
 		{
@@ -114,9 +118,6 @@ void ANormalZombie::Tick(float DeltaTime)
 			bLookTarget = false;
 		}
 	}
-
-	//UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
-
 }
 
 void ANormalZombie::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -143,12 +144,12 @@ void ANormalZombie::MoveTotaget()
 		}
 		if (FVector::Distance(GetActorLocation(), targetLoc) <= attackDistance)
 		{
-			enemyState = EEnemyState::ATTACK;
+			motionState = ECharacterMotionState::Attack;
 		}
 
 		if (FVector::Distance(GetActorLocation(), targetLoc) >= 500)
 		{
-			enemyState = EEnemyState::IDLE;
+			motionState = ECharacterMotionState::Idle;
 		}
 	}
 }
@@ -172,8 +173,8 @@ void ANormalZombie::Attack()
 	if (AnimInstance && bAttack)
 	{
 		PlayAnimMontage(attack_Montage);
-		UE_LOG(LogTemp, Warning, TEXT("AttackAM!!"))
-			enemyState = EEnemyState::ATTACKDELAY;
+
+		motionState = ECharacterMotionState::AttackDelay;
 	}
 }
 
@@ -196,7 +197,7 @@ void ANormalZombie::AttackDelay()
 
 		GetWorld()->GetTimerManager().SetTimer(AttackTimer, [&]() {
 
-			enemyState = EEnemyState::IDLE;
+			motionState = ECharacterMotionState::Idle;
 
 			UKismetSystemLibrary::PrintString(GetWorld(), TEXT("EEnemyState::IDLE"));
 
@@ -210,7 +211,7 @@ void ANormalZombie::DieFunction()
 
 	Super::DieFunction();
 
-	if (DeathSound && enemyState != EEnemyState::DIE)
+	if (DeathSound && motionState != ECharacterMotionState::Die)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
 	}
@@ -220,7 +221,7 @@ void ANormalZombie::DieFunction()
 
 void ANormalZombie::ServerRPC_DieFunction_Implementation()
 {
-	enemyState = EEnemyState::DIE;
+	motionState = ECharacterMotionState::Die;
 
 	aiCon->SetFocus(nullptr);
 
@@ -231,7 +232,7 @@ void ANormalZombie::ServerRPC_DieFunction_Implementation()
 
 		}, 2.0f, false);
 
-	//NetMulticastRPC_DieFunction();
+	NetMulticastRPC_DieFunction();
 }
 
 void ANormalZombie::NetMulticastRPC_DieFunction_Implementation()
@@ -258,7 +259,7 @@ void ANormalZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ANormalZombie, enemyState);
+	DOREPLIFETIME(ANormalZombie, motionState);
 }
 
 AAIController* ANormalZombie::GetAIController()
@@ -295,7 +296,7 @@ void ANormalZombie::PrintInfo()
 	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
 	FString strSP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::SP));
 
-	FString strState = UEnum::GetValueAsString(enemyState);
+	FString strState = UEnum::GetValueAsString(motionState);
 
 	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s\n strState : %s"), *localRole, *remoteRole, *owner, *netConn, /**netMode,*/ *hasController, *strHP, *strSP, *strState);
 
@@ -305,27 +306,27 @@ void ANormalZombie::PrintInfo()
 
 
 
-void ANormalZombie::OnDamaged(int32 dmg)
-{
-	EnemyCurrentHP = FMath::Clamp(EnemyCurrentHP - dmg, 0, 100);
-	if (EnemyCurrentHP <= 0)
-	{
-		enemyState = EEnemyState::DIE;
-
-
-	}
-	else
-	{
-		enemyState = EEnemyState::DAMAGED;
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance)
-		{
-			PlayAnimMontage(HitReact_Montage);
-			UE_LOG(LogTemp, Warning, TEXT("HitReactAM!!"))
-		}
-	}
-
-}
+//void ANormalZombie::OnDamaged(int32 dmg)
+//{
+//	EnemyCurrentHP = FMath::Clamp(EnemyCurrentHP - dmg, 0, 100);
+//	if (EnemyCurrentHP <= 0)
+//	{
+//		enemyState = EEnemyState::DIE;
+//
+//
+//	}
+//	else
+//	{
+//		//enemyState = EEnemyState::DAMAGED;
+//		//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+//		//if (AnimInstance)
+//		//{
+//		//	PlayAnimMontage(HitReact_Montage);
+//		//	UE_LOG(LogTemp, Warning, TEXT("HitReactAM!!"))
+//		//}
+//	}
+//
+//}
 
 void ANormalZombie::SearchPlayer()
 {
@@ -360,11 +361,11 @@ void ANormalZombie::SearchPlayer()
 
 	if (Player == nullptr)
 	{
-		enemyState = EEnemyState::IDLE;
+		motionState = ECharacterMotionState::Idle;
 	}
 	else
 	{
-		enemyState = EEnemyState::MOVE;
+		motionState = ECharacterMotionState::Move;
 	}
 }
 

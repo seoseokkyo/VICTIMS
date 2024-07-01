@@ -22,21 +22,23 @@ void APickUp::InitializePickup(const int32 InQuantity)
 	if (!ItemRowHandle.IsNull())
 	{
 		const FItemData* ItemData = ItemRowHandle.GetRow<FItemData>(ItemRowHandle.RowName.ToString());
+		if(ItemData)
+		{
+			ItemReference = NewObject<UItemBase>(this, UItemBase::StaticClass());
 
-		ItemReference = NewObject<UItemBase>(this, UItemBase::StaticClass());
+			ItemReference->ID = ItemData->ID;
+			ItemReference->ItemType = ItemData->itemType;
+			ItemReference->ItemQuality = ItemData->itemQuality;
+			ItemReference->NumericData = ItemData->numericData;
+			ItemReference->TextData = ItemData->textData;
+			ItemReference->AssetData = ItemData->assetData;
 
-		ItemReference->ID = ItemData->ID;
-		ItemReference->ItemType = ItemData->itemType;
-		ItemReference->ItemQuality = ItemData->itemQuality;
-		ItemReference->NumericData = ItemData->numericData;
-		ItemReference->TextData = ItemData->textData;
-		ItemReference->AssetData = ItemData->assetData;
+			ItemReference->NumericData.bIsStackable = ItemData->numericData.maxStackSize > 1;
+			InQuantity <= 0 ? ItemReference->SetQuantity(1) : ItemReference->SetQuantity(InQuantity);
 
-		ItemReference->NumericData.bIsStackable = ItemData->numericData.maxStackSize > 1;
-		InQuantity <= 0 ? ItemReference->SetQuantity(1) : ItemReference->SetQuantity(InQuantity);
-
-		PickupMesh->SetStaticMesh(ItemData->assetData.staticMesh);
-		UpdateInteractableData();
+			PickupMesh->SetStaticMesh(ItemData->assetData.staticMesh);
+			UpdateInteractableData();
+		}
 	}
 }
 
