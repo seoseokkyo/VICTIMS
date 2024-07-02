@@ -155,6 +155,36 @@ void ABaseWeapon::OnHitCollisionComponent(FHitResult lastHitStruct)
 
 	AActor* hitActor = lastHitStruct.GetActor();
 
+	FString ownerTeamTag;
+	FString hitActorTeamTag;
+
+	bool bOwnerTagFind = false;
+	for (auto tag : GetOwner()->Tags)
+	{
+		if (tag.ToString().Contains("Team"))
+		{
+			ownerTeamTag = tag.ToString();
+			bOwnerTagFind = true;
+			break;
+		}
+	}
+
+	bool bHitActorTagFind = false;
+	for (auto tag : hitActor->Tags)
+	{
+		if (tag.ToString().Contains("Team"))
+		{
+			hitActorTeamTag = tag.ToString();
+			bHitActorTagFind = true;
+			break;
+		}
+	}
+
+	if (bOwnerTagFind && bHitActorTagFind && (ownerTeamTag == hitActorTeamTag))
+	{
+		return;
+	}
+
 	auto interfaceCheck = Cast<ICombatInterface>(hitActor);
 
 	if (interfaceCheck != nullptr)

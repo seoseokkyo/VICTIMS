@@ -14,7 +14,7 @@ UCollisionComponent::UCollisionComponent()
 	this->startSocketName = FName("Weapon Start");
 	this->endSocketName = FName("Weapon End");
 	this->traceRadius = 20;
-	this->drawDebugType = EDrawDebugTrace::None;
+	this->drawDebugType = EDrawDebugTrace::ForDuration;
 
 	collisionObjectTypes.Reset();
 	collisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));

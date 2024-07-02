@@ -107,10 +107,10 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPC_PerformAttack(UAnimMontage* useMontage);
+	void ServerRPC_PerformAttack(int useIndex);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticastRPC_PerformAttack(UAnimMontage* useMontage);
+	void NetMulticastRPC_PerformAttack(int useIndex);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_AmountDamage(float damage);

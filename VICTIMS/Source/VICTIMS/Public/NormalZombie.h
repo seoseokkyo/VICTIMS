@@ -37,8 +37,6 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	float traceSpeed = 450.0f;
 
@@ -54,7 +52,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	float returnSpeed = 500.0f;
 
-	void SearchPlayer();
+	UPROPERTY(Replicated, EditDefaultsOnly)
+	UCombatComponent* combatComponent_Additional;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class UAnimMontage* attack_Montage;
@@ -67,10 +66,6 @@ public:
 
 
 	// ป๓ลย
-	void Idle();
-	void MoveTotaget();
-	void Attack();
-	void AttackDelay();
 	void Die();
 
 	virtual void DieFunction() override;
@@ -90,6 +85,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
+	TSubclassOf<class ABaseWeapon> defaultWeapon_Additional;
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_DieFunction();

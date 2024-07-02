@@ -16,7 +16,7 @@
 // Sets default values
 ACharacterBase::ACharacterBase()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	stateComp = CreateDefaultSubobject<UStateComponent>(TEXT("StateComp"));
@@ -68,9 +68,19 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	{
 		motionState = ECharacterMotionState::Hit;
 
+		FVector targetDir = DamageCauser->GetActorLocation() - GetActorLocation();
+		targetDir.Normalize();
+
+		SetActorRotation(targetDir.Rotation());
+
 		float animTime = PlayAnimMontage(hitReaction, 1.0f);
 
+		FTimerHandle hnd;
+		GetWorldTimerManager().SetTimer(hnd, [&]() {
 
+			motionState = ECharacterMotionState::Idle;
+
+			}, animTime, false);
 	}
 
 	// µð¹ö±×
@@ -104,11 +114,11 @@ void ACharacterBase::NetMulticastRPC_HitReact_Implementation()
 	float animTime = PlayAnimMontage(hitReaction, 1.0f);
 
 	FTimerHandle hnd;
-	GetWorldTimerManager().SetTimer(hnd, [&](){
+	GetWorldTimerManager().SetTimer(hnd, [&]() {
 
 		motionState = ECharacterMotionState::Idle;
 
-	}, animTime, false);
+		}, animTime, false);
 }
 
 void ACharacterBase::ContinueAttack_Implementation()
@@ -161,11 +171,13 @@ void ACharacterBase::PerformAttack(int32 attackIndex, bool bUseRandom)
 			int32 montagesSize = mainWeapon->attackMontages.Num();
 			int32 randIndex = FMath::RandRange(0, montagesSize - 1);
 
+			int useIndex = bUseRandom ? randIndex : attackIndex;
+
 			useMontage = bUseRandom ? mainWeapon->attackMontages[randIndex] : mainWeapon->attackMontages[attackIndex];
 
 			if (IsValid(useMontage))
 			{
-				ServerRPC_PerformAttack(useMontage);
+				ServerRPC_PerformAttack(useIndex);
 			}
 		}
 	}
@@ -233,7 +245,7 @@ void ACharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ACharacterBase, bDead);
 }
 
-void ACharacterBase::ServerRPC_PerformAttack_Implementation(UAnimMontage* useMontage)
+void ACharacterBase::ServerRPC_PerformAttack_Implementation(int useIndex)
 {
 	ABaseWeapon* mainWeapon = combatComponent->GetMainWeapon();
 
@@ -255,22 +267,27 @@ void ACharacterBase::ServerRPC_PerformAttack_Implementation(UAnimMontage* useMon
 		combatComponent->attackCount = 0;
 	}
 
-	NetMulticastRPC_PerformAttack(useMontage);
+	NetMulticastRPC_PerformAttack(useIndex);
 }
 
-void ACharacterBase::NetMulticastRPC_PerformAttack_Implementation(UAnimMontage* useMontage)
+void ACharacterBase::NetMulticastRPC_PerformAttack_Implementation(int useIndex)
 {
-	float attackAnimTime = PlayAnimMontage(useMontage);
+	ABaseWeapon* mainWeapon = combatComponent->GetMainWeapon();
 
-	FTimerHandle handler;
-	GetWorldTimerManager().SetTimer(handler, [&]() {
+	if (mainWeapon)
+	{
+		float attackAnimTime = PlayAnimMontage(mainWeapon->attackMontages[useIndex]);
 
-		combatComponent->bAttacking = false;
-		motionState = ECharacterMotionState::Idle;
+		FTimerHandle handler;
+		GetWorldTimerManager().SetTimer(handler, [&]() {
 
-		GetWorldTimerManager().ClearTimer(handler);
+			combatComponent->bAttacking = false;
+			motionState = ECharacterMotionState::Idle;
 
-		}, 1.0f, false, attackAnimTime);
+			GetWorldTimerManager().ClearTimer(handler);
+
+			}, 1.0f, false, attackAnimTime);
+	}
 }
 
 void ACharacterBase::ServerRPC_AmountDamage_Implementation(float damage)
