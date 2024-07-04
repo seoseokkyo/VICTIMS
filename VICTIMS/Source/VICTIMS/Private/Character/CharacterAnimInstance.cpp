@@ -26,6 +26,7 @@ void UCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	if (myCharacter != nullptr)
 	{
 		bDie = myCharacter->bDead;
+		bCrouch = myCharacter->bCrouch;
 	}
 }
 

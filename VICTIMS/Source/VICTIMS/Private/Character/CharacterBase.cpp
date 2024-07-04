@@ -131,6 +131,8 @@ void ACharacterBase::ContinueAttack_Implementation()
 	{
 		combatComponent->bAttackSaved = false;
 
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ContinueAttack_Implementation")));
+
 		AttackEvent();
 	}
 }
@@ -139,6 +141,8 @@ void ACharacterBase::ResetCombat_Implementation()
 {
 	motionState = ECharacterMotionState::Idle;
 	combatComponent->attackCount = 0;
+	combatComponent->bAttacking = false;
+	combatComponent->bAttackSaved = false;
 }
 
 bool ACharacterBase::CanReceiveDamage_Implementation()
@@ -243,6 +247,7 @@ void ACharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ACharacterBase, combatComponent);
 	DOREPLIFETIME(ACharacterBase, motionState);
 	DOREPLIFETIME(ACharacterBase, bDead);
+	DOREPLIFETIME(ACharacterBase, bCrouch);
 }
 
 void ACharacterBase::ServerRPC_PerformAttack_Implementation(int useIndex)
@@ -276,17 +281,22 @@ void ACharacterBase::NetMulticastRPC_PerformAttack_Implementation(int useIndex)
 
 	if (mainWeapon)
 	{
+		combatComponent->bAttacking = true;
+
 		float attackAnimTime = PlayAnimMontage(mainWeapon->attackMontages[useIndex]);
 
-		FTimerHandle handler;
-		GetWorldTimerManager().SetTimer(handler, [&]() {
+		//FTimerHandle handler;
+		//GetWorldTimerManager().SetTimer(handler, [&]() {
 
-			combatComponent->bAttacking = false;
-			motionState = ECharacterMotionState::Idle;
+		//	combatComponent->bAttacking = false;
+		//	combatComponent->bAttackSaved = false;
+		//	motionState = ECharacterMotionState::Idle;
 
-			GetWorldTimerManager().ClearTimer(handler);
+		//	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("NetMulticastRPC_PerformAttack_Implementation")));
 
-			}, 1.0f, false, attackAnimTime);
+		//	GetWorldTimerManager().ClearTimer(handler);
+
+		//	}, 1.0f, false, attackAnimTime);
 	}
 }
 

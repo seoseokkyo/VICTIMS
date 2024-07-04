@@ -79,6 +79,9 @@ class AVICTIMSCharacter : public ACharacterBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ia_LeftClickAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ia_ToggleCrouch;
+
 public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)			// 상호작용 가능범위 
@@ -130,6 +133,8 @@ protected:
 	void ToggleCombat(const FInputActionValue& Value);
 
 	void LeftClick(const FInputActionValue& Value);
+
+	void Crouch(const FInputActionValue& Value);
 
 	void PrintInfo();
 

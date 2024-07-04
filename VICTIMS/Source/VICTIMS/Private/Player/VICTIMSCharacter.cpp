@@ -30,7 +30,7 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -60,14 +60,13 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-
 	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
 	PlayerInventory->SetSlotsCapacity(20);
 
 	interactableRange = CreateDefaultSubobject<USphereComponent>(TEXT("Interactable Range"));
-	interactableRange -> SetupAttachment(RootComponent);
-	interactableRange -> SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	interactableRange -> SetRelativeScale3D(FVector(4));
+	interactableRange->SetupAttachment(RootComponent);
+	interactableRange->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	interactableRange->SetRelativeScale3D(FVector(4));
 	interactableRange->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlapInteractableRange);
 	interactableRange->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlapInteractableRange);
 
@@ -96,13 +95,13 @@ void AVICTIMSCharacter::BeginPlay()
 	{
 		equipment->OnEquipped();
 	}
-	
+
 	if (IsLocallyControlled())
 	{
 		MainPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 		HUD = Cast<AMainHUD>(MainPlayerController->GetHUD());
 	}
-	
+
 	if (HousingComponent)
 	{
 		HousingComponent->Camera = FollowCamera; // 초기화 시 카메라 컴포넌트를 할당
@@ -129,14 +128,13 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-	
+
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
 
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::BeginInteract);
 		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AVICTIMSCharacter::EndInteract);
@@ -150,7 +148,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
 		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
-		
+
 	}
 	else
 	{
@@ -171,7 +169,7 @@ void AVICTIMSCharacter::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -204,7 +202,7 @@ void AVICTIMSCharacter::Interact()
 	}
 }
 
-void AVICTIMSCharacter::OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AVICTIMSCharacter::OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (OtherActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 	{
@@ -218,7 +216,7 @@ void AVICTIMSCharacter::OnBeginOverlapInteractableRange(UPrimitiveComponent* Ove
 		{
 			return;
 		}
-	}	
+	}
 }
 
 void AVICTIMSCharacter::OnEndOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
@@ -243,7 +241,7 @@ void AVICTIMSCharacter::OnEndOverlapInteractableRange(UPrimitiveComponent* Overl
 }
 void AVICTIMSCharacter::ToggleMenu()
 {
-	 HUD->ToggleMenu();
+	HUD->ToggleMenu();
 }
 
 void AVICTIMSCharacter::FoundInteractable(AActor* NewInteractable)
@@ -252,16 +250,21 @@ void AVICTIMSCharacter::FoundInteractable(AActor* NewInteractable)
 	{
 		EndInteract();
 	}
+
 	if (InteractionData.CurrentInteractable)
 	{
 		TargetInteractable = InteractionData.CurrentInteractable;
 		TargetInteractable->EndFocus();
 	}
+
 	InteractionData.CurrentInteractable = NewInteractable;
 	TargetInteractable = NewInteractable;
 
-	HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
-	TargetInteractable->BeginFocus();
+	if (HUD)
+	{
+		HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
+		TargetInteractable->BeginFocus();
+	}
 }
 
 void AVICTIMSCharacter::NoInteractableFound()
@@ -277,9 +280,13 @@ void AVICTIMSCharacter::NoInteractableFound()
 			TargetInteractable->EndFocus();
 			EndInteract();
 		}
-		HUD->HideInteractionWidget();
-		InteractionData.CurrentInteractable = nullptr;
-		TargetInteractable = nullptr;
+
+		if (HUD)
+		{
+			HUD->HideInteractionWidget();
+			InteractionData.CurrentInteractable = nullptr;
+			TargetInteractable = nullptr;
+		}
 	}
 }
 
@@ -424,6 +431,11 @@ void AVICTIMSCharacter::LeftClick(const FInputActionValue& Value)
 	{
 		AttackEvent();
 	}
+}
+
+void AVICTIMSCharacter::Crouch(const FInputActionValue& Value)
+{
+	bCrouch ^= true;
 }
 
 void AVICTIMSCharacter::ServerRPC_ToggleCombat_Implementation()

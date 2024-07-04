@@ -36,7 +36,7 @@ ANormalZombieController::ANormalZombieController()
 	}
 
 	if (hearingConfig != nullptr) {
-		hearingConfig->HearingRange = 3000.F;
+		hearingConfig->HearingRange = 10000.F;
 		hearingConfig->SetMaxAge(5.F);
 		hearingConfig->DetectionByAffiliation.bDetectEnemies = true;
 		hearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
@@ -229,14 +229,7 @@ void ANormalZombieController::SetupPerceptionSystem()
 
 void ANormalZombieController::OnTargetDetected(AActor* _Actor, FAIStimulus const Stimulus)
 {
-	if (Cast<AVICTIMSCharacter>(_Actor))
-	{
-		targetActor = _Actor;
-	}
-	else
-	{
-		return;
-	}
+	targetActor = _Actor;
 
 	if (Stimulus.Type.Name == FName("Default__AISense_Sight"))
 	{
@@ -246,9 +239,18 @@ void ANormalZombieController::OnTargetDetected(AActor* _Actor, FAIStimulus const
 	}
 	else if (Stimulus.Type.Name == FName("Default__AISense_Hearing"))
 	{
+		// 1000보다 먼 거리에서 난 100보다 작은 소리는 무시
+		if (Stimulus.Strength < 100)
+		{
+			if (FVector::Dist(targetActor->GetActorLocation(), GetPawn()->GetActorLocation()) > 1000)
+			{
+				return;
+			}
+		}
+
 		SetNoiseDetect(GetNoiseDetect() + Stimulus.Strength);
 
-		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Strength : %f"), hearingValue));
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Strength : %f"), Stimulus.Strength));
 		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("GetNoiseDetect : %f"), GetNoiseDetect()));
 	}
 	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Type.Name : %s"), *Stimulus.Type.Name.ToString()));

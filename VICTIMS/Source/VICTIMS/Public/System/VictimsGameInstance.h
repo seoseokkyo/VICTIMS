@@ -8,8 +8,20 @@
 #include "VictimsGameInstance.generated.h"
 
 /**
- * 
+ *
  */
+
+USTRUCT()
+struct FInstantServerStruct
+{
+	GENERATED_BODY()
+
+	int32	serverNumber;
+	int32	serverPortNumber;
+	int32	playerNum;
+	FString serverLevelName;
+};
+
 
 class UDataTable;
 
@@ -17,7 +29,7 @@ UCLASS()
 class VICTIMS_API UVictimsGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -25,15 +37,28 @@ public:
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ConnectToServerAndMoveToNewLevel(APlayerController* PlayerController, const FString& NewLevelName, ETravelType type);
-	
 
 	UFUNCTION()
-	void StreamingLevelTest();
+	virtual void OnStart() override;
 
-	UFUNCTION(Server, Reliable, BlueprintCallable)
-	void LoadSubLevel(APlayerController* PlayerController, const FString& LevelName);
+	UPROPERTY()
+	FString serverType;
 
+	UPROPERTY()
+	FString serverPort;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MySettings")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	UDataTable* dt_characerStatDataTable;
+
+	UFUNCTION(Server, Unreliable, BlueprintCallable)
+	void ServerRPC_PrintServerType();
+
+	UFUNCTION(NetMulticast, Unreliable, BlueprintCallable)
+	void MultiRPC_PrintServerType(const FString& serverTypeString);
+
+	UPROPERTY()
+	TArray<FInstantServerStruct> InstantServerArray;
+
+	UPROPERTY()
+	class UProcSocketObject* mySocket;
 };

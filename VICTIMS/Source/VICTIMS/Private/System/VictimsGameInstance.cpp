@@ -4,6 +4,8 @@
 #include "VictimsGameInstance.h"
 #include "StateComponent.h"
 #include <Kismet/KismetSystemLibrary.h>
+#include <ServerProcSocket.h>
+#include <InstantProcSocket.h>
 
 FCharacterStat UVictimsGameInstance::GetCharacterDataTable(const FString& rowName)
 {
@@ -25,88 +27,128 @@ FCharacterStat UVictimsGameInstance::GetCharacterDataTable(const FString& rowNam
 	return FCharacterStat();
 }
 
-void UVictimsGameInstance::StreamingLevelTest()
-{
-	//FString PackageName = "/Game/Maps/" + LevelName;
-	//FString PackagePath = FPackageName::GetLongPackagePath(PackageName);
-	//FString LevelPackageName = FPackageName::ObjectPathToPackageName(PackagePath);
-
-	// ULevelStreaming 객체 생성
-	//ULevelStreaming* LevelStreaming = ULevelStreaming::NewLevelStreaming(LevelPackageName, LevelPackageName, FName(*LevelName), FTransform::Identity);
-
-    int mapsNum = GetWorld()->GetStreamingLevels().Num();
-    ULevelStreaming* LevelStreamingPersistent = NewObject<ULevelStreaming>(GetWorld(), ULevelStreaming::StaticClass(), FName(FString::Printf(TEXT("Map_%d"), mapsNum)));
-
-    
-
-    GetWorld()->AddStreamingLevel(LevelStreamingPersistent);
-}
-
 void UVictimsGameInstance::ConnectToServerAndMoveToNewLevel_Implementation(APlayerController* PlayerController, const FString& NewLevelName, ETravelType type)
 {
-    FString ServerAddress = "192.168.0.147"; // 서버 주소
-    int32 ServerPort = 7777; // 서버 포트
-    FString DefaultLevelName = "/Game/Maps/DefaultLevel"; // 서버의 기본 레벨
+	// 클라이언트의 맵 이동 요청
+	// 우선 런쳐 하나를 새로 연다 (같은 맵 요청이 들어와도 일단은 갈라놓자)
+	// 파티가 있는지 검사를 한다
+	// 클라이언트 소켓 연결을 대기한다.
+	// Array에 쌓인 플레이어들의 상태를 소켓으로 쏜다
+	// 싹 다 밀어넣는다.
 
-    // 서버에 접속
-    //FString URL = FString::Printf(TEXT("%s:%d"), *ServerAddress, ServerPort);
+	//일단 쳐내기
+	if (InstantServerArray.Num() > 0)
+	{
+		return;
+	}
 
-	bool bCheck = PlayerController->HasAuthority();
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("PlayerController->HasAuthority : %s"), bCheck ? TEXT("TRUE") : TEXT("FALSE")));
+	FInstantServerStruct newServerInst;
+	newServerInst.serverNumber = InstantServerArray.Num() + 1;
+	newServerInst.serverPortNumber = newServerInst.serverNumber + 8001;
+	newServerInst.serverLevelName = NewLevelName;
+	newServerInst.playerNum = 0;
 
-    FString URL = FString::Printf(TEXT("192.168.0.147/Game/%s"), *NewLevelName);
-    //if (PlayerController)
-    //{
-    //    PlayerController->ClientTravel(URL, ETravelType::TRAVEL_Absolute);
-	//
-	//	GetWorld()->ServerTravel();
-    //}
+	FString ExecutablePath = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Build/WindowsServer/VICTIMSServer.exe"));
 
-    // 기본 레벨에서 새로운 레벨로 이동
-    if (PlayerController)
-    {
-		//ServerAddress.Append(NewLevelName);
-        PlayerController->ClientTravel(NewLevelName, type);
-        
-		bCheck = PlayerController->HasAuthority();
+	FString strMapName = FString::Printf(TEXT("\"%s?listen\" "), *newServerInst.serverLevelName);
+	FString Params = FString::Printf(TEXT("%s-serverType=InstanceServer -PORT=%d -log"), *strMapName, newServerInst.serverPortNumber);
 
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("PlayerController->HasAuthority : %s"), bCheck ? TEXT("TRUE") : TEXT("FALSE")));
-    }
+	FProcHandle ProcessHandle = FPlatformProcess::CreateProc(*ExecutablePath, *Params, true, false, false, nullptr, 0, nullptr, nullptr);
+	if (ProcessHandle.IsValid())
+	{
+		UE_LOG(LogTemp, Log, TEXT("Launched new process with parameters: %s"), *Params);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to launch new process with parameters: %s"), *Params);
+	}
+
+	//while (1)
+	//{
+	//	if (Cast<UServerProcSocket>(mySocket)->bConnection == true)
+	//	{
+	//		UE_LOG(LogTemp, Error, TEXT("Cast<UServerProcSocket>(mySocket)->bConnection == true"));
+	//		break;
+	//	}
+	//}
+
+	//FString URL = FString::Printf(TEXT("192.168.0.147:%d"), newServerInst.serverPortNumber);
+
+	//// 일단 한놈 갑니다
+	//PlayerController->ClientTravel(URL, type);
+
+	InstantServerArray.Add(newServerInst);
 }
 
-// 클라이언트에서 서브레벨을 로드하는 함수 예시
-void UVictimsGameInstance::LoadSubLevel_Implementation(APlayerController* PlayerController, const FString& LevelName)
+void UVictimsGameInstance::OnStart()
 {
-    // 월드 객체 가져오기
-    UWorld* World = PlayerController->GetWorld();
-    if (!World)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to get world in LoadSubLevel"));
-        return;
-    }
+	Super::OnStart();
 
-    // 레벨 이름과 맵 경로 설정
-    FString PackageName = "/Game/" + LevelName;
-    FString PackagePath = FPackageName::GetLongPackagePath(PackageName);
-    FString LevelPackageName = FPackageName::ObjectPathToPackageName(PackagePath);
+	FString ServerTypeCheck;
+	if (FParse::Value(FCommandLine::Get(), TEXT("serverType="), ServerTypeCheck))
+	{
+		serverType = ServerTypeCheck;
 
-    // ULevelStreaming 객체 생성
-    ULevelStreaming* LevelStreaming = NewObject<ULevelStreaming>(World, ULevelStreaming::StaticClass(), FName(*LevelName));
-    if (LevelStreaming)
-    {
-        LevelStreaming->SetWorldAssetByPackageName(*LevelPackageName);
-        LevelStreaming->SetShouldBeLoaded(true);
-        LevelStreaming->SetShouldBeVisible(true);
-        //World->StreamingLevels.Add(LevelStreaming);
-        auto arrayTest = World->GetStreamingLevels();
-        arrayTest.Add(LevelStreaming);
-        World->SetStreamingLevels(arrayTest);
+		if (serverType == "MainServer")
+		{
+			// 메인 서버 로직
+			UE_LOG(LogTemp, Warning, TEXT("This is the Main Server"));
 
-        // 클라이언트에게 새로운 레벨 로드 요청
-        PlayerController->ClientTravel(LevelName, ETravelType::TRAVEL_Absolute);
-    }
-    else
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Failed to create level streaming object for %s"), *LevelName);
-    }
+			mySocket = NewObject<UServerProcSocket>(GetWorld(), UServerProcSocket::StaticClass());
+
+			InstantServerArray.Reset();
+		}
+		else if (serverType == "InstanceServer")
+		{
+			mySocket = NewObject<UInstantProcSocket>(GetWorld(), UInstantProcSocket::StaticClass());
+
+			// 새로운 서버 인스턴스 로직
+			UE_LOG(LogTemp, Warning, TEXT("This is an Instance Server"));
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ServerType not specified in command line arguments"));
+	}
+
+	if (FParse::Value(FCommandLine::Get(), TEXT("PORT="), serverPort))
+	{
+		if (serverType == "MainServer")
+		{
+			Cast<UServerProcSocket>(mySocket)->InitializeSocket();
+		}
+		else
+		{
+			int32 portNum = FCString::Atoi(*serverPort);
+			int32 instNum = portNum - 8001;
+
+			Cast<UInstantProcSocket>(mySocket)->SetInstantProcNumber(instNum);
+			Cast<UInstantProcSocket>(mySocket)->SetInstantProcPortNum(portNum);
+
+			Cast<UInstantProcSocket>(mySocket)->InitializeSocket();
+
+			UE_LOG(LogTemp, Warning, TEXT("This is an Instance Server Numer : %d"), instNum);
+			UE_LOG(LogTemp, Warning, TEXT("This is an Instance Server Port : %d"), portNum);
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("PORT : %s"), *serverPort);
+	}
+}
+
+void UVictimsGameInstance::ServerRPC_PrintServerType_Implementation()
+{
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("SERVER TYPE : %s"), *serverType));
+	MultiRPC_PrintServerType(serverType);
+}
+
+void UVictimsGameInstance::MultiRPC_PrintServerType_Implementation(const FString& serverTypeString)
+{
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("SERVER TYPE : %s"), *serverTypeString));
+
+	if (InstantServerArray.Num() > 0)
+	{
+		FString strMapName = FString::Printf(TEXT("\"%s?listen\" "), *InstantServerArray[0].serverLevelName);
+		FString Params = FString::Printf(TEXT("%s-serverType=InstanceServer -PORT=%d -log"), *strMapName, InstantServerArray[0].serverPortNumber);
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("TEST : %s"), *FPaths::Combine(FPaths::ProjectDir(), TEXT("/Build/WindowsServer/VICTIMSServer.exe"))));
+	}
 }

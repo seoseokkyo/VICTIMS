@@ -29,6 +29,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bDie = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCrouch = false;
+
 	UPROPERTY()
 	ACharacterBase* myCharacter;
 
