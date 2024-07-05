@@ -14,11 +14,7 @@
 #include "CombatComponent.h"
 #include "BaseWeapon.h"
 #include "Components/SphereComponent.h"
-#include "MainHUD.h"
-#include "InventoryComponent.h"
 #include "AVICTIMSPlayerController.h"
-#include "InteractionInterface.h"
-#include "PickUp.h"
 #include "HousingComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -60,18 +56,6 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
 	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
 
-	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
-	PlayerInventory->SetSlotsCapacity(20);
-
-	interactableRange = CreateDefaultSubobject<USphereComponent>(TEXT("Interactable Range"));
-	interactableRange->SetupAttachment(RootComponent);
-	interactableRange->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	interactableRange->SetRelativeScale3D(FVector(4));
-	interactableRange->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlapInteractableRange);
-	interactableRange->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlapInteractableRange);
-
-	InteractionCheckFrequency = 0.1;
-
 	characterName = TEXT("Player");
 
 	HousingComponent = CreateDefaultSubobject<UHousingComponent>(TEXT("HousingComp"));
@@ -94,12 +78,6 @@ void AVICTIMSCharacter::BeginPlay()
 	if (equipment)
 	{
 		equipment->OnEquipped();
-	}
-
-	if (IsLocallyControlled())
-	{
-		MainPlayerController = Cast<AVICTIMSPlayerController>(GetController());
-		HUD = Cast<AMainHUD>(MainPlayerController->GetHUD());
 	}
 
 	if (HousingComponent)
@@ -135,10 +113,6 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::BeginInteract);
-		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Completed, this, &AVICTIMSCharacter::EndInteract);
-		EnhancedInputComponent->BindAction(ToggleMenuAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleMenu);
 
 		// Moving
 		EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Move);
@@ -192,168 +166,6 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AVICTIMSCharacter::Interact()
-{
-	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
-
-	if (IsValid(TargetInteractable.GetObject()))
-	{
-		TargetInteractable->Interact(this);
-	}
-}
-
-void AVICTIMSCharacter::OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (OtherActor->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
-	{
-		bInteracting = true;
-		if (OtherActor != InteractionData.CurrentInteractable)		// 첫 상호작용인 액터 ( 상호작용 가능 판별 )
-		{
-			FoundInteractable(OtherActor);
-			return;
-		}
-		if (OtherActor == InteractionData.CurrentInteractable)		// 이미 상호작용 가능 판별난 액터
-		{
-			return;
-		}
-	}
-}
-
-void AVICTIMSCharacter::OnEndOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	bInteracting = false;
-
-	NoInteractableFound();
-
-	if (IsInteracting())
-	{
-		GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
-	}
-	if (InteractionData.CurrentInteractable)
-	{
-		if (IsValid(TargetInteractable.GetObject()))
-		{
-			TargetInteractable->EndFocus();
-		}
-		InteractionData.CurrentInteractable = nullptr;
-		TargetInteractable = nullptr;
-	}
-}
-void AVICTIMSCharacter::ToggleMenu()
-{
-	HUD->ToggleMenu();
-}
-
-void AVICTIMSCharacter::FoundInteractable(AActor* NewInteractable)
-{
-	if (IsInteracting())
-	{
-		EndInteract();
-	}
-
-	if (InteractionData.CurrentInteractable)
-	{
-		TargetInteractable = InteractionData.CurrentInteractable;
-		TargetInteractable->EndFocus();
-	}
-
-	InteractionData.CurrentInteractable = NewInteractable;
-	TargetInteractable = NewInteractable;
-
-	if (HUD)
-	{
-		HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
-		TargetInteractable->BeginFocus();
-	}
-}
-
-void AVICTIMSCharacter::NoInteractableFound()
-{
-	if (IsInteracting())
-	{
-		GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
-	}
-	if (InteractionData.CurrentInteractable)
-	{
-		if (IsValid(TargetInteractable.GetObject()))
-		{
-			TargetInteractable->EndFocus();
-			EndInteract();
-		}
-
-		if (HUD)
-		{
-			HUD->HideInteractionWidget();
-			InteractionData.CurrentInteractable = nullptr;
-			TargetInteractable = nullptr;
-		}
-	}
-}
-
-void AVICTIMSCharacter::BeginInteract()
-{
-	if (InteractionData.CurrentInteractable)
-	{
-		if (IsValid(TargetInteractable.GetObject()))
-		{
-			TargetInteractable->BeginInteract();
-
-			if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f))
-			{
-				Interact();
-			}
-			else
-			{
-				GetWorldTimerManager().SetTimer(TimerHandle_Interaction,
-					this,
-					&AVICTIMSCharacter::Interact,
-					TargetInteractable->InteractableData.InteractionDuration,
-					false);
-			}
-		}
-	}
-}
-
-void AVICTIMSCharacter::EndInteract()
-{
-	GetWorldTimerManager().ClearTimer(TimerHandle_Interaction);
-
-	if (IsValid(TargetInteractable.GetObject()))
-	{
-		TargetInteractable->EndInteract();
-	}
-}
-void AVICTIMSCharacter::UpdateInteractionWidget() const
-{
-	if (IsValid(TargetInteractable.GetObject()))
-	{
-		HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData);
-	}
-}
-
-void AVICTIMSCharacter::DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop)
-{
-	if (PlayerInventory->FindMatchingItem(ItemToDrop))
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.Owner = this;
-		SpawnParams.bNoFail = true;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-
-		const FVector SpawnLocation{ GetActorLocation() + (GetActorForwardVector() * 50.0f) };
-		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
-
-		const int32 RemovedQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
-
-		APickUp* Pickup = GetWorld()->SpawnActor<APickUp>(APickUp::StaticClass(), SpawnTransform, SpawnParams);
-
-		Pickup->InitializeDrop(ItemToDrop, RemovedQuantity);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Item to drop was somehow null!"));
-	}
-}
 
 float AVICTIMSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {

@@ -6,13 +6,9 @@
 #include "GameFramework/Character.h"
 #include "Logging/LogMacros.h"
 #include "CharacterBase.h"
-#include "InteractionInterface.h"
 #include "VICTIMSCharacter.generated.h"
 
 class AVICTIMSPlayerController;
-class AMainHUD;
-class UItemBase;
-class IInteractionInterface;
 class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
@@ -66,12 +62,6 @@ class AVICTIMSCharacter : public ACharacterBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* InteractAction;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ToggleMenuAction;
-
 	// ToggleCombat(있는경우 사용)
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ia_ToggleCombat;
@@ -83,44 +73,12 @@ class AVICTIMSCharacter : public ACharacterBase
 	UInputAction* ia_ToggleCrouch;
 
 public:
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)			// 상호작용 가능범위 
-	class USphereComponent* interactableRange;	
-	
-	bool bInteracting;									// 상호작용 가능한지 확인
-//=====================================================================================================
-//  FUNCTION
-//=====================================================================================================
-
-	FORCEINLINE bool IsInteracting() const { return GetWorldTimerManager().IsTimerActive(TimerHandle_Interaction); };
-	FORCEINLINE class UInventoryComponent* GetInventory() const { return PlayerInventory; };	// 인벤토리 가져오기
-
-	void UpdateInteractionWidget() const;				// 상호작용 위젯 업데이트
-	void DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop);		// 아이템 버리기
 
 	AVICTIMSCharacter();
 	
 protected:
 	UPROPERTY()
-	AMainHUD* HUD;
-	UPROPERTY()
 	AVICTIMSPlayerController* MainPlayerController;
-//=====================================================================================================
-// 상호작용 관련 
-//=====================================================================================================
-
-	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
-	TScriptInterface<IInteractionInterface> TargetInteractable;
-	UPROPERTY(VisibleAnywhere, Category= "Character | Inventory")
-	UInventoryComponent* PlayerInventory;
-	
-	UPROPERTY(EditDefaultsOnly, Category = "Character | Interaction")
-	float InteractionCheckDistance = 2.0f;
-	float InteractionCheckFrequency;
-	FTimerHandle TimerHandle_Interaction;
-	FInteractionData InteractionData;
-
-//=====================================================================================================
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -148,27 +106,17 @@ protected:
 
 	virtual void Tick(float DeltaSeconds) override;
 
-	void ToggleMenu();
-
-	void FoundInteractable(AActor* NewInteractable);
-	void NoInteractableFound();
-	void BeginInteract();
-	void EndInteract();
-	void Interact();
-
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; };
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; };
-
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Build")
     class UHousingComponent* HousingComponent;
 
 	UFUNCTION(BlueprintCallable, Category = "Build")
 	void DestroyComponent(UActorComponent* TargetComponent);
-
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;
@@ -184,12 +132,5 @@ public:
 	virtual void DieFunction() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
-	
-		// 상호작용 가능범위 판별 
-	UFUNCTION()
-	void OnBeginOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-	void OnEndOverlapInteractableRange(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
 };
 

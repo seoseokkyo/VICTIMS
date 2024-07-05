@@ -4,8 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "ProcSocketObject.h"
-#include "ServerProcSocket.generated.h"
 #include <utility>
+#include "ServerProcSocket.generated.h"
 /**
  * 
  */
