@@ -18,22 +18,22 @@ public:
 	virtual bool InitializeInventory() override;
 
 	UFUNCTION()
-		TArray<FLootList> GetLootList();
+	TArray<FLootList> GetLootList();
 	UFUNCTION()
-		TArray<FSlotStructure> GetRandomLootItems();
+	TArray<FSlotStructure> GetRandomLootItems();
 	UFUNCTION()
-		void SetItemAmount(FSlotStructure& Item, uint8 NewAmount);
+	void SetItemAmount(FSlotStructure& Item, uint8 NewAmount);
 
 	UFUNCTION()
-		bool IsItemCurrency(const FSlotStructure Item);
+	bool IsItemCurrency(const FSlotStructure Item);
 	UFUNCTION()
-		uint8 GetItemMaxStackSize(const FSlotStructure Item);
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		uint8 MinLootItems = 2;
+	uint8 GetItemMaxStackSize(const FSlotStructure Item);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		uint8 MaxLootItems = 4;
+	uint8 MinLootItems = 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 MaxLootItems = 4;
 
 protected:
 	virtual void BeginPlay() override;

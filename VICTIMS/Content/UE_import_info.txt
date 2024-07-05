@@ -1,0 +1,3 @@
+move or copy this folder to your project
+
+\EpicGames\ProjectName\Content\
