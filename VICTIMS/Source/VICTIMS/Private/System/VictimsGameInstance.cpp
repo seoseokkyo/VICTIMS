@@ -89,7 +89,7 @@ void UVictimsGameInstance::ConnectToServerAndMoveToNewLevel_Implementation(APlay
 
 		TryToClientTravel(currentIndex);
 
-	}, 1.0f, true);
+		}, 1.0f, true);
 }
 
 void UVictimsGameInstance::OnStart()
@@ -129,7 +129,7 @@ void UVictimsGameInstance::OnStart()
 		{
 			Cast<UServerProcSocket>(mySocket)->InitializeSocket();
 		}
-		else
+		else if (serverType == "InstanceServer")
 		{
 			int32 portNum = FCString::Atoi(*serverPort);
 			int32 instNum = portNum - 8001;
@@ -152,7 +152,7 @@ void UVictimsGameInstance::TryToClientTravel(int waitIndex)
 	if (serverType == "MainServer")
 	{
 		Cast<UServerProcSocket>(mySocket)->ClientSockets[waitIndex];
-		
+
 	}
 }
 
