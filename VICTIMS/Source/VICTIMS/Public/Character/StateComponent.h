@@ -113,4 +113,5 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "MySettings")
 	FCharacterHPZero dieDelegate;	
+
 };

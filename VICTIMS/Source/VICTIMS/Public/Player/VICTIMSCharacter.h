@@ -98,6 +98,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UHPWidget> hpWidget_bp;
 
+	UPROPERTY()
+	class UHPWidget* hpWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UHPWidget> hpWidget_bp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")			// 상호작용 범위
 	class USphereComponent* InteractionField;
