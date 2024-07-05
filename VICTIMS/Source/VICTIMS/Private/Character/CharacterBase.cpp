@@ -247,7 +247,6 @@ void ACharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME(ACharacterBase, combatComponent);
 	DOREPLIFETIME(ACharacterBase, motionState);
 	DOREPLIFETIME(ACharacterBase, bDead);
-	DOREPLIFETIME(ACharacterBase, bCrouch);
 }
 
 void ACharacterBase::ServerRPC_PerformAttack_Implementation(int useIndex)

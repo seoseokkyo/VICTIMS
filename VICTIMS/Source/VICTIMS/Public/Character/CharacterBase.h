@@ -60,9 +60,6 @@ public:
 	bool bDead;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
-	bool bCrouch;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	UStateComponent* stateComp;
 	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")

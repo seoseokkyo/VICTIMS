@@ -15,21 +15,6 @@ class UInputMappingContext;
 class UInputAction;
 struct FInputActionValue;
 
-USTRUCT()
-struct FInteractionData						// 상호작용 관련 필요 요소
-{
-	GENERATED_USTRUCT_BODY()
-
-	FInteractionData() :
-		CurrentInteractable(nullptr),
-		LastInteractionCheckTime(0.0f){};
-
-	UPROPERTY()
-	TObjectPtr<AActor> CurrentInteractable;
-	UPROPERTY()
-	float LastInteractionCheckTime;
-};
-
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -69,16 +54,117 @@ class AVICTIMSCharacter : public ACharacterBase
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ia_LeftClickAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* ia_ToggleCrouch;
-
 public:
+//=====================================================================================================
+//  인벤토리, 아이템, 상호작용 관련 
+//=====================================================================================================
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleInventory;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleProfile;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleMenu;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* Interact;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleUIMode;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* UserHotbar1;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* UserHotbar2;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* UserHotbar3;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* UserHotbar4;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* UserHotbar5;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")			// 상호작용 범위
+	class USphereComponent* InteractionField;
+
+	UPROPERTY()
+	class AVICTIMSPlayerController* MyPlayerController;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* MainWeapon;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Chest;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Feet;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Hands;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Legs;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMeshComponent* Head;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Interaction")
+	TArray<AActor*> UsableActorsInsideRange;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")
+	TArray<AActor*> WorldActorsInsideRange;
+	
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainWeaponMesh", meta=(DisplayName="Weapon Mesh", Category="Inventory|Equipment"))
+	USkeletalMesh* MainWeaponMesh;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainChestMesh", meta=(DisplayName="Main Chest Mesh", Category="Inventory|Equipment"))
+	USkeletalMesh* ChestMesh;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainFeetMesh", meta=(DisplayName="Main Feet Mesh", Category="Inventory|Equipment"))
+	USkeletalMesh* FeetMesh;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHandsMesh", meta=(DisplayName="Main Hands Mesh", Category="Inventory|Equipment"))
+	USkeletalMesh* HandsMesh;
+	
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainLegsMesh", meta = (DisplayName = "Main Legs Mesh", Category = "Inventory|Equipment"))
+	USkeletalMesh* LegsMesh;
+
+	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHeadMesh", meta = (DisplayName = "Main Head Mesh", Category = "Inventory|Equipment"))
+	USkeletalMesh* HeadMesh;	
+
+//=====================================================================================================
+//  FUNCTION
+
+	UFUNCTION(meta=(OverrideNativeName="OnRep_MainWeaponMesh"))
+	void OnRep_MainWeaponMesh();
+
+	UFUNCTION(meta=(OverrideNativeName="OnRep_MainChestMesh"))
+	void OnRep_MainChestMesh();
+	
+	UFUNCTION(meta=(OverrideNativeName="OnRep_MainFeetMesh"))
+	void OnRep_MainFeetMesh();
+
+	UFUNCTION(meta=(OverrideNativeName="OnRep_MainHandsMesh"))
+	void OnRep_MainHandsMesh();
+
+	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainLegsMesh"))
+	void OnRep_MainLegsMesh();
+
+	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainHeadMesh"))
+	void OnRep_MainHeadMesh();
+
+	UFUNCTION(BlueprintCallable)
+	void OnBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION(BlueprintCallable)
+	void OnEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+//=====================================================================================================
 
 	AVICTIMSCharacter();
 	
 protected:
-	UPROPERTY()
-	AVICTIMSPlayerController* MainPlayerController;
+
+//=====================================================================================================
+// 상호작용 관련 
+//=====================================================================================================
+
+//=====================================================================================================
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -91,8 +177,6 @@ protected:
 	void ToggleCombat(const FInputActionValue& Value);
 
 	void LeftClick(const FInputActionValue& Value);
-
-	void Crouch(const FInputActionValue& Value);
 
 	void PrintInfo();
 
@@ -132,5 +216,8 @@ public:
 	virtual void DieFunction() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+
+	void TestFunction(UInputComponent* PlayerInputComponent);
 };
 
