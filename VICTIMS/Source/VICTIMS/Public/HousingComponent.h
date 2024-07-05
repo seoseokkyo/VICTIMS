@@ -39,13 +39,16 @@ class VICTIMS_API UHousingComponent : public UActorComponent
  	// Sets default values for this component's properties
  	UHousingComponent();
  
- 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
+ 	UPROPERTY(ReplicatedUsing = OnRep_IsBuildModeOn, EditAnywhere, BlueprintReadWrite, Category = "Build")
     bool IsBuildModeOn;
  
+    UFUNCTION()
+    void OnRep_IsBuildModeOn();
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
     bool CanBuild;
  
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
+    UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Build")
     int32 BuildID;
  
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
@@ -114,7 +117,9 @@ class VICTIMS_API UHousingComponent : public UActorComponent
     void ChangeMesh();
 
     UFUNCTION(BlueprintCallable)
-    void SpawnBuild();
+    void SpawnBuild(bool Moving, AActor* Movable, const FTransform& Transform, const TArray<FBuildablesStructs>& DB, int32 ID);
+
+    TArray<FBuildablesStructs> GetBuildablesArray() const;
 
 //     UFUNCTION(BlueprintCallable, Category = "Build")
 //     void LoadDataFromDataTable();
@@ -124,7 +129,34 @@ class VICTIMS_API UHousingComponent : public UActorComponent
     //UPROPERTY(EditAnywhere, BlueprintReadWrite)
     bool CanPlacePreviewMesh();
 
+    UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Build")
+    AActor* MoveableActor;
 
+ 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Build")
+    bool IsMoving;
+
+    UFUNCTION(BlueprintCallable)
+    void MoveObject();
+
+
+    UFUNCTION(BlueprintCallable)
+    void RemoveObject();
+
+
+    UFUNCTION(Server, Reliable)
+    void Server_RemoveObject();
+
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_RemoveObject();
+
+    UFUNCTION(Server, Reliable)
+    void Server_MoveObject();
+
+    UFUNCTION(NetMulticast, Reliable)
+    void Multicast_MoveObject(FVector StartLocation, FVector EndLocation);
+
+    virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 
 

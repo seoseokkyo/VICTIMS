@@ -30,4 +30,10 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	void SetMesh(UStaticMesh* Mesh);
 	void SetMesh_Implementation(UStaticMesh* Mesh) PURE_VIRTUAL(IHousingInterface::SetMesh_Implementation, return;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	int32 ReturnBuildID();
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void SetBuildID(int32 BuildID);
 };

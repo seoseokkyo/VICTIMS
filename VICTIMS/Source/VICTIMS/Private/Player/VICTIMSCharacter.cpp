@@ -211,6 +211,11 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
 		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
+		
+		EnhancedInputComponent->BindAction(MoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnMoveObject);
+		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
+		/********/
+		EnhancedInputComponent->BindAction(HousingBuildAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRightMouseButtonPressed);
 
 		//상호작용 =====================================================================================================================
 		if (MyPlayerController == nullptr)
@@ -415,6 +420,14 @@ void AVICTIMSCharacter::LeftClick(const FInputActionValue& Value)
 	}
 }
 
+void AVICTIMSCharacter::OnRightMouseButtonPressed(const FInputActionValue& Value)
+{
+	if (HousingComponent && HousingComponent->IsBuildModeOn && HousingComponent->CanBuild)
+	{
+		Server_SpawnBuild(HousingComponent, HousingComponent->IsMoving, HousingComponent->MoveableActor, HousingComponent->BuildTransform, HousingComponent->Buildables, HousingComponent->BuildID);
+	}
+}
+
 void AVICTIMSCharacter::ServerRPC_ToggleCombat_Implementation()
 {
 	motionState = ECharacterMotionState::ToggleCombat;
@@ -495,15 +508,6 @@ void AVICTIMSCharacter::PrintInfo()
 	FVector loc = GetActorLocation() + FVector(0, 0, 50);
 	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
 }
-
-void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
-{
-	if (TargetComponent)
-	{
-		TargetComponent->DestroyComponent();
-	}
-}
-
 
 void AVICTIMSCharacter::OnRep_MainWeaponMesh()
 {
@@ -657,5 +661,75 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 				}
 			}
 		}
+	}
+}
+
+void AVICTIMSCharacter::Server_SpawnBuild_Implementation(UHousingComponent* Comp, bool Moving, AActor* Movable, const FTransform& Transform, const TArray<FBuildablesStructs>& DB, int32 ID)
+{
+	if (Comp)
+	{
+		// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("AHousingTestCharacter :: Server_SpawnBuild :: Movable : %p"), Movable));
+		Comp->SpawnBuild(Moving, Movable, Transform, DB, ID);
+	}
+}
+
+void AVICTIMSCharacter::OnRemoveObject()
+{
+	if (HousingComponent)
+	{
+		Server_RemoveObject();
+	}
+}
+
+void AVICTIMSCharacter::Server_RemoveObject_Implementation()
+{
+	if (HousingComponent)
+	{
+		HousingComponent->Server_RemoveObject();
+		Multicast_RemoveObject();
+	}
+}
+
+
+void AVICTIMSCharacter::Multicast_RemoveObject_Implementation()
+{
+	if (HousingComponent)
+	{
+		HousingComponent->RemoveObject();
+	}
+}
+
+
+void AVICTIMSCharacter::OnMoveObject()
+{
+	if (HousingComponent)
+	{
+		Server_MoveObject();
+	}
+}
+
+void AVICTIMSCharacter::Server_MoveObject_Implementation()
+{
+	if (HousingComponent)
+	{
+		HousingComponent->Server_MoveObject();
+		Multicast_MoveObject();
+	}
+}
+
+
+void AVICTIMSCharacter::Multicast_MoveObject_Implementation()
+{
+	if (HousingComponent)
+	{
+		HousingComponent->MoveObject();
+	}
+}
+
+void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
+{
+	if (TargetComponent)
+	{
+		TargetComponent->DestroyComponent();
 	}
 }

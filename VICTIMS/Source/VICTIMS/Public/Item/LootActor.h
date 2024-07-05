@@ -35,13 +35,17 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 MaxLootItems = 4;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UDataTable* DB_ItemList;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UDataTable* BP_LootDB;
+
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	TArray<FSlotStructure> InventoryItems;
 
-	UDataTable* DB_ItemList;
 
-	UDataTable* BP_LootDB;
 };

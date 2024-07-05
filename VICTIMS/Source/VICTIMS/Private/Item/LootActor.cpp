@@ -14,7 +14,10 @@ void ALootActor::BeginPlay()
 	Action = FText::FromString("Check");
 	Name = FText::FromString("Dummy");
 
-	DB_ItemList = LoadObject<UDataTable>(this, TEXT("/Script/Engine.DataTable'/Game/Item/Data/Item_DB.Item_DB'"));
+	if (DB_ItemList == nullptr)
+	{
+		DB_ItemList = LoadObject<UDataTable>(this, TEXT("/Script/Engine.DataTable'/Game/Item/Data/Item_DB.Item_DB'"));
+	}
 
 	uint8 LocalNumberOfRows = InventoryComponent->NumberOfRowsInventory;
 	uint8 LocalNumberOfSlotsPerRow = InventoryComponent->SlotsPerRowInventory;

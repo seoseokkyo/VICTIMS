@@ -79,6 +79,18 @@ public:
 	UInputAction* UserHotbar4;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* UserHotbar5;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* MoveObjectAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* RemoveObjectAction;
+
+
+
+	/***********/
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* HousingBuildAction;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")			// 상호작용 범위
@@ -177,6 +189,7 @@ protected:
 	void ToggleCombat(const FInputActionValue& Value);
 
 	void LeftClick(const FInputActionValue& Value);
+	void OnRightMouseButtonPressed(const FInputActionValue& Value);
 
 	void PrintInfo();
 
@@ -201,6 +214,29 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Build")
 	void DestroyComponent(UActorComponent* TargetComponent);
+	
+
+	UFUNCTION(Server, Reliable)
+	void Server_RemoveObject();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_RemoveObject();
+
+	UFUNCTION(Server, Reliable)
+	void Server_MoveObject();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_MoveObject();
+
+	UFUNCTION()
+	void OnMoveObject();
+
+	UFUNCTION()
+	void OnRemoveObject();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnBuild(UHousingComponent* Comp, bool Moving, AActor* Movable, const FTransform& Transform, const TArray<FBuildablesStructs>& DB, int32 ID);
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;

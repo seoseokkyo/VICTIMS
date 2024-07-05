@@ -12,6 +12,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/DataTableFunctionLibrary.h>
 #include "Engine/DataTable.h"
 #include "HousingInterface.h"
+#include "Net/UnrealNetwork.h"
 
 UHousingComponent::UHousingComponent()
 {
@@ -22,6 +23,9 @@ UHousingComponent::UHousingComponent()
 	IsBuildModeOn = false;
 	CanBuild = false;
 	BuildID = 0;
+
+	IsMoving = false;
+	SetIsReplicatedByDefault(true);
 }
 
 void UHousingComponent::BeginPlay()
@@ -66,38 +70,13 @@ void UHousingComponent::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("DB_Housing is null"));
 	}
-
-	// 	BuildID = 0;
-	// 
-	// 	// Buildables 배열 크기 확인 로그
-	// 	UE_LOG(LogTemp, Warning, TEXT("Buildables array size: %d"), Buildables.Num());
-
-		//     if (DB_Buildables)
-		//     {
-		//         // 데이터 테이블의 행 이름 가져오기
-		//         TArray<FName> RowNames;
-		//         UDataTableFunctionLibrary::GetDataTableRowNames(DB_Buildables, RowNames);
-		// 
-		//         // 각 행 이름에 대해 데이터 가져오기?
-		//         for (const FName& RowName : RowNames)
-		//         {
-		//             // FBuildableRow* Row = DB_Buildables->FindRow<FBuildableRow>(RowName, TEXT(""));
-		//             if (Row)
-		//             {
-		//             }
-		//             else
-		//             {
-		//                 GLog->Log(FString::Printf(TEXT("Row not found: %s"), *RowName.ToString()));
-		//             }
-		//         }
-		//     }
-			// UDataTableFunctionLibrary::GetDataTableRowNames
 }
 
 void UHousingComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	OnRep_IsBuildModeOn();
 }
 
 
@@ -119,8 +98,6 @@ void UHousingComponent::SpawnPreviewMesh()
 	// Buildables 배열에서 해당 요소를 가져옴
 	const FBuildablesStructs& Buildable = Buildables[BuildID];
 
-	// UStaticMeshComponent* NewStaticMeshComponent = Cast<UStaticMeshComponent>(PlayerRef->AddComponent(TEXT("PreviewMesh"), false, BuildTransform, UStaticMeshComponent::StaticClass()));
-	// UStaticMeshComponent* NewStaticMeshComponent = NewObject<UStaticMeshComponent>(PlayerRef);
 	PreviewMesh = NewObject<UStaticMeshComponent>(PlayerRef);
 
 	if (PreviewMesh)
@@ -128,18 +105,8 @@ void UHousingComponent::SpawnPreviewMesh()
 		PreviewMesh->AttachToComponent(PlayerRef->GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		PreviewMesh->SetRelativeTransform(BuildTransform);
 		PreviewMesh->RegisterComponent();
-		//PreviewMesh = NewStaticMeshComponent;
 
-		//         if (PreviewMeshAsset)
-		//         {
-		//             PreviewMesh->SetStaticMesh(PreviewMeshAsset);
-		//         }
-		//         else
-		//         {
-		//             UE_LOG(LogTemp, Warning, TEXT("PreviewMeshAsset is null"));
-		//         }
-		// 
-				// Buildables 배열에서 가져온 Mesh를 설정
+		// Buildables 배열에서 가져온 Mesh를 설정
 		if (Buildable.Mesh)
 		{
 			PreviewMesh->SetStaticMesh(Buildable.Mesh);
@@ -151,20 +118,8 @@ void UHousingComponent::SpawnPreviewMesh()
 
 		// 콜리전 비활성화
 		PreviewMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		//PreviewMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-
-
-
-
-
 
 		GiveBuildColor();
-
-
-
-
-
-
 	}
 	else
 	{
@@ -172,7 +127,7 @@ void UHousingComponent::SpawnPreviewMesh()
 	}
 }
 
-void UHousingComponent::GiveBuildColor(/*bool IsGreen*/)
+void UHousingComponent::GiveBuildColor()
 {
 	if (!PreviewMesh)
 	{
@@ -186,12 +141,6 @@ void UHousingComponent::GiveBuildColor(/*bool IsGreen*/)
 	CanBuild = bCanBuild;
 
 	UMaterialInterface* MaterialToApply = bCanBuild ? GreenMaterial : RedMaterial;
-	//UMaterialInterface* MaterialToApply = IsGreen ? GreenMaterial : RedMaterial;
-
-
-
-
-
 
 	if (MaterialToApply)
 	{
@@ -204,13 +153,6 @@ void UHousingComponent::GiveBuildColor(/*bool IsGreen*/)
 		}
 
 		//CanBuild = true;
-
-
-
-
-
-
-
 
 		PreviewMesh->SetWorldTransform(BuildTransform);
 	}
@@ -235,13 +177,12 @@ void UHousingComponent::BuildCycle()
 		return;
 	}
 
-
 	const FBuildablesStructs& Buildable = Buildables[BuildID];
 
-
-	FVector StartLocation = Camera->GetComponentLocation() + Camera->GetForwardVector() * 350.f;
-	// FVector ForwardVector = Camera->GetForwardVector();
-	FVector EndLocation = Camera->GetComponentLocation() + Camera->GetForwardVector() * 1000.f;
+	FVector CameraLocation = Camera->GetComponentLocation();
+	FRotator CameraRotation = Camera->GetComponentRotation();
+	FVector StartLocation = CameraLocation;
+	FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
@@ -284,7 +225,7 @@ void UHousingComponent::BuildCycle()
 	{
 		FVector ImpactPoint = HitResult.ImpactPoint;
 
-		BuildTransform.SetLocation(ImpactPoint);
+		BuildTransform.SetLocation(ImpactPoint + FVector(0, 0, 10));
 	}
 	else
 	{
@@ -295,12 +236,12 @@ void UHousingComponent::BuildCycle()
 
 	if (IsValid(PreviewMesh))
 	{
-		GiveBuildColor(/*true*/);
+		GiveBuildColor();
 	}
 	else
 	{
 		SpawnPreviewMesh();
-		GiveBuildColor(/*false*/);
+		GiveBuildColor();
 	}
 
 	if (IsBuildModeOn)
@@ -361,6 +302,10 @@ void UHousingComponent::StopBuildMode()
 {
 	IsBuildModeOn = false;
 	CanBuild = false;
+
+	MoveableActor = nullptr;
+	IsMoving = false;
+
 	if (IsValid(PreviewMesh))
 	{
 		PlayerRef->DestroyComponent(PreviewMesh);
@@ -440,45 +385,61 @@ void UHousingComponent::ChangeMesh()
 	}
 }
 
-void UHousingComponent::SpawnBuild()
+void UHousingComponent::SpawnBuild(bool Moving, AActor* Movable, const FTransform& Transform, const TArray<FBuildablesStructs>& DB, int32 ID)
 {
-	if (BuildID < 0 || BuildID >= Buildables.Num())
+	if (!Moving)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid BuildID: %d"), BuildID);
-		// 기본값으로 설정하거나 사용자에게 알림 제공
-		BuildID = 0; // 예시로 기본값을 0으로 설정
-		return;
-	}
+		const FBuildablesStructs& Buildable = DB[ID];
 
-	const FBuildablesStructs& Buildable = Buildables[BuildID];
-
-	if (Buildable.Actor)
-	{
-		FActorSpawnParameters SpawnParams;
-		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Buildable.Actor, BuildTransform, SpawnParams);
-		if (!SpawnedActor)
+		if (Buildable.Actor)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed to spawn actor"));
-		}
-		// 스폰된 액터가 HousingInterface를 구현하고 있는지 확인
-		if (SpawnedActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
-		{
-			// 인터페이스 함수 호출
-			//IHousingInterface::SetMesh_Implementation(SpawnedActor, Buildable.Mesh);
-			IHousingInterface::Execute_SetMesh(SpawnedActor, Buildable.Mesh);
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
+			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Buildable.Actor, Transform, SpawnParams);
+
+			// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("UHousingComponent :: SpawnBuild :: SpawnedActor : %p"), SpawnedActor));
+
+			if (!SpawnedActor)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Failed to spawn actor"));
+			}
+			// 스폰된 액터가 HousingInterface를 구현하고 있는지 확인
+			if (SpawnedActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
+			{
+				// 인터페이스 함수 호출
+				IHousingInterface::Execute_SetMesh(SpawnedActor, Buildable.Mesh);
+				IHousingInterface::Execute_SetBuildID(SpawnedActor, ID);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Spawned actor does not implement HousingInterface"));
+			}
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Spawned actor does not implement HousingInterface"));
+			UE_LOG(LogTemp, Warning, TEXT("Buildable Actor is null"));
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Buildable Actor is null"));
+		if (Movable == nullptr)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Movable Actor is null"));
+		}
+		else
+		{
+			// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("UHousingComponent :: SpawnBuild->MoveObj :: Movable : %p"), Movable));
+
+			Movable->SetActorTransform(Transform);
+			StopBuildMode();
+		}
 	}
+}
+
+TArray<FBuildablesStructs> UHousingComponent::GetBuildablesArray() const
+{
+	return Buildables;
 }
 
 bool UHousingComponent::CanPlacePreviewMesh()
@@ -493,7 +454,7 @@ bool UHousingComponent::CanPlacePreviewMesh()
 	FVector End = Start;
 
 	FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(PlayerRef);
+	// CollisionParams.AddIgnoredActor(PlayerRef);
 
 	const FBuildablesStructs& Buildable = Buildables[BuildID];
 	ECollisionChannel TraceChannel = UEngineTypes::ConvertToCollisionChannel(Buildable.TraceChannel);
@@ -532,6 +493,138 @@ bool UHousingComponent::CanPlacePreviewMesh()
 		}
 	}
 
+	if (HitResult.GetActor()->IsA(ACharacter::StaticClass()))
+	{
+		return false;
+	}
+
 	return true;
 }
 
+void UHousingComponent::RemoveObject()
+{
+	FVector CameraLocation = Camera->GetComponentLocation();
+	FRotator CameraRotation = Camera->GetComponentRotation();
+	FVector StartLocation = CameraLocation;
+	FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetOwner());
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
+
+	if (bHit)
+	{
+		AActor* HitActor = HitResult.GetActor();
+
+		if (HitActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
+		{
+			HitActor->Destroy();
+		}
+	}
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
+	if (bHit)
+	{
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5, 12, FColor::Red, false, 1);
+	}
+}
+
+void UHousingComponent::MoveObject()
+{
+	Server_MoveObject();
+}
+
+void UHousingComponent::OnRep_IsBuildModeOn()
+{
+	if (IsBuildModeOn && !PreviewMesh)
+	{
+		SpawnPreviewMesh();
+		UE_LOG(LogTemp, Warning, TEXT("Build mode enabled on client"));
+	}
+	else if (!IsBuildModeOn && PreviewMesh)
+	{
+		PreviewMesh->DestroyComponent();
+		PreviewMesh = nullptr;
+		UE_LOG(LogTemp, Warning, TEXT("Build mode disabled on client"));
+	}
+}
+
+
+void UHousingComponent::Server_RemoveObject_Implementation()
+{
+	RemoveObject();
+	Multicast_RemoveObject();
+}
+
+void UHousingComponent::Multicast_RemoveObject_Implementation()
+{
+	RemoveObject();
+}
+
+void UHousingComponent::Server_MoveObject_Implementation()
+{
+	//if (!IsMoving || !MoveableActor)
+	//{
+	//	return;
+	//}
+	if (IsBuildModeOn)
+	{
+		return;
+	}
+	//IsBuildModeOn = false;
+	IsMoving = true;
+
+	FVector CameraLocation = Camera->GetComponentLocation();
+	FRotator CameraRotation = Camera->GetComponentRotation();
+	FVector StartLocation = CameraLocation;
+	FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
+
+	Multicast_MoveObject(StartLocation, EndLocation);
+}
+
+void UHousingComponent::Multicast_MoveObject_Implementation(FVector StartLocation, FVector EndLocation)
+{
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetOwner());
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
+
+	if (bHit)
+	{
+		MoveableActor = HitResult.GetActor();
+
+		// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("UHousingComponent :: Multicast_MoveObject :: Movable : %p"), MoveableActor));
+
+		if (MoveableActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
+		{
+			// 인터페이스 함수 호출
+			BuildID = IHousingInterface::Execute_ReturnBuildID(MoveableActor);
+			UE_LOG(LogTemp, Warning, TEXT("Build ID: %d"), BuildID);
+
+			this->BuildID = BuildID;
+
+			LaunchBuildMode();
+		}
+		else
+		{
+			// 여기서 movable이 아닌 액터가 Hit된경우 처리
+		}
+	}
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
+	if (bHit)
+	{
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5, 12, FColor::Red, false, 1);
+	}
+}
+
+void UHousingComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHousingComponent, IsBuildModeOn);
+	DOREPLIFETIME(UHousingComponent, MoveableActor);
+	DOREPLIFETIME(UHousingComponent, IsMoving);
+}
