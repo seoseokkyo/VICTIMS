@@ -40,6 +40,13 @@ AVICTIMSPlayerController::AVICTIMSPlayerController()
 void AVICTIMSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (CharacterReference == nullptr)
+	{
+		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
+
+		UE_LOG(LogTemp, Warning, TEXT("CharacterReference Was Null, Replace : %p"), CharacterReference);
+	}
 }
 
 int AVICTIMSPlayerController::GetCurrentViewMode(const APlayerController* PlayerController)
@@ -47,22 +54,29 @@ int AVICTIMSPlayerController::GetCurrentViewMode(const APlayerController* Player
 	if (IsValid(PlayerController))
 	{
 		UGameViewportClient* GameViewportClient = PlayerController->GetWorld()->GetGameViewport();
-		ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
-
-		bool ignore = GameViewportClient->IgnoreInput();
-		EMouseCaptureMode capt = GameViewportClient->GetMouseCaptureMode(); 
-
-		if (ignore == false && capt == EMouseCaptureMode::CaptureDuringMouseDown)
+		if (GameViewportClient)
 		{
-			return 0;  // Game And UI
-		}
-		else if (ignore == true && capt == EMouseCaptureMode::NoCapture)
-		{
-			return 1;  // UI Only
+			ULocalPlayer* LocalPlayer = PlayerController->GetLocalPlayer();
+
+			bool ignore = GameViewportClient->IgnoreInput();
+			EMouseCaptureMode capt = GameViewportClient->GetMouseCaptureMode();
+
+			if (ignore == false && capt == EMouseCaptureMode::CaptureDuringMouseDown)
+			{
+				return 0;  // Game And UI
+			}
+			else if (ignore == true && capt == EMouseCaptureMode::NoCapture)
+			{
+				return 1;  // UI Only
+			}
+			else
+			{
+				return 2;  // Game Only
+			}
 		}
 		else
 		{
-			return 2;  // Game Only
+
 		}
 	}
 	return -1;
@@ -72,26 +86,26 @@ void AVICTIMSPlayerController::OnPossess(APawn* aPawn)
 {
 	Super::OnPossess(aPawn);
 
-		FTimerHandle Timer;
-		GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
-	CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
-	if (CharacterReference != nullptr)
-	{
+	FTimerHandle Timer;
+	GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
+		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
+		if (CharacterReference != nullptr)
+		{
 
-		PlayerInventoryComponent->EquipmentCharacterReference = CharacterReference;
+			PlayerInventoryComponent->EquipmentCharacterReference = CharacterReference;
 
-		InventoryManagerComponent->InitializeInventoryManager(PlayerInventoryComponent);
-		InventoryManagerComponent->Server_InitInventory();
-		InventoryManagerComponent->InitializePlayerAttributes();
+			InventoryManagerComponent->InitializeInventoryManager(PlayerInventoryComponent);
+			InventoryManagerComponent->Server_InitInventory();
+			InventoryManagerComponent->InitializePlayerAttributes();
 
-		
-		CharacterReference->TestFunction(InputComponent);
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("NULL"));
-	}
-			}, 0.5f, false);
+
+			CharacterReference->TestFunction(InputComponent);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("NULL"));
+		}
+		}, 0.5f, false);
 }
 
 void AVICTIMSPlayerController::Tick(float DeltaTime)
@@ -148,7 +162,7 @@ void AVICTIMSPlayerController::CollectFromPanel(const FName& Name)
 				return;
 			}
 		}
-		else 
+		else
 		{
 			Server_OnActorUsed(Actor);
 			return;
@@ -159,7 +173,7 @@ void AVICTIMSPlayerController::CollectFromPanel(const FName& Name)
 
 bool AVICTIMSPlayerController::IsContainerOpen()
 {
-	return HUD_Reference->HUDReference->MainLayout->Container->IsVisible();		
+	return HUD_Reference->HUDReference->MainLayout->Container->IsVisible();
 }
 
 
@@ -326,6 +340,11 @@ void AVICTIMSPlayerController::UseHotbarSlot5()
 
 void AVICTIMSPlayerController::Interact()
 {
+	if (CharacterReference == nullptr)
+	{
+		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
+	}
+
 	if (CharacterReference->UsableActorsInsideRange.Num() > 0)
 	{
 		uint32 Index = 0;

@@ -34,7 +34,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool StartWithPhysicsEnabled;
-	UPROPERTY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* ItemDB;
 
 	UFUNCTION()

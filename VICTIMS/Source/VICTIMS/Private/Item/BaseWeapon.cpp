@@ -155,6 +155,7 @@ void ABaseWeapon::OnHitCollisionComponent(FHitResult lastHitStruct)
 
 	AActor* hitActor = lastHitStruct.GetActor();
 
+	// Enemy : Enemy Check
 	FString ownerTeamTag;
 	FString hitActorTeamTag;
 

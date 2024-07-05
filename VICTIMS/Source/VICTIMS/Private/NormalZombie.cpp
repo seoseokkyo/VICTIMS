@@ -63,7 +63,7 @@ void ANormalZombie::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (1)
+	if (0)
 	{
 		PrintInfo();
 	}
@@ -118,7 +118,7 @@ void ANormalZombie::ServerRPC_DieFunction_Implementation()
 	GetWorldTimerManager().SetTimer(hnd, [&]() {
 
 		EnableRagdoll();
-		GetController<ANormalZombieController>()->UnPossess();
+		//GetController<ANormalZombieController>()->UnPossess();
 
 		}, 2.0f, false);
 

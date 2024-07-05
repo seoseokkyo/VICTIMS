@@ -57,12 +57,22 @@ void ANormalZombieController::BeginPlay()
 
 void ANormalZombieController::Tick(float deltaTime)
 {
+	auto temp = GetPawn<ANormalZombie>();
+
+	if (temp == nullptr)
+	{
+		return;
+	}
+
+	if (temp->bDead == true)
+	{
+		return;
+	}
+
 	currentAttackDelayTime = FMath::Clamp(currentAttackDelayTime += deltaTime, 0, attackDelayTime);
 	currentsightInitDelayTime = FMath::Clamp(currentsightInitDelayTime += deltaTime, 0, sightInitDelayTime);
 
 	SetNoiseDetect(GetNoiseDetect() - deltaTime * 20);
-
-	auto temp = GetPawn<ANormalZombie>();
 
 	if (temp->motionState == ECharacterMotionState::Move)
 	{
@@ -229,6 +239,37 @@ void ANormalZombieController::SetupPerceptionSystem()
 
 void ANormalZombieController::OnTargetDetected(AActor* _Actor, FAIStimulus const Stimulus)
 {
+	// Enemy : Enemy Check
+	FString ownerTeamTag;
+	FString hitActorTeamTag;
+
+	bool bOwnerTagFind = false;
+	for (auto tag : GetPawn()->Tags)
+	{
+		if (tag.ToString().Contains("Team"))
+		{
+			ownerTeamTag = tag.ToString();
+			bOwnerTagFind = true;
+			break;
+		}
+	}
+
+	bool bHitActorTagFind = false;
+	for (auto tag : _Actor->Tags)
+	{
+		if (tag.ToString().Contains("Team"))
+		{
+			hitActorTeamTag = tag.ToString();
+			bHitActorTagFind = true;
+			break;
+		}
+	}
+
+	if (bOwnerTagFind && bHitActorTagFind && (ownerTeamTag == hitActorTeamTag))
+	{
+		return;
+	}
+
 	targetActor = _Actor;
 
 	if (Stimulus.Type.Name == FName("Default__AISense_Sight"))
