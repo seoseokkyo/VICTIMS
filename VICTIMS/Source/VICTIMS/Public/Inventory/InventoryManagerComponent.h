@@ -32,6 +32,12 @@ public:
 	UFUNCTION()
 	void InitializeItemDB();
 
+	UPROPERTY()
+	class AVICTIMSCharacter* playerReference;
+
+	UPROPERTY()
+	class AMyHUD* HUD;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -247,6 +253,9 @@ private:
 
 	UFUNCTION(Category="Manager|Private|Items")
 	void UseConsumableItem(uint8 InventorySlot, FSlotStructure InventoryItem);
+
+	UFUNCTION(Category="Manager|Private|Items")
+	void UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem);
 	
 	UFUNCTION(Category="Manager|Private|Items")
 	void UseInventoryItem(const uint8& InventorySlot);
