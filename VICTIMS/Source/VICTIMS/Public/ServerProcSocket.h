@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "ProcSocketObject.h"
 #include "ServerProcSocket.generated.h"
-
+#include <utility>
 /**
  * 
  */
@@ -20,11 +20,10 @@ public:
 
 	virtual void InitializeSocket() override;
 
-	bool bConnection = false;
+	TArray<FSocket*> ClientSockets;
 
 private:
 	void HandleIncomingConnections();
 	void HandleClient(FSocket* ClientSocket);
-	
 	
 };

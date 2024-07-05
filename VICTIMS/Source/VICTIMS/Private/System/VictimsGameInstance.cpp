@@ -6,6 +6,7 @@
 #include <Kismet/KismetSystemLibrary.h>
 #include <ServerProcSocket.h>
 #include <InstantProcSocket.h>
+#include <functional>
 
 FCharacterStat UVictimsGameInstance::GetCharacterDataTable(const FString& rowName)
 {
@@ -77,7 +78,18 @@ void UVictimsGameInstance::ConnectToServerAndMoveToNewLevel_Implementation(APlay
 	//// 일단 한놈 갑니다
 	//PlayerController->ClientTravel(URL, type);
 
+	// 여기서 클라이언트 소켓의 응답을 대기를 해야 하는데........ 흠
+	FTimerHandle timer;
+	clientTravelTimers.Add(timer);
+	int currentIndex = clientTravelTimers.Num() - 1;
+
 	InstantServerArray.Add(newServerInst);
+
+	GetWorld()->GetTimerManager().SetTimer(clientTravelTimers[currentIndex], [&, currentIndex]() {
+
+		TryToClientTravel(currentIndex);
+
+	}, 1.0f, true);
 }
 
 void UVictimsGameInstance::OnStart()
@@ -135,20 +147,21 @@ void UVictimsGameInstance::OnStart()
 	}
 }
 
+void UVictimsGameInstance::TryToClientTravel(int waitIndex)
+{
+	if (serverType == "MainServer")
+	{
+		Cast<UServerProcSocket>(mySocket)->ClientSockets[waitIndex];
+		
+	}
+}
+
 void UVictimsGameInstance::ServerRPC_PrintServerType_Implementation()
 {
-	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("SERVER TYPE : %s"), *serverType));
 	MultiRPC_PrintServerType(serverType);
 }
 
 void UVictimsGameInstance::MultiRPC_PrintServerType_Implementation(const FString& serverTypeString)
 {
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("SERVER TYPE : %s"), *serverTypeString));
-
-	if (InstantServerArray.Num() > 0)
-	{
-		FString strMapName = FString::Printf(TEXT("\"%s?listen\" "), *InstantServerArray[0].serverLevelName);
-		FString Params = FString::Printf(TEXT("%s-serverType=InstanceServer -PORT=%d -log"), *strMapName, InstantServerArray[0].serverPortNumber);
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("TEST : %s"), *FPaths::Combine(FPaths::ProjectDir(), TEXT("/Build/WindowsServer/VICTIMSServer.exe"))));
-	}
 }

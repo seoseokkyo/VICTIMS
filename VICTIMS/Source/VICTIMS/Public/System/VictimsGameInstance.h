@@ -61,4 +61,10 @@ public:
 
 	UPROPERTY()
 	class UProcSocketObject* mySocket;
+
+	UPROPERTY()
+	TArray<FTimerHandle> clientTravelTimers;
+
+	UFUNCTION()
+	void TryToClientTravel(int waitIndex);
 };

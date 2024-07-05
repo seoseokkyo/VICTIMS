@@ -28,10 +28,12 @@ protected:
     FSocket* Socket;
     FTimerHandle TimerHandle;
 
-    FString recvString;
+    TQueue<FString> ReceivedDataQueue;
+    bool DequeueReceivedString(FString& OutString);
 
     void SendData(FString Message);
     void ReceiveData();
 	
-	
+    UPROPERTY()
+	bool bConnection = false;
 };

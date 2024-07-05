@@ -23,8 +23,8 @@ void UInstantProcSocket::InitializeSocket()
 
     if (bIsValid)
     {
-        bool bConnected = Socket->Connect(*RemoteAddress);
-        if (bConnected)
+        bConnection = Socket->Connect(*RemoteAddress);
+        if (bConnection)
         {
             UE_LOG(LogTemp, Log, TEXT("Connected to server at %s"), *RemoteAddress->ToString(true));
             SendDataToServer();

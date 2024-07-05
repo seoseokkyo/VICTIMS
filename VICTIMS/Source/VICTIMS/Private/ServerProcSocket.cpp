@@ -44,45 +44,45 @@ void UServerProcSocket::HandleIncomingConnections()
 
             bConnection = true;
 
+            ClientSockets.Add(ClientSocket);
             HandleClient(ClientSocket);
-
         }
     }
 }
 
 void UServerProcSocket::HandleClient(FSocket* ClientSocket)
 {
-    AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [ClientSocket]()
+    AsyncTask(ENamedThreads::AnyBackgroundThreadNormalTask, [ClientSocket, this]()
         {
             TArray<uint8> ReceivedData;
             uint32 Size;
 
-
-            while (ClientSocket->HasPendingData(Size))
+            while (true)  // 무한 루프로 지속적으로 데이터를 확인합니다.
             {
-                ReceivedData.SetNumUninitialized(Size);
-                int32 Read = 0;
-                ClientSocket->Recv(ReceivedData.GetData(), ReceivedData.Num(), Read);
-
-                FString ReceivedString = FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
-                UE_LOG(LogTemp, Log, TEXT("Received Data: %s"), *ReceivedString);
-
-                if (ReceivedString.Find(TEXT("InstantProcSocket_Completed_Port")))
+                if (ClientSocket->HasPendingData(Size))  // 소켓에 대기 중인 데이터가 있는지 확인합니다.
                 {
-                    int iFind = ReceivedString.Find(TEXT("_"),ESearchCase::IgnoreCase, ESearchDir::FromEnd);
-                    int iLength = ReceivedString.Len();
+                    ReceivedData.SetNumUninitialized(Size);
+                    int32 Read = 0;
+                    ClientSocket->Recv(ReceivedData.GetData(), ReceivedData.Num(), Read);
 
-                    FString strPort = ReceivedString.Right(iLength - iFind);
-                    
-                    FCString::Atoi(*strPort);
+                    FString ReceivedString = FString(ANSI_TO_TCHAR(reinterpret_cast<const char*>(ReceivedData.GetData())));
+                    UE_LOG(LogTemp, Log, TEXT("Received Data: %s"), *ReceivedString);
+
+                    // 큐에 데이터 추가
+                    ReceivedDataQueue.Enqueue(ReceivedString);
+
+                    // 클라이언트로 응답 보내기
+                    FString ResponseString = TEXT("Hello from server!");
+                    TArray<uint8> ResponseData;
+                    ResponseData.Append(reinterpret_cast<const uint8*>(TCHAR_TO_ANSI(*ResponseString)), ResponseString.Len());
+                    int32 Sent;
+                    ClientSocket->Send(ResponseData.GetData(), ResponseData.Num(), Sent);
                 }
-
-                // 클라이언트로 응답 보내기
-                FString ResponseString = TEXT("Hello from server!");
-                TArray<uint8> ResponseData;
-                ResponseData.Append(reinterpret_cast<const uint8*>(TCHAR_TO_ANSI(*ResponseString)), ResponseString.Len());
-                int32 Sent;
-                ClientSocket->Send(ResponseData.GetData(), ResponseData.Num(), Sent);
+                else
+                {
+                    // 데이터를 기다리는 짧은 대기 시간을 추가합니다.
+                    FPlatformProcess::Sleep(0.01f);
+                }
             }
         });
 }
