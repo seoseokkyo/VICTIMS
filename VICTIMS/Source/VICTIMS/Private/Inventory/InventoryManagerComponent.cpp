@@ -21,7 +21,12 @@
 #include "GameFramework/PlayerState.h"
 #include "FContainerInfo.h"
 #include "Net/UnrealNetwork.h"
+#include "StateComponent.h"
+#include "VICTIMSCharacter.h"
 #include "AVICTIMSPlayerController.h"
+#include "HUDLayout.h"
+#include "Character/CharacterBase.h"
+#include "HousingComponent.h"
 
 UInventoryManagerComponent::UInventoryManagerComponent()
 {
@@ -34,6 +39,24 @@ void UInventoryManagerComponent::BeginPlay()
 	Gold = 0;
 	TotalNumberOfSlots = (NumberOfRowsInventory * SlotsPerRowInventory) + (uint8)EEquipmentSlot::Count;
 	InitializeItemDB();
+
+	if (GetOwner())
+	{
+		auto ownerController = Cast<AVICTIMSPlayerController>(GetOwner());
+
+		if (ownerController)
+		{
+			HUD = Cast<AMyHUD>(ownerController->GetHUD());
+			auto ownerCharacter = ownerController->GetPawn();
+			if (ownerCharacter)
+			{
+				playerReference = Cast<AVICTIMSCharacter>(ownerCharacter);
+				UE_LOG(LogTemp, Warning, TEXT("111111111111111111111111111111111111111111111111111"));
+			}
+		}
+	}
+
+	
 }
 
 
@@ -954,7 +977,7 @@ void UInventoryManagerComponent::RandomizeDropLocation(FSlotStructure LocalSlot,
 	FVector DistanceFromPawn{ (float)DropDistanceRangeX,1.0f,1.0f };
 
 	const float DropItemsRotation = FMath::FRandRange(-180.0, 180.0);
-	FRotator Rotation{ 1.0f, DropItemsRotation, DropItemsRotation }; 
+	FRotator Rotation{ 1.0f, DropItemsRotation, DropItemsRotation };
 	FVector VectorRotated = Rotation.RotateVector(DistanceFromPawn);
 	FVector FinalLocation = PawnLocation + LocalLocation + VectorRotated;
 	FRotator FinalRotator{ 1.0f, 1.0f, 1.0f };
@@ -980,7 +1003,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 		{
 			WActor->Amount = LocalSlot.Amount;
 		}
-	
+
 		RemoveItem(Inventory, InventorySlot);
 
 		if (InventorySlot < (uint8)EEquipmentSlot::Count)
@@ -1130,6 +1153,29 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 {
 	UE_LOG(LogTemp, Warning, TEXT("Consuming this Item..."))
 
+		uint8 AmountToRemove = 1;
+	bool WasFullAmountRemoved = false;
+	uint8 AmountRemoved = 0;
+
+	RemoveFromItemAmount(InventoryItem, AmountToRemove, WasFullAmountRemoved, AmountRemoved);
+
+	if (WasFullAmountRemoved)
+	{
+		InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
+
+		RemoveItem(PlayerInventory, InventorySlot);
+	}
+	else
+	{
+		AddItem(PlayerInventory, InventorySlot, InventoryItem);
+	}
+	// HEAL ! 
+	playerReference->stateComp->AddStatePoint(EStateType::HP, InventoryItem.ItemStructure.Health);
+	
+}
+
+void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem)
+{
 	uint8 AmountToRemove = 1;
 	bool WasFullAmountRemoved = false;
 	uint8 AmountRemoved = 0;
@@ -1146,7 +1192,25 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 	{
 		AddItem(PlayerInventory, InventorySlot, InventoryItem);
 	}
-}
+
+	// 인벤토리, 장비창, 보관함 UI 켜져있으면 꺼버리기 
+	if (HUD->HUDReference->MainLayout->Inventory->IsVisible())
+	{
+		HUD->HUDReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (HUD->HUDReference->MainLayout->Profile->IsVisible())
+	{
+		HUD->HUDReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Collapsed);
+	}
+	if (HUD->HUDReference->MainLayout->Container->IsVisible())
+	{
+		HUD->HUDReference->MainLayout->Container->SetVisibility(ESlateVisibility::Collapsed);
+	}
+
+	//========================================================================================================
+
+// 	playerReference->HousingComponent->LaunchBuildMode();
+ }
 
 void UInventoryManagerComponent::UseInventoryItem(const uint8& InventorySlot)
 {
@@ -1191,6 +1255,7 @@ void UInventoryManagerComponent::UseInventoryItem(const uint8& InventorySlot)
 	switch (LocalInventorySlot.ItemStructure.ItemType)
 	{
 	case EItemType::Furniture:
+		UseFurnitureItem(InventorySlot, LocalInventorySlot);
 		break;
 	case EItemType::Consumable:
 		UseConsumableItem(InventorySlot, LocalInventorySlot);

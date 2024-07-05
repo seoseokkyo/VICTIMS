@@ -80,6 +80,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* UserHotbar5;
 
+	UPROPERTY()
+	class UHPWidget* hpWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UHPWidget> hpWidget_bp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")			// 상호작용 범위
 	class USphereComponent* InteractionField;

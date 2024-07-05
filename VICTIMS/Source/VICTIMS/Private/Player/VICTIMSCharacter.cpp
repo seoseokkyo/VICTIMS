@@ -25,6 +25,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "InteractiveText_Panel.h"
+#include "HPWidget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -129,6 +130,8 @@ void AVICTIMSCharacter::BeginPlay()
 	MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 	InteractionField->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlap);
 	InteractionField->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlap);
+
+	hpWidget = Cast<UHPWidget>(hpWidget_bp);
 }
 
 
