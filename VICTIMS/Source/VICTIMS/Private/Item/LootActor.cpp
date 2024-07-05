@@ -9,6 +9,35 @@ ALootActor::ALootActor()
 	C_CanStoreItems = false;
 }
 
+void ALootActor::BeginPlay()
+{
+	Action = FText::FromString("Check");
+	Name = FText::FromString("Dummy");
+
+	DB_ItemList = LoadObject<UDataTable>(this, TEXT("/Script/Engine.DataTable'/Game/Item/Data/Item_DB.Item_DB'"));
+
+	uint8 LocalNumberOfRows = InventoryComponent->NumberOfRowsInventory;
+	uint8 LocalNumberOfSlotsPerRow = InventoryComponent->SlotsPerRowInventory;
+
+	if (LocalNumberOfRows * LocalNumberOfSlotsPerRow < MaxLootItems)
+	{
+		for (uint8 i = 1; i < MaxLootItems; i++)
+		{
+			LocalNumberOfRows = i;
+			LocalNumberOfSlotsPerRow = i;
+
+			if (LocalNumberOfRows * LocalNumberOfSlotsPerRow >= MaxLootItems) {
+				break;
+			}
+		}
+
+		InventoryComponent->NumberOfRowsInventory = LocalNumberOfRows;
+		InventoryComponent->SlotsPerRowInventory = LocalNumberOfSlotsPerRow;
+	}
+
+	Super::BeginPlay();
+}
+
 bool ALootActor::InitializeInventory()
 {
 	if (HasAuthority())
@@ -116,31 +145,3 @@ uint8 ALootActor::GetItemMaxStackSize(const FSlotStructure Item)
 	return Item.ItemStructure.MaxStackSize;
 }
 
-void ALootActor::BeginPlay()
-{
-	Action = FText::FromString("Check");
-	Name = FText::FromString("Dummy");
-
-	DB_ItemList = LoadObject<UDataTable>(this, TEXT("/Script/Engine.DataTable'/Game/Item/Data/Item_DB.Item_DB'"));
-
-	uint8 LocalNumberOfRows = InventoryComponent->NumberOfRowsInventory;
-	uint8 LocalNumberOfSlotsPerRow = InventoryComponent->SlotsPerRowInventory;
-
-	if (LocalNumberOfRows * LocalNumberOfSlotsPerRow < MaxLootItems)
-	{
-		for (uint8 i = 1; i < MaxLootItems; i++)
-		{
-			LocalNumberOfRows = i;
-			LocalNumberOfSlotsPerRow = i;
-
-			if (LocalNumberOfRows * LocalNumberOfSlotsPerRow >= MaxLootItems) {
-				break;
-			}
-		}
-
-		InventoryComponent->NumberOfRowsInventory = LocalNumberOfRows;
-		InventoryComponent->SlotsPerRowInventory = LocalNumberOfSlotsPerRow;
-	}
-
-	Super::BeginPlay();
-}
