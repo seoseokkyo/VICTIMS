@@ -10,7 +10,7 @@ UEquipmentComponent::UEquipmentComponent()
 
 	EquipmentCharacterReference = nullptr;		// 장비 착용할 캐릭터 데이터값 비워두기
 	
-	NumberOfRowsInventory = 7;					// 인벤토리 슬롯 개수 설정
+	NumberOfRowsInventory = 4;					// 인벤토리 슬롯 개수 설정
 	SlotsPerRowInventory = 4;
 
 	NumberOfSlotsOnHotbar = 5;					// 퀵슬롯 개수 설정 

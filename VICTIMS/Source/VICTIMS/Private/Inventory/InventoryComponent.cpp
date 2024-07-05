@@ -44,11 +44,11 @@ void UInventoryComponent::InitInventory(uint8 InventorySize)
 	{
 		if (Index == 0)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Weapon);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Head);
 		}
 		else if (Index == 1)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Chest);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Weapon);
 		}
 		else if (Index == 2)
 		{
@@ -56,16 +56,16 @@ void UInventoryComponent::InitInventory(uint8 InventorySize)
 		}
 		else if (Index == 3)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Hands);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Chest);
 		}
 
 		else if (Index == 4)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Legs);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Hands);
 		}
 		else if (Index == 5)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Head);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Legs);
 		}
 		else
 		{
