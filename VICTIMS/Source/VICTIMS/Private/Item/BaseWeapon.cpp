@@ -205,4 +205,4 @@ void ABaseWeapon::SimulateWeaponPhysics()
 {
 	GetItemMesh()->SetCollisionProfileName(FName("PhysicsActor"));
 	GetItemMesh()->SetSimulatePhysics(true);
-}
+}  

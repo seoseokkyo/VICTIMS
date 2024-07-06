@@ -48,6 +48,7 @@ void UVictimsGameInstance::ConnectToServerAndMoveToNewLevel_Implementation(APlay
 	newServerInst.serverPortNumber = newServerInst.serverNumber + 8001;
 	newServerInst.serverLevelName = NewLevelName;
 	newServerInst.playerNum = 0;
+	newServerInst.clients.Add(PlayerController);
 
 	FString ExecutablePath = FPaths::Combine(FPaths::ProjectDir(), TEXT("/Build/WindowsServer/VICTIMSServer.exe"));
 
@@ -151,8 +152,26 @@ void UVictimsGameInstance::TryToClientTravel(int waitIndex)
 {
 	if (serverType == "MainServer")
 	{
-		Cast<UServerProcSocket>(mySocket)->ClientSockets[waitIndex];
+		auto serverSocketCheck = Cast<UServerProcSocket>(mySocket);
+		if (serverSocketCheck)
+		{
+			if (serverSocketCheck->ClientSockets.Num() > 0)
+			{
+				auto clientSocketCheck = serverSocketCheck->ClientSockets[waitIndex];
 
+				if (clientSocketCheck)
+				{
+					if (clientSocketCheck->GetConnectionState() == SCS_Connected)
+					{
+						clientSocketCheck->GetPortNo();
+
+						UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("clientSocketCheck:%d"), clientSocketCheck->GetPortNo()));
+
+						//InstantServerArray[waitIndex].clients[waitIndex]->ClientTravel();
+					}
+				}
+			}
+		}
 	}
 }
 

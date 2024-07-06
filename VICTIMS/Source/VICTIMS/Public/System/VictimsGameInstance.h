@@ -20,6 +20,8 @@ struct FInstantServerStruct
 	int32	serverPortNumber;
 	int32	playerNum;
 	FString serverLevelName;
+
+	TArray<class APlayerController*> clients;
 };
 
 

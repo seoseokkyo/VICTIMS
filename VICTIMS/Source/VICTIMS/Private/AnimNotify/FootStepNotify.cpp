@@ -17,7 +17,7 @@ void UFootStepNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 			}
 			else
 			{
-				UAISense_Hearing::ReportNoiseEvent(GetWorld(), MeshComp->GetComponentLocation(), 10, MeshComp->GetOwner(), 1000);
+				//UAISense_Hearing::ReportNoiseEvent(GetWorld(), MeshComp->GetComponentLocation(), 10, MeshComp->GetOwner(), 1000);
 			}
 		}
 	}
