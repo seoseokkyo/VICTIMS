@@ -131,7 +131,10 @@ void AVICTIMSCharacter::BeginPlay()
 	InteractionField->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlap);
 	InteractionField->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlap);
 
-	hpWidget = Cast<UHPWidget>(hpWidget_bp);
+	hpWidget = Cast<UHPWidget>(CreateWidget(GetWorld(), hpWidget_bp));
+	hpWidget->AddToViewport();
+
+	stateComp->UpdateStat();
 }
 
 
