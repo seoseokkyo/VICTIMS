@@ -13,8 +13,8 @@ class USpringArmComponent;
 class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
+class UHPWidget;
 struct FInputActionValue;
-
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
@@ -93,13 +93,7 @@ public:
 	UInputAction* HousingBuildAction;
 	
 	UPROPERTY()
-	class UHPWidget* hpWidget;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
-	TSubclassOf<UHPWidget> hpWidget_bp;
-
-	UPROPERTY()
-	class UHPWidget* hpWidget;
+	UHPWidget* hpWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UHPWidget> hpWidget_bp;

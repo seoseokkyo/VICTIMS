@@ -58,10 +58,12 @@ void UStateComponent::InitStat()
 	{
 		stat = gi->GetCharacterDataTable(character->GetName());
 
-		currentHP = stat.MaxHP;
-		currentSP = stat.MaxSP;
-		currentStrength = stat.Strength;
-		currentAgility = stat.Agility;
+		runningStat.currentHP = stat.MaxHP;
+		runningStat.currentSP = stat.MaxSP;
+		runningStat.currentStrength = stat.Strength;
+		runningStat.currentAgility = stat.Agility;
+
+		OnCharacterRunningStatChanged.Broadcast(runningStat);
 	}
 	else
 	{
@@ -74,9 +76,9 @@ float UStateComponent::GetStatePoint(EStateType stateType)
 	switch (stateType)
 	{
 	case HP:
-		return currentHP;
+		return runningStat.currentHP;
 	case SP:
-		return currentSP;
+		return runningStat.currentSP;
 	default:
 		//UE_LOG(LogTemp, Warning, TEXT("Type Error, %s, %d"), __FILE__, __LINE__);
 		break;
@@ -92,10 +94,10 @@ float UStateComponent::AddStatePoint(EStateType stateType, float value)
 	switch (stateType)
 	{
 	case HP:
-		temp = currentHP + value;
-		currentHP = temp;
+		temp = runningStat.currentHP + value;
+		runningStat.currentHP = temp;
 
-		if (currentHP <= 0)
+		if (runningStat.currentHP <= 0)
 		{
 			if (dieDelegate.IsBound())
 			{
@@ -105,13 +107,15 @@ float UStateComponent::AddStatePoint(EStateType stateType, float value)
 
 		break;
 	case SP:
-		temp = currentSP + value;
-		currentSP = temp;
+		temp = runningStat.currentSP + value;
+		runningStat.currentSP = temp;
 		break;
 	default:
 		//UE_LOG(LogTemp, Warning, TEXT("Type Error, %s, %d"), __FILE__, __LINE__);
 		break;
 	}
+
+	OnCharacterRunningStatChanged.Broadcast(runningStat);
 
 	return temp;
 }
@@ -121,15 +125,17 @@ void UStateComponent::ServerRPC_SetStatePoint_Implementation(EStateType stateTyp
 	switch (stateType)
 	{
 	case HP:
-		currentHP = value;
+		runningStat.currentHP = value;
 		break;
 	case SP:
-		currentSP = value;
+		runningStat.currentSP = value;
 		break;
 	default:
 		//UE_LOG(LogTemp, Warning, TEXT("Type Error, %s, %d"), __FILE__, __LINE__);
 		break;
 	}
+
+	OnCharacterRunningStatChanged.Broadcast(runningStat);
 }
 
 void UStateComponent::NetMulticastRPC_SetStatePoint_Implementation(EStateType stateType, float value)
@@ -137,31 +143,32 @@ void UStateComponent::NetMulticastRPC_SetStatePoint_Implementation(EStateType st
 	switch (stateType)
 	{
 	case HP:
-		currentHP = value;
+		runningStat.currentHP = value;
 		break;
 	case SP:
-		currentSP = value;
+		runningStat.currentSP = value;
 		break;
 	default:
 		//UE_LOG(LogTemp, Warning, TEXT("Type Error, %s, %d"), __FILE__, __LINE__);
 		break;
 	}
+
+	OnCharacterRunningStatChanged.Broadcast(runningStat);
 }
 
 void UStateComponent::UpdateStat()
 {
 	// 이후 장비에 있는 스탯을 여기에 추가해줘야 함
-	MaxHP = stat.MaxHP;
-	MaxSP = stat.MaxSP;
+	runningStat.MaxHP = stat.MaxHP;
+	runningStat.MaxSP = stat.MaxSP;
+
+	OnCharacterRunningStatChanged.Broadcast(runningStat);
 }
 
 void UStateComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UStateComponent, currentHP);
-	DOREPLIFETIME(UStateComponent, MaxHP);
-	DOREPLIFETIME(UStateComponent, currentSP);
-	DOREPLIFETIME(UStateComponent, MaxSP);
+	DOREPLIFETIME(UStateComponent, runningStat);
 }
 

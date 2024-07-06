@@ -6,6 +6,7 @@
 #include "HPWidget.generated.h"
 
 class UProgressBar;
+class AVICTIMSCharacter;
 
 UCLASS()
 class VICTIMS_API UHPWidget : public UUserWidget
@@ -28,4 +29,7 @@ public:
 private:
 	
 	virtual void NativeConstruct() override;
+
+	UFUNCTION()
+	void OnUpdateCharacterStat(struct FCharacterRunningStat characterRunningStat);
 };

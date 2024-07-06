@@ -59,7 +59,7 @@ void ANormalZombieController::Tick(float deltaTime)
 {
 	auto temp = GetPawn<ANormalZombie>();
 
-	if (temp == nullptr)
+	if (temp == nullptr || targetActor == nullptr)
 	{
 		return;
 	}

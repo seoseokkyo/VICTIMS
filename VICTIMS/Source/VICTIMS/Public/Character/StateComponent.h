@@ -35,11 +35,38 @@ struct FCharacterStat : public FTableRowBase
 	int32 Agility;
 };
 
+USTRUCT(BlueprintType)
+struct FCharacterRunningStat
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	FCharacterStat DefinedStat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float currentHP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float MaxHP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float currentSP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float MaxSP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	int32 currentStrength = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	int32 currentAgility = 0;
+};
 
 class ACharacterBase;
 class UDataTable;
 
 DECLARE_DYNAMIC_DELEGATE(FCharacterHPZero);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCharacterStatePointChanged, FCharacterRunningStat, characterRunningStat);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VICTIMS_API UStateComponent : public UActorComponent
@@ -69,23 +96,7 @@ public:
 	FCharacterStat stat;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
-	float currentHP = 0.0f;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
-	float MaxHP = 0.0f;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
-	float currentSP = 0.0f;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
-	float MaxSP = 0.0f;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
-	int32 currentStrength = 0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
-	int32 currentAgility = 0;
-
+	FCharacterRunningStat runningStat;
 
 	void InitStat();
 
@@ -103,8 +114,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastRPC_SetStatePoint(EStateType stateType, float value);
 
-	int32 GetStrength() { return currentStrength; };
-	int32 GetAgility() { return currentAgility; };
+	int32 GetStrength() { return runningStat.currentStrength; };
+	int32 GetAgility() { return runningStat.currentAgility; };
 
 	// Set CurrentValue
 	void UpdateStat();
@@ -114,4 +125,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "MySettings")
 	FCharacterHPZero dieDelegate;	
 
+	UPROPERTY(BlueprintReadWrite, Category = "MySettings")
+	FCharacterStatePointChanged OnCharacterRunningStatChanged;
 };
