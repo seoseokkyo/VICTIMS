@@ -20,6 +20,9 @@ struct FBuildablesStructs : public FTableRowBase
 {
 	GENERATED_BODY()
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite)
+    FName ID;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UStaticMesh* Mesh;
 
@@ -28,6 +31,11 @@ struct FBuildablesStructs : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<AActor> Actor;
+
+    bool operator==(const FBuildablesStructs& Other) const
+    {
+        return ID == Other.ID;
+    }
 };
 
  UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -48,8 +56,14 @@ class VICTIMS_API UHousingComponent : public UActorComponent
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
     bool CanBuild;
  
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
+    TArray<FName> RowNames;
+
     UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Build")
     int32 BuildID;
+
+    //UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Build")
+    //FName CurrentBuildID;
  
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
     FTransform BuildTransform;
@@ -102,11 +116,17 @@ class VICTIMS_API UHousingComponent : public UActorComponent
     void StopBuildMode();
 
     UFUNCTION(BlueprintCallable/*, Category = "Build"*/)
-    void LaunchBuildMode();
+    void LaunchBuildMode(FName ItemID);
 
 
  	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
     UDataTable* DB_Housing;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
+    UDataTable* DB_Item;
+
+    UPROPERTY()
+    TArray<FName> ItemRowNames;
 
  	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
     //FBuildablesStructs S_Buildables;

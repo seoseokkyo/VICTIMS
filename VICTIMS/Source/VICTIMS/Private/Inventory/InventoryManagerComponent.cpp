@@ -1176,6 +1176,11 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 
 void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem)
 {
+	UE_LOG(LogTemp, Warning, TEXT("Using Furniture Item - Slot: %d, Item ID: %s, Amount: %d"), InventorySlot, *InventoryItem.ItemStructure.ID.ToString(), InventoryItem.Amount);
+	UE_LOG(LogTemp, Warning, TEXT("Item Structure Info - ID: %s, Name: %s, ItemType: %d"), *InventoryItem.ItemStructure.ID.ToString(), *InventoryItem.ItemStructure.Name.ToString(), (int32)InventoryItem.ItemStructure.ItemType);
+
+	FName ItemID = InventoryItem.ItemStructure.ID;
+
 	uint8 AmountToRemove = 1;
 	bool WasFullAmountRemoved = false;
 	uint8 AmountRemoved = 0;
@@ -1210,6 +1215,70 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 	//========================================================================================================
 
 // 	playerReference->HousingComponent->LaunchBuildMode();
+	if (playerReference && playerReference->HousingComponent)
+	{
+		housingComponent = playerReference->HousingComponent;
+
+		bool bBuildIDSet = false;
+		for (int32 i = 0; i < housingComponent->Buildables.Num(); i++)
+		{
+			FName BuildableID = housingComponent->Buildables[i].ID;
+			UE_LOG(LogTemp, Warning, TEXT("Comparing Item ID: %s with Buildable ID: %s"), *ItemID.ToString(), *BuildableID.ToString());
+
+			if (BuildableID == ItemID)
+			{
+				housingComponent->BuildID = i;
+				bBuildIDSet = true;
+				UE_LOG(LogTemp, Warning, TEXT("Matching BuildID found: %d for Item ID: %s"), i, *ItemID.ToString());
+				break;
+			}
+		}
+
+		if (bBuildIDSet)
+		{
+			playerReference->HousingComponent->LaunchBuildMode(ItemID);
+
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No matching BuildID found in housing data table for Item ID: %s"), *ItemID.ToString());
+		}
+	}
+		// 인벤토리 아이템의 RowName을 가져와서 BuildID를 설정
+		//FName name = InventoryItem.ItemStructure.ID;
+		//UE_LOG(LogTemp, Warning, TEXT("TESTUsing Furniture Item with ID: %s"), *name.ToString());
+		//TArray<FName> names = playerReference->HousingComponent->RowNames;
+		//UE_LOG(LogTemp, Warning, TEXT("TESTNumber of RowNames: %d"), names.Num());
+		//for (int i = 0; i < names.Num(); i++)
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("TESTComparing with RowName: %s"), *names[i].ToString());
+		//	if (name.ToString() == names[i].ToString())
+		//	{
+		//		housingComponent->BuildID = i;
+		//		UE_LOG(LogTemp, Warning, TEXT("TESTBuildID set to: %d"), i);
+		//		playerReference->HousingComponent->LaunchBuildMode();
+		//		break;
+		//	}
+		//}
+		// if (playerReference && playerReference->HousingComponent)
+		//playerReference->HousingComponent->LaunchBuildMode();
+		//for (int32 i = 0; i < housingComponent->Buildables.Num(); ++i)
+		//{
+		//	if (housingComponent->Buildables[i].ID == ItemRowName)
+		//	{
+		//		housingComponent->BuildID = i;
+		//		break;
+		//	}
+		//}
+		//housingComponent->CurrentBuildID = ItemID;
+
+
+
+		// 인벤토리에서 선택한 아이템에 따라 BuildID 설정 ?
+		//playerReference->HousingComponent->BuildID = InventoryItem.ItemStructure.ID;
+
+		//playerReference->HousingComponent->LaunchBuildMode();
+
  }
 
 void UInventoryManagerComponent::UseInventoryItem(const uint8& InventorySlot)

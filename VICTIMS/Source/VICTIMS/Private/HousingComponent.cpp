@@ -14,6 +14,9 @@
 #include "HousingInterface.h"
 #include "Net/UnrealNetwork.h"
 
+#include "Item/FItemStructure.h"
+
+
 UHousingComponent::UHousingComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
@@ -47,7 +50,7 @@ void UHousingComponent::BeginPlay()
 	{
 
 		// 데이터 테이블에서 행 이름 가져오기
-		TArray<FName> RowNames = DB_Housing->GetRowNames();
+		/*TArray<FName> */RowNames = DB_Housing->GetRowNames();
 
 		UE_LOG(LogTemp, Warning, TEXT("Number of rows in the data table: %d"), RowNames.Num());
 
@@ -69,6 +72,10 @@ void UHousingComponent::BeginPlay()
 	else
 	{
 		UE_LOG(LogTemp, Error, TEXT("DB_Housing is null"));
+	}
+	if (DB_Item)
+	{
+		ItemRowNames = DB_Item->GetRowNames();
 	}
 }
 
@@ -313,19 +320,64 @@ void UHousingComponent::StopBuildMode()
 	}
 }
 
-void UHousingComponent::LaunchBuildMode()
+void UHousingComponent::LaunchBuildMode(FName ItemID)
 {
 	// BuildID 로그 출력
-	UE_LOG(LogTemp, Warning, TEXT("Launching Build Mode with BuildID: %d"), BuildID);
+	//UE_LOG(LogTemp, Warning, TEXT("Launching Build Mode with BuildID: %d"), BuildID);
 
-	// BuildID가 유효한지 검사
-	if (BuildID < 0 || BuildID >= Buildables.Num())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Invalid BuildID: %d"), BuildID);
-		// 기본값으로 설정하거나 사용자에게 알림 제공
-		BuildID = 0; // 예시로 기본값을 0으로 설정
-		return;
-	}
+	//// BuildID가 유효한지 검사
+	//if (BuildID < 0 || BuildID >= Buildables.Num())
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Invalid BuildID: %d"), BuildID);
+	//	// 기본값으로 설정하거나 사용자에게 알림 제공
+	//	BuildID = 0; // 예시로 기본값을 0으로 설정
+	//	return;
+	//}
+
+	//if (IsBuildModeOn)
+	//{
+	//	StopBuildMode();
+	//}
+	//else
+	//{
+	//	IsBuildModeOn = true;
+	//	bool bBuildIDSet = false;
+	//	// 인벤토리의 아이템과 하우징 데이터 테이블의 RowName을 비교하여 BuildID 설정
+	//	for (const FName& ItemRowName : ItemRowNames)
+	//	{
+	//		FItemStructure* ItemRowData = DB_Item->FindRow<FItemStructure>(ItemRowName, TEXT(""));
+	//		if (ItemRowData && ItemRowData->ItemType == EItemType::Furniture)
+	//		{
+	//			UE_LOG(LogTemp, Warning, TEXT("TESTInventory Item ID: %s"), *ItemRowData->ID.ToString());
+	//			for (const FBuildablesStructs& Buildable : Buildables)
+	//			{
+	//				UE_LOG(LogTemp, Warning, TEXT("TESTHousing Item ID: %s"), *Buildable.ID.ToString());
+	//				if (ItemRowData->ID == Buildable.ID)
+	//				{
+	//					BuildID = Buildables.IndexOfByKey(Buildable);
+	//					UE_LOG(LogTemp, Warning, TEXT("TESTMatching BuildID found: %d"), BuildID);
+	//					bBuildIDSet = true;
+	//					break;
+	//				}
+	//			}
+	//			if (bBuildIDSet)
+	//			{
+	//				break;
+	//			}
+	//		}
+	//	}
+
+	//	if (bBuildIDSet)
+	//	{
+	//		SpawnPreviewMesh();  // 프리뷰 메쉬 스폰
+	//		BuildCycle();  // BuildCycle 시작
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("No matching BuildID found in inventory"));
+	//	}
+	//}
+	UE_LOG(LogTemp, Warning, TEXT("Launching Build Mode with Item ID: %s"), *ItemID.ToString());
 
 	if (IsBuildModeOn)
 	{
@@ -334,7 +386,18 @@ void UHousingComponent::LaunchBuildMode()
 	else
 	{
 		IsBuildModeOn = true;
+
+		if (BuildID < 0 || BuildID >= Buildables.Num())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Invalid BuildID: %d"), BuildID);
+			return;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("Spawning Preview Mesh with BuildID: %d"), BuildID);
+		SpawnPreviewMesh();
 		BuildCycle();
+
+
 	}
 }
 
@@ -420,6 +483,7 @@ void UHousingComponent::SpawnBuild(bool Moving, AActor* Movable, const FTransfor
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Buildable Actor is null"));
 		}
+		StopBuildMode();
 	}
 	else
 	{
@@ -478,7 +542,7 @@ bool UHousingComponent::CanPlacePreviewMesh()
 	// 바닥에 설치 가능한 경우 추가 확인
 	if (TraceChannel == ECC_GameTraceChannel2)
 	{
-		if (!HitResult.GetActor()->ActorHasTag("Floor"))
+		if (!HitResult.GetComponent()->ComponentHasTag("Floor")) /*GetActor()->ActorHasTag("Floor"))*/
 		{
 			return false;
 		}
@@ -604,9 +668,13 @@ void UHousingComponent::Multicast_MoveObject_Implementation(FVector StartLocatio
 			BuildID = IHousingInterface::Execute_ReturnBuildID(MoveableActor);
 			UE_LOG(LogTemp, Warning, TEXT("Build ID: %d"), BuildID);
 
+			//this->BuildID = BuildID;
+
+			//LaunchBuildMode();
+			FName ItemID = Buildables[BuildID].ID;
 			this->BuildID = BuildID;
 
-			LaunchBuildMode();
+			LaunchBuildMode(ItemID);
 		}
 		else
 		{

@@ -38,6 +38,9 @@ public:
 	UPROPERTY()
 	class AMyHUD* HUD;
 
+	UPROPERTY()
+	class UHousingComponent* housingComponent;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
