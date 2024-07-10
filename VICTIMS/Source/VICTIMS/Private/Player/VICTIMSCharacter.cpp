@@ -156,42 +156,45 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 		}
 		return;
 	}
-
-	for (AActor*& UsableActor : UsableActorsInsideRange)
+	if (IsLocallyControlled())
 	{
-		if (Cast<AWorldActor>(UsableActor))
+		for (AActor*& UsableActor : UsableActorsInsideRange)
 		{
-			return;
-		}
-
-		if (AUsableActor* TempUsableActor = Cast<AUsableActor>(UsableActor))
-		{
-			if (IUsableActorInterface::Execute_GetIsActorUsable(TempUsableActor))
+			if (Cast<AWorldActor>(UsableActor))
 			{
-				FVector2D ScreenPosition = {};
-				MyPlayerController->ProjectWorldLocationToScreen(UsableActor->GetActorLocation(), ScreenPosition);
-				TempUsableActor->SetScreenPosition(ScreenPosition);
-				if (MyPlayerController->ProjectWorldLocationToScreen(UsableActor->GetActorLocation(), ScreenPosition))
+				return;
+			}
+
+			if (AUsableActor* TempUsableActor = Cast<AUsableActor>(UsableActor))
+			{
+				if (IUsableActorInterface::Execute_GetIsActorUsable(TempUsableActor))
 				{
-					if (TempUsableActor->InteractUserWidget->GetVisibility() == ESlateVisibility::Hidden)
+					FVector2D ScreenPosition = {};
+					MyPlayerController->ProjectWorldLocationToScreen(UsableActor->GetActorLocation(), ScreenPosition);
+					TempUsableActor->SetScreenPosition(ScreenPosition);
+					if (MyPlayerController->ProjectWorldLocationToScreen(UsableActor->GetActorLocation(), ScreenPosition))
 					{
-						TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Visible);
+						if (TempUsableActor->InteractUserWidget->GetVisibility() == ESlateVisibility::Hidden)
+						{
+							TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Visible);
+							TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+						}
+
+						TempUsableActor->SetScreenPosition(ScreenPosition);
+					}
+					else
+					{
 						TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
 					}
-
-					TempUsableActor->SetScreenPosition(ScreenPosition);
 				}
-				else
-				{
+				else {
+					IUsableActorInterface::Execute_EndOutlineFocus(TempUsableActor);
 					TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
 				}
 			}
-			else {
-				IUsableActorInterface::Execute_EndOutlineFocus(TempUsableActor);
-				TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
-			}
 		}
 	}
+	
 }
 //////////////////////////////////////////////////////////////////////////
 // Input

@@ -995,7 +995,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 	{
 		UE_LOG(LogTemp, Warning, TEXT("DROPPED ITEM"))
 
-			UClass* LocalClass;
+		UClass* LocalClass = nullptr;
 		FTransform OutTransform;
 		RandomizeDropLocation(LocalSlot, LocalClass, OutTransform);
 		AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransform);
@@ -1173,7 +1173,7 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, InventoryItem.ItemStructure.Health);
 
 }
-
+ 
 void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Using Furniture Item - Slot: %d, Item ID: %s, Amount: %d"), InventorySlot, *InventoryItem.ItemStructure.ID.ToString(), InventoryItem.Amount);
@@ -1197,6 +1197,7 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 	{
 		AddItem(PlayerInventory, InventorySlot, InventoryItem);
 	}
+	
 
 	ClientRPC_UseFurnitureItem(ItemID);
 
@@ -1292,7 +1293,7 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 	}
 }
 
-void UInventoryManagerComponent::UseInventoryItem(const uint8& InventorySlot)
+ void UInventoryManagerComponent::UseInventoryItem(const uint8& InventorySlot)
 {
 	FSlotStructure LocalInventorySlot = PlayerInventory->GetInventoryItem(InventorySlot);
 
@@ -1782,6 +1783,7 @@ void UInventoryManagerComponent::AddItemToStack(UInventoryComponent* Inventory, 
 
 AVICTIMSCharacter* UInventoryManagerComponent::GetPlayerRef()
 {
+
 	if (playerReference == nullptr)
 	{
 		auto ownerCheck = GetOwner();
