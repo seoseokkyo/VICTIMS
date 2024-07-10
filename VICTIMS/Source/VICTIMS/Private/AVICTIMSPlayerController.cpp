@@ -202,19 +202,22 @@ void AVICTIMSPlayerController::ToggleProfile()
 
 void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 {
-	if (HUD_Reference->IsAnyWidgetVisible())
+	if (IsLocalPlayerController())
 	{
-		SetInputMode(FInputModeGameAndUI());
-		bShowMouseCursor = true;
+		if (HUD_Reference->IsAnyWidgetVisible())
+		{
+			SetInputMode(FInputModeGameAndUI());
+			bShowMouseCursor = true;
 
-		HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
-	}
-	else
-	{
-		SetInputMode(FInputModeGameOnly());
-		bShowMouseCursor = false;
+			HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
+		}
+		else
+		{
+			SetInputMode(FInputModeGameOnly());
+			bShowMouseCursor = false;
 
-		HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+		}
 	}
 }
 
