@@ -1153,7 +1153,11 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 {
 	UE_LOG(LogTemp, Warning, TEXT("Consuming this Item..."))
 
-		uint8 AmountToRemove = 1;
+	// HEAL ! 
+	UE_LOG(LogTemp, Warning, TEXT("Call ClientRPC_UseConsumableItem Value : %d"), InventoryItem.ItemStructure.Health);
+	ClientRPC_UseConsumableItem(InventoryItem.ItemStructure.Health);
+
+	uint8 AmountToRemove = 1;
 	bool WasFullAmountRemoved = false;
 	uint8 AmountRemoved = 0;
 
@@ -1169,11 +1173,14 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 	{
 		AddItem(PlayerInventory, InventorySlot, InventoryItem);
 	}
-	// HEAL ! 
-	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, InventoryItem.ItemStructure.Health);
-
 }
  
+void UInventoryManagerComponent::ClientRPC_UseConsumableItem_Implementation(const int32 Health)
+{
+	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, Health);
+	UE_LOG(LogTemp, Warning, TEXT("Called ClientRPC_UseConsumableItem Value : %d"), Health);
+}
+
 void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Using Furniture Item - Slot: %d, Item ID: %s, Amount: %d"), InventorySlot, *InventoryItem.ItemStructure.ID.ToString(), InventoryItem.Amount);

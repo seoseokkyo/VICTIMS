@@ -257,6 +257,9 @@ private:
 	UFUNCTION(Category = "Manager|Private|Items")
 	void UseConsumableItem(uint8 InventorySlot, FSlotStructure InventoryItem);
 
+	UFUNCTION(Client, Reliable, Category = "Manager|Private|Items")
+	void ClientRPC_UseConsumableItem(const int32 Health);
+
 	UFUNCTION(Category = "Manager|Private|Items")
 	void UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem);
 
