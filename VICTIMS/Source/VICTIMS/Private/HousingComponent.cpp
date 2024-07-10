@@ -19,6 +19,7 @@
 #include "Item/FSlotStructure.h"
 #include "InventoryManagerComponent.h"
 #include "InventoryComponent.h"
+#include "EquipmentComponent.h"
 
 UHousingComponent::UHousingComponent()
 {
@@ -617,6 +618,7 @@ void UHousingComponent::RemoveObject()
 			{
 				UE_LOG(LogTemp, Error, TEXT("Failed to cast PlayerInventoryComponent to UInventoryComponent."));
 			}
+		}
 	}
 	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
 	if (bHit)
