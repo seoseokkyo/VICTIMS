@@ -39,14 +39,14 @@ void UInventoryManagerComponent::BeginPlay()
 	Gold = 0;
 	TotalNumberOfSlots = (NumberOfRowsInventory * SlotsPerRowInventory) + (uint8)EEquipmentSlot::Count;
 	InitializeItemDB();
-
+	
 	if (GetOwner())
 	{
 		auto ownerController = Cast<AVICTIMSPlayerController>(GetOwner());
 
-		if (ownerController)
+		if (ownerController && ownerController->IsLocalController())
 		{
-			HUD = Cast<AMyHUD>(ownerController->GetHUD());
+			HUD = GetPlayerHud();
 			auto ownerCharacter = ownerController->GetPawn();
 			if (ownerCharacter)
 			{
@@ -1170,7 +1170,7 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 		AddItem(PlayerInventory, InventorySlot, InventoryItem);
 	}
 	// HEAL ! 
-	playerReference->stateComp->AddStatePoint(EStateType::HP, InventoryItem.ItemStructure.Health);
+	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, InventoryItem.ItemStructure.Health);
 	
 }
 
@@ -1199,25 +1199,25 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 	}
 
 	// 인벤토리, 장비창, 보관함 UI 켜져있으면 꺼버리기 
-	if (HUD->HUDReference->MainLayout->Inventory->IsVisible())
+	if (GetPlayerHud()->HUDReference->MainLayout->Inventory->IsVisible())
 	{
-		HUD->HUDReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Collapsed);
+		GetPlayerHud()->HUDReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	if (HUD->HUDReference->MainLayout->Profile->IsVisible())
+	if (GetPlayerHud()->HUDReference->MainLayout->Profile->IsVisible())
 	{
-		HUD->HUDReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Collapsed);
+		GetPlayerHud()->HUDReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Collapsed);
 	}
-	if (HUD->HUDReference->MainLayout->Container->IsVisible())
+	if (GetPlayerHud()->HUDReference->MainLayout->Container->IsVisible())
 	{
-		HUD->HUDReference->MainLayout->Container->SetVisibility(ESlateVisibility::Collapsed);
+		GetPlayerHud()->HUDReference->MainLayout->Container->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	//========================================================================================================
 
 // 	playerReference->HousingComponent->LaunchBuildMode();
-	if (playerReference && playerReference->HousingComponent)
+	if (GetPlayerRef() && GetPlayerRef()->HousingComponent)
 	{
-		housingComponent = playerReference->HousingComponent;
+		housingComponent = GetPlayerRef()->HousingComponent;
 
 		bool bBuildIDSet = false;
 		for (int32 i = 0; i < housingComponent->Buildables.Num(); i++)
@@ -1236,7 +1236,8 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 
 		if (bBuildIDSet)
 		{
-			playerReference->HousingComponent->LaunchBuildMode(ItemID);
+			GetPlayerRef()->HousingComponent->IsBuildModeOn = false;
+			GetPlayerRef()->HousingComponent->LaunchBuildMode(ItemID);
 
 		}
 		else
@@ -1768,4 +1769,27 @@ void UInventoryManagerComponent::AddItemToStack(UInventoryComponent* Inventory, 
 
 	AmountRemaining = LocalRemainingAmount;
 }
+
+AVICTIMSCharacter* UInventoryManagerComponent::GetPlayerRef()
+{
+	if (playerReference == nullptr)
+	{
+		auto localPawn = GetWorld()->GetFirstLocalPlayerFromController()->GetPlayerController(GetWorld())->GetPawn();
+
+		playerReference = Cast<AVICTIMSCharacter>(localPawn);
+	}
+
+	return playerReference;
+}
+
+AMyHUD* UInventoryManagerComponent::GetPlayerHud()
+{
+	if (HUD == nullptr)
+	{
+		HUD = Cast<AMyHUD>(GetWorld()->GetFirstLocalPlayerFromController()->GetPlayerController(GetWorld())->GetHUD());
+	}
+
+	return HUD;
+}
+
 

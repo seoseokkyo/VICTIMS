@@ -131,8 +131,14 @@ void AVICTIMSCharacter::BeginPlay()
 	InteractionField->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlap);
 	InteractionField->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlap);
 
-	hpWidget = Cast<UHPWidget>(CreateWidget(GetWorld(), hpWidget_bp));
-	hpWidget->AddToViewport();
+	if (hpWidget_bp)
+	{
+		if (MyPlayerController && MyPlayerController->IsLocalController())
+		{
+			hpWidget = Cast<UHPWidget>(CreateWidget(GetWorld(), hpWidget_bp));
+			hpWidget->AddToViewport();
+		}
+	}
 
 	stateComp->UpdateStat();
 }

@@ -133,18 +133,21 @@ uint8 AVICTIMSPlayerController::UIGetPlayerGold()
 
 void AVICTIMSPlayerController::SetupHUDReferences()
 {
-	if (AMyHUD* HUDReferenceResult = Cast<AMyHUD>(GetHUD()))
+	if (IsLocalController())
 	{
-		HUD_Reference = HUDReferenceResult;
+		if (AMyHUD* HUDReferenceResult = Cast<AMyHUD>(GetHUD()))
+		{
+			HUD_Reference = HUDReferenceResult;
 
-		HUDLayoutReference = HUDReferenceResult->HUDReference;
+			HUDLayoutReference = HUDReferenceResult->HUDReference;
 
-		InventoryManagerComponent->InitializeInventoryManagerUI(HUDLayoutReference->MainLayout);
+			InventoryManagerComponent->InitializeInventoryManagerUI(HUDLayoutReference->MainLayout);
 
-		InventoryManagerComponent->Client_LoadInventoryUI();
-		InventoryManagerComponent->Client_LoadProfileUI();
+			InventoryManagerComponent->Client_LoadInventoryUI();
+			InventoryManagerComponent->Client_LoadProfileUI();
 
-		InventoryManagerComponent->Client_LoadHotbarUI();
+			InventoryManagerComponent->Client_LoadHotbarUI();
+		}
 	}
 }
 

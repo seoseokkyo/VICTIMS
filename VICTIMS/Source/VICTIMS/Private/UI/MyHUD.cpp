@@ -25,6 +25,14 @@ void AMyHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (auto ownerCon = Cast<AVICTIMSPlayerController>(GetOwner()))
+	{
+		if (false == ownerCon->IsLocalController())
+		{
+			return;
+		}
+	}
+
 	UDataTable* BP_WidgetDB = LoadObject<UDataTable>(this, TEXT("/Script/Engine.DataTable'/Game/Item/Data/Widgets_DB.Widgets_DB'"));
 	if (IsValid(BP_WidgetDB))
 	{
