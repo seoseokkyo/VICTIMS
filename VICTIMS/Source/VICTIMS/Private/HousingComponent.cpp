@@ -15,7 +15,10 @@
 #include "Net/UnrealNetwork.h"
 
 #include "Item/FItemStructure.h"
-
+#include "AVICTIMSPlayerController.h"
+#include "Item/FSlotStructure.h"
+#include "InventoryManagerComponent.h"
+#include "InventoryComponent.h"
 
 UHousingComponent::UHousingComponent()
 {
@@ -534,7 +537,7 @@ bool UHousingComponent::CanPlacePreviewMesh()
 	);
 
 	// 허공에 생기는 것을 막기 위해 바닥 또는 벽 충돌 여부를 확인
-	if (!bHit || !HitResult.GetActor())
+	if (!bHit || !HitResult.GetComponent())
 	{
 		return false;
 	}
@@ -551,13 +554,13 @@ bool UHousingComponent::CanPlacePreviewMesh()
 	// 벽에 설치 가능한 경우 추가 확인
 	if (TraceChannel == ECC_GameTraceChannel3)
 	{
-		if (!HitResult.GetActor()->ActorHasTag("Wall"))
+		if (!HitResult.GetComponent()->ComponentHasTag("Wall"))
 		{
 			return false;
 		}
 	}
 
-	if (HitResult.GetActor()->IsA(ACharacter::StaticClass()))
+	if (HitResult.GetComponent()->IsA(ACharacter::StaticClass()))
 	{
 		return false;
 	}
@@ -584,8 +587,36 @@ void UHousingComponent::RemoveObject()
 
 		if (HitActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
 		{
+			int32 RemovedBuildID = IHousingInterface::Execute_ReturnBuildID(HitActor);
+			FName RemovedItemID = Buildables[RemovedBuildID].ID;
+
+			//UE_LOG(LogTemp, Warning, TEXT("%s will remove"), *RemovedItemID.ToString());
 			HitActor->Destroy();
-		}
+
+ 			AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(PlayerRef->GetController());
+ 			if (PlayerController && PlayerController->InventoryManagerComponent)
+ 			{
+				FSlotStructure SlotStructure = PlayerController->InventoryManagerComponent->GetItemFromItemDB(RemovedItemID);
+				SlotStructure.Amount = 1;
+
+				bool bSuccess = false;
+				UInventoryComponent* InventoryComponent = Cast<UInventoryComponent>(PlayerController->PlayerInventoryComponent);
+				PlayerController->InventoryManagerComponent->TryToAddItemToInventory(InventoryComponent, SlotStructure, bSuccess);
+
+				if (bSuccess)
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Item successfully added to inventory."));
+					PlayerController->InventoryManagerComponent->Server_UpdateTooltips();
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Failed to add item to inventory."));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("Failed to cast PlayerInventoryComponent to UInventoryComponent."));
+			}
 	}
 	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
 	if (bHit)
@@ -668,13 +699,12 @@ void UHousingComponent::Multicast_MoveObject_Implementation(FVector StartLocatio
 			BuildID = IHousingInterface::Execute_ReturnBuildID(MoveableActor);
 			UE_LOG(LogTemp, Warning, TEXT("Build ID: %d"), BuildID);
 
-			//this->BuildID = BuildID;
-
-			//LaunchBuildMode();
 			FName ItemID = Buildables[BuildID].ID;
 			this->BuildID = BuildID;
 
 			LaunchBuildMode(ItemID);
+
+
 		}
 		else
 		{
