@@ -260,6 +260,9 @@ private:
 	UFUNCTION(Category = "Manager|Private|Items")
 	void UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem);
 
+	UFUNCTION(Client, Reliable, Category = "Manager|Private|Items")
+	void ClientRPC_UseFurnitureItem(FName ItemID);
+
 	UFUNCTION(Category = "Manager|Private|Items")
 	void UseInventoryItem(const uint8& InventorySlot);
 	UFUNCTION(Category = "Manager|Private|Container")

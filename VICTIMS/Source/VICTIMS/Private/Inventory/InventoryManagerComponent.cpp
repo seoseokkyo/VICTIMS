@@ -39,7 +39,7 @@ void UInventoryManagerComponent::BeginPlay()
 	Gold = 0;
 	TotalNumberOfSlots = (NumberOfRowsInventory * SlotsPerRowInventory) + (uint8)EEquipmentSlot::Count;
 	InitializeItemDB();
-	
+
 	if (GetOwner())
 	{
 		auto ownerController = Cast<AVICTIMSPlayerController>(GetOwner());
@@ -56,7 +56,7 @@ void UInventoryManagerComponent::BeginPlay()
 		}
 	}
 
-	
+
 }
 
 
@@ -1153,7 +1153,7 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 {
 	UE_LOG(LogTemp, Warning, TEXT("Consuming this Item..."))
 
-	uint8 AmountToRemove = 1;
+		uint8 AmountToRemove = 1;
 	bool WasFullAmountRemoved = false;
 	uint8 AmountRemoved = 0;
 
@@ -1171,7 +1171,7 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 	}
 	// HEAL ! 
 	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, InventoryItem.ItemStructure.Health);
-	
+
 }
 
 void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem)
@@ -1198,6 +1198,52 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 		AddItem(PlayerInventory, InventorySlot, InventoryItem);
 	}
 
+	ClientRPC_UseFurnitureItem(ItemID);
+
+
+
+	//========================================================================================================
+
+
+	// 인벤토리 아이템의 RowName을 가져와서 BuildID를 설정
+	//FName name = InventoryItem.ItemStructure.ID;
+	//UE_LOG(LogTemp, Warning, TEXT("TESTUsing Furniture Item with ID: %s"), *name.ToString());
+	//TArray<FName> names = playerReference->HousingComponent->RowNames;
+	//UE_LOG(LogTemp, Warning, TEXT("TESTNumber of RowNames: %d"), names.Num());
+	//for (int i = 0; i < names.Num(); i++)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("TESTComparing with RowName: %s"), *names[i].ToString());
+	//	if (name.ToString() == names[i].ToString())
+	//	{
+	//		housingComponent->BuildID = i;
+	//		UE_LOG(LogTemp, Warning, TEXT("TESTBuildID set to: %d"), i);
+	//		playerReference->HousingComponent->LaunchBuildMode();
+	//		break;
+	//	}
+	//}
+	// if (playerReference && playerReference->HousingComponent)
+	//playerReference->HousingComponent->LaunchBuildMode();
+	//for (int32 i = 0; i < housingComponent->Buildables.Num(); ++i)
+	//{
+	//	if (housingComponent->Buildables[i].ID == ItemRowName)
+	//	{
+	//		housingComponent->BuildID = i;
+	//		break;
+	//	}
+	//}
+	//housingComponent->CurrentBuildID = ItemID;
+
+
+
+	// 인벤토리에서 선택한 아이템에 따라 BuildID 설정 ?
+	//playerReference->HousingComponent->BuildID = InventoryItem.ItemStructure.ID;
+
+	//playerReference->HousingComponent->LaunchBuildMode();
+}
+
+void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName ItemID)
+{
+
 	// 인벤토리, 장비창, 보관함 UI 켜져있으면 꺼버리기 
 	if (GetPlayerHud()->HUDReference->MainLayout->Inventory->IsVisible())
 	{
@@ -1212,11 +1258,10 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 		GetPlayerHud()->HUDReference->MainLayout->Container->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
-	//========================================================================================================
-
-// 	playerReference->HousingComponent->LaunchBuildMode();
+	// 	playerReference->HousingComponent->LaunchBuildMode();
 	if (GetPlayerRef() && GetPlayerRef()->HousingComponent)
 	{
+
 		housingComponent = GetPlayerRef()->HousingComponent;
 
 		bool bBuildIDSet = false;
@@ -1245,42 +1290,7 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 			UE_LOG(LogTemp, Warning, TEXT("No matching BuildID found in housing data table for Item ID: %s"), *ItemID.ToString());
 		}
 	}
-		// 인벤토리 아이템의 RowName을 가져와서 BuildID를 설정
-		//FName name = InventoryItem.ItemStructure.ID;
-		//UE_LOG(LogTemp, Warning, TEXT("TESTUsing Furniture Item with ID: %s"), *name.ToString());
-		//TArray<FName> names = playerReference->HousingComponent->RowNames;
-		//UE_LOG(LogTemp, Warning, TEXT("TESTNumber of RowNames: %d"), names.Num());
-		//for (int i = 0; i < names.Num(); i++)
-		//{
-		//	UE_LOG(LogTemp, Warning, TEXT("TESTComparing with RowName: %s"), *names[i].ToString());
-		//	if (name.ToString() == names[i].ToString())
-		//	{
-		//		housingComponent->BuildID = i;
-		//		UE_LOG(LogTemp, Warning, TEXT("TESTBuildID set to: %d"), i);
-		//		playerReference->HousingComponent->LaunchBuildMode();
-		//		break;
-		//	}
-		//}
-		// if (playerReference && playerReference->HousingComponent)
-		//playerReference->HousingComponent->LaunchBuildMode();
-		//for (int32 i = 0; i < housingComponent->Buildables.Num(); ++i)
-		//{
-		//	if (housingComponent->Buildables[i].ID == ItemRowName)
-		//	{
-		//		housingComponent->BuildID = i;
-		//		break;
-		//	}
-		//}
-		//housingComponent->CurrentBuildID = ItemID;
-
-
-
-		// 인벤토리에서 선택한 아이템에 따라 BuildID 설정 ?
-		//playerReference->HousingComponent->BuildID = InventoryItem.ItemStructure.ID;
-
-		//playerReference->HousingComponent->LaunchBuildMode();
-
- }
+}
 
 void UInventoryManagerComponent::UseInventoryItem(const uint8& InventorySlot)
 {
@@ -1774,9 +1784,20 @@ AVICTIMSCharacter* UInventoryManagerComponent::GetPlayerRef()
 {
 	if (playerReference == nullptr)
 	{
-		auto localPawn = GetWorld()->GetFirstLocalPlayerFromController()->GetPlayerController(GetWorld())->GetPawn();
+		auto ownerCheck = GetOwner();
+		if (ownerCheck)
+		{
 
-		playerReference = Cast<AVICTIMSCharacter>(localPawn);
+			auto conCheck = Cast<AVICTIMSPlayerController>(ownerCheck);
+			if (conCheck)
+			{
+				auto charCheck = Cast<AVICTIMSCharacter>(conCheck->GetPawn());
+				if (charCheck)
+				{
+					playerReference = charCheck;
+				}
+			}
+		}
 	}
 
 	return playerReference;
@@ -1786,7 +1807,19 @@ AMyHUD* UInventoryManagerComponent::GetPlayerHud()
 {
 	if (HUD == nullptr)
 	{
-		HUD = Cast<AMyHUD>(GetWorld()->GetFirstLocalPlayerFromController()->GetPlayerController(GetWorld())->GetHUD());
+		auto ownerCheck = GetOwner();
+		if (ownerCheck)
+		{
+			auto conCheck = Cast<AVICTIMSPlayerController>(ownerCheck);
+			if (conCheck)
+			{
+				HUD = Cast<AMyHUD>(conCheck->GetHUD());
+
+				//HUD = conCheck->GetHUD();
+
+				int iTemp = 0;
+			}
+		}
 	}
 
 	return HUD;
