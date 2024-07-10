@@ -322,6 +322,23 @@ void UHousingComponent::StopBuildMode()
 		PlayerRef->DestroyComponent(PreviewMesh);
 		PreviewMesh = nullptr;
 	}
+
+	ClientRPC_StopBuildMode();
+}
+
+void UHousingComponent::ClientRPC_StopBuildMode_Implementation()
+{
+	IsBuildModeOn = false;
+	CanBuild = false;
+
+	MoveableActor = nullptr;
+	IsMoving = false;
+
+	//if (IsValid(PreviewMesh))
+	//{
+	//	PlayerRef->DestroyComponent(PreviewMesh);
+	//	PreviewMesh = nullptr;
+	//}
 }
 
 void UHousingComponent::LaunchBuildMode(FName ItemID)

@@ -115,6 +115,9 @@ class VICTIMS_API UHousingComponent : public UActorComponent
     UFUNCTION(BlueprintCallable/*, Category = "Build"*/)
     void StopBuildMode();
 
+    UFUNCTION(Client, Reliable, BlueprintCallable/*, Category = "Build"*/)
+    void ClientRPC_StopBuildMode();
+
     UFUNCTION(BlueprintCallable/*, Category = "Build"*/)
     void LaunchBuildMode(FName ItemID);
 
