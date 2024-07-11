@@ -27,6 +27,8 @@ void AVICTIMSGameMode::Logout(AController* Exiting)
 		{
 			if (victimsPlayerController != nullptr)
 			{
+				UE_LOG(LogTemp, Warning, TEXT("Player %s has logged out"), *victimsPlayerController->GetActorNameOrLabel());
+
 				auto playerCheck = Cast<AVICTIMSCharacter>(victimsPlayerController->GetPawn());
 				if (playerCheck != nullptr)
 				{
@@ -34,6 +36,5 @@ void AVICTIMSGameMode::Logout(AController* Exiting)
 				}
 			}
 		}
-        //UE_LOG(LogTemp, Warning, TEXT("Player %s has logged out"), *PlayerController->GetPlayerState()->GetPlayerName());
     }
 }

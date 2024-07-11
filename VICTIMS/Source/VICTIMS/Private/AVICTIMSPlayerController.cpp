@@ -14,6 +14,8 @@
 #include "UsableActor.h"
 #include "InventoryComponent.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+
 
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
@@ -388,6 +390,21 @@ void AVICTIMSPlayerController::OnActorUsed(AActor* Actor1)
 			IUsableActorInterface::Execute_OnActorUsed(Actor1, this);
 		}
 	}
+}
+
+void AVICTIMSPlayerController::RequestClientTravel(const FString& URL)
+{
+	ServerRPC_RequestClientTravel(URL);
+}
+
+void AVICTIMSPlayerController::ServerRPC_RequestClientTravel_Implementation(const FString& URL)
+{
+	ClientRPC_RequestClientTravel(URL);
+}
+
+void AVICTIMSPlayerController::ClientRPC_RequestClientTravel_Implementation(const FString& URL)
+{
+	UGameplayStatics::OpenLevel(this, FName(*URL));
 }
 
 void AVICTIMSPlayerController::UI_MoveContainerItem_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot)

@@ -126,6 +126,15 @@ public:
 	UFUNCTION()
 	void OnActorUsed(AActor* Actor1);
 
+	UFUNCTION(BlueprintCallable)
+	void RequestClientTravel(const FString& URL);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_RequestClientTravel(const FString& URL);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_RequestClientTravel(const FString& URL);
+
 protected:
 	virtual void BeginPlay() override;
 	
