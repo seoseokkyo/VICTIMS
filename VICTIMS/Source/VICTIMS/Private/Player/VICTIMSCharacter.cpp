@@ -108,6 +108,9 @@ void AVICTIMSCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+
+	DisableInput(Cast<APlayerController>(GetController()));
+
 	FActorSpawnParameters spawnParam;
 	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	spawnParam.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;

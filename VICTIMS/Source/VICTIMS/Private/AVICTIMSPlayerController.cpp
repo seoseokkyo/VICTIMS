@@ -41,12 +41,14 @@ void AVICTIMSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (CharacterReference == nullptr)
-	{
-		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
+	//if (CharacterReference == nullptr)
+	//{
+	//	CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
 
-		UE_LOG(LogTemp, Warning, TEXT("CharacterReference Was Null, Replace : %p"), CharacterReference);
-	}
+	//	UE_LOG(LogTemp, Warning, TEXT("CharacterReference Was Null, Replace : %p"), CharacterReference);
+	//}
+
+
 }
 
 int AVICTIMSPlayerController::GetCurrentViewMode(const APlayerController* PlayerController)
@@ -86,11 +88,20 @@ void AVICTIMSPlayerController::OnPossess(APawn* aPawn)
 {
 	Super::OnPossess(aPawn);
 
-	FTimerHandle Timer;
-	GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
-		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
-		if (CharacterReference != nullptr)
+}
+
+void AVICTIMSPlayerController::Tick(float DeltaTime)
+{
+	auto pawnCheck = GetPawn();
+	if (pawnCheck != nullptr)
+	{
+		auto charCheck = Cast<AVICTIMSCharacter>(pawnCheck);
+
+		if (CharacterReference == nullptr || CharacterReference != charCheck)
 		{
+			CharacterReference = charCheck;
+
+			UE_LOG(LogTemp, Warning, TEXT("Inventory,Controller Init(%s)"), *GetPawn()->GetActorNameOrLabel());
 
 			PlayerInventoryComponent->EquipmentCharacterReference = CharacterReference;
 
@@ -98,18 +109,10 @@ void AVICTIMSPlayerController::OnPossess(APawn* aPawn)
 			InventoryManagerComponent->Server_InitInventory();
 			InventoryManagerComponent->InitializePlayerAttributes();
 
-
 			CharacterReference->TestFunction(InputComponent);
 		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("NULL"));
-		}
-		}, 0.5f, false);
-}
+	}
 
-void AVICTIMSPlayerController::Tick(float DeltaTime)
-{
 	if (GetCurrentViewMode(this) == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");

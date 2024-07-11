@@ -23,7 +23,7 @@ public:
 	AVICTIMSPlayerController();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	AVICTIMSCharacter* CharacterReference;
+	AVICTIMSCharacter* CharacterReference = nullptr;
 
 	// ========================================================================================================
 	// AIAI¨¡aAI¨ö¨¬ 
