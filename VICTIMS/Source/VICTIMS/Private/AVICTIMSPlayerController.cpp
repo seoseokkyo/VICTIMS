@@ -110,6 +110,8 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			InventoryManagerComponent->InitializePlayerAttributes();
 
 			CharacterReference->TestFunction(InputComponent);
+
+			CharacterReference->InputComponent = InputComponent;
 		}
 	}
 
