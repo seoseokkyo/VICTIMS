@@ -250,7 +250,7 @@ public:
 	void ServerRPC_ToggleCombat();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticastRPC_ToggleCombat();
+	void NetMulticastRPC_ToggleCombat(bool bCombatEnable);
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 

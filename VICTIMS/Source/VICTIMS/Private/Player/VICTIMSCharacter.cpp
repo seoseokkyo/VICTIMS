@@ -452,16 +452,18 @@ void AVICTIMSCharacter::ServerRPC_ToggleCombat_Implementation()
 
 	combatComponent->bCombatEnable = !combatComponent->bCombatEnable;
 
-	NetMulticastRPC_ToggleCombat();
+	NetMulticastRPC_ToggleCombat(combatComponent->bCombatEnable);
 }
 
-void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation()
+void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation(bool bCombatEnable)
 {
 	auto mainWeaponPtr = combatComponent->GetMainWeapon();
 
+	combatComponent->bCombatEnable = bCombatEnable;
+
 	float animPlayTime = 0.0f;
 
-	if (!combatComponent->bCombatEnable)
+	if (combatComponent->bCombatEnable)
 	{
 		if (mainWeaponPtr->exitCombatMontage)
 		{
