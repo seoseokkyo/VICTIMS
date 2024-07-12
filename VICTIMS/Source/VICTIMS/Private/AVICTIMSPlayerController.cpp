@@ -87,7 +87,27 @@ int AVICTIMSPlayerController::GetCurrentViewMode(const APlayerController* Player
 void AVICTIMSPlayerController::OnPossess(APawn* aPawn)
 {
 	Super::OnPossess(aPawn);
+	MocapCharCP=aPawn;
+}
 
+void AVICTIMSPlayerController::SetupHUDReferences()
+{
+		if (IsLocalController())
+		{
+			if (AMyHUD* HUDReferenceResult = Cast<AMyHUD>(GetHUD()))
+			{
+				HUD_Reference = HUDReferenceResult;
+
+				HUDLayoutReference = HUDReferenceResult->HUDReference;
+
+				InventoryManagerComponent->InitializeInventoryManagerUI(HUDLayoutReference->MainLayout);
+
+				InventoryManagerComponent->Client_LoadInventoryUI();
+				InventoryManagerComponent->Client_LoadProfileUI();
+
+				InventoryManagerComponent->Client_LoadHotbarUI();
+			}
+		}
 }
 
 void AVICTIMSPlayerController::Tick(float DeltaTime)
@@ -133,27 +153,6 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 uint8 AVICTIMSPlayerController::UIGetPlayerGold()
 {
 	return InventoryManagerComponent->Gold;
-}
-
-
-void AVICTIMSPlayerController::SetupHUDReferences()
-{
-	if (IsLocalController())
-	{
-		if (AMyHUD* HUDReferenceResult = Cast<AMyHUD>(GetHUD()))
-		{
-			HUD_Reference = HUDReferenceResult;
-
-			HUDLayoutReference = HUDReferenceResult->HUDReference;
-
-			InventoryManagerComponent->InitializeInventoryManagerUI(HUDLayoutReference->MainLayout);
-
-			InventoryManagerComponent->Client_LoadInventoryUI();
-			InventoryManagerComponent->Client_LoadProfileUI();
-
-			InventoryManagerComponent->Client_LoadHotbarUI();
-		}
-	}
 }
 
 

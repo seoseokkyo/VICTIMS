@@ -145,6 +145,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHeadMesh", meta = (DisplayName = "Main Head Mesh", Category = "Inventory|Equipment"))
 	USkeletalMesh* HeadMesh;	
 
+
+
 //=====================================================================================================
 //  FUNCTION
 
