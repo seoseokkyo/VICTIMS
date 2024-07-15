@@ -1,6 +1,6 @@
----,Mesh,TraceChannel,Actor
-Shelter,"/Script/Engine.StaticMesh'/Game/Maps/JunkerTown/Static_Mesh/Merged/SM_Shop8_Merged.SM_Shop8_Merged'","TraceTypeQuery3","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/Blueprints/BP_Shelter.BP_Shelter_C'"
-Floor,"/Script/Engine.StaticMesh'/Game/Maps/JunkerTown/Static_Mesh/SM_MetalFloor.SM_MetalFloor'","TraceTypeQuery4","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/BP_Floor.BP_Floor_C'"
-Bed,"/Script/Engine.StaticMesh'/Game/Maps/JunkerTown/Static_Mesh/SM_bed_SM_bed.SM_bed_SM_bed'","TraceTypeQuery4","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/BP_Floor.BP_Floor_C'"
-WallShelf,"/Script/Engine.StaticMesh'/Game/StarterContent/Props/SM_Shelf.SM_Shelf'","TraceTypeQuery5","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/BP_Wall.BP_Wall_C'"
-WallLamp,"/Script/Engine.StaticMesh'/Game/StarterContent/Props/SM_Lamp_Wall.SM_Lamp_Wall'","TraceTypeQuery5","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/BP_Wall.BP_Wall_C'"
+---,ID,Mesh,TraceChannel,Actor
+Shelter,"ID_Shelter","/Script/Engine.StaticMesh'/Game/Maps/JunkerTown/Static_Mesh/Merged/SM_Shop8_Merged.SM_Shop8_Merged'","TraceTypeQuery3","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/Blueprints/BP_Shelter.BP_Shelter_C'"
+Floor,"ID_Floor","/Script/Engine.StaticMesh'/Game/Maps/JunkerTown/Static_Mesh/SM_MetalFloor.SM_MetalFloor'","TraceTypeQuery4","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/BP_Floor.BP_Floor_C'"
+Bed,"ID_Bed","/Script/Engine.StaticMesh'/Game/Maps/JunkerTown/Static_Mesh/SM_bed_SM_bed.SM_bed_SM_bed'","TraceTypeQuery4","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/BP_Floor.BP_Floor_C'"
+WallShelf,"ID_WallShelf","/Script/Engine.StaticMesh'/Game/StarterContent/Props/SM_Shelf.SM_Shelf'","TraceTypeQuery5","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/BP_Wall.BP_Wall_C'"
+WallLamp,"ID_WallLamp","/Script/Engine.StaticMesh'/Game/StarterContent/Props/SM_Lamp_Wall.SM_Lamp_Wall'","TraceTypeQuery5","/Script/Engine.BlueprintGeneratedClass'/Game/Housing/BP_Wall.BP_Wall_C'"
