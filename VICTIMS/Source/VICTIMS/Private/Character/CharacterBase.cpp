@@ -46,6 +46,10 @@ void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (1)
+	{
+		PrintInfo();
+	}
 }
 
 // Called to bind functionality to input
@@ -58,6 +62,7 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
+	stateComp->NetMulticastRPC_SetStatePoint(HP, temp);
 
 	if (HitSound)
 	{
@@ -84,7 +89,7 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	}
 
 	// µð¹ö±×
-	if (0)
+	if (1)
 	{
 		if (EventInstigator != nullptr)
 		{
@@ -98,6 +103,35 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	}
 
 	return 0.0f;
+}
+
+void ACharacterBase::PrintInfo()
+{
+	// localRole
+	FString localRole = UEnum::GetValueAsString(GetLocalRole());
+
+	// remoteRole
+	FString remoteRole = UEnum::GetValueAsString(GetRemoteRole());
+
+	// owner
+	FString owner = GetOwner() ? GetOwner()->GetName() : "";
+
+	// netConn
+	FString netConn = GetNetConnection() ? "Valid" : "Invalid";
+
+	//FString netMode = UEnum::GetValueAsString(GetNetMode());
+
+	FString hasController = Controller ? TEXT("HasController") : TEXT("NoController");
+
+	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
+	FString strSP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::SP));
+
+	FString strState = UEnum::GetValueAsString(motionState);
+
+	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nhasController : %s\n HP : %s\n SP : %s\n strState : %s\n"), *localRole, *remoteRole, *owner, *netConn, *hasController, *strHP, *strSP, *strState);
+
+	FVector loc = GetActorLocation() + FVector(0, 0, 50);
+	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
 }
 
 void ACharacterBase::ServerRPC_HitReact_Implementation()

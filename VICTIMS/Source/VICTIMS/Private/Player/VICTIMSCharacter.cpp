@@ -133,6 +133,10 @@ void AVICTIMSCharacter::BeginPlay()
 	MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 	InteractionField->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlap);
 	InteractionField->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlap);
+	InteractionField->ComponentTags.Add(TEXT("InteractionField"));
+
+	InteractionField->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECR_Ignore);
+	InteractionField->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel5, ECR_Ignore);
 
 	if (hpWidget_bp)
 	{
