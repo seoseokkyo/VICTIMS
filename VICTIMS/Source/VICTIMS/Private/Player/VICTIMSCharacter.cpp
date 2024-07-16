@@ -207,6 +207,7 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 
 void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	// Add Input Mapping Context
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -218,7 +219,9 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 
 		// Jumping
 		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
@@ -230,9 +233,11 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		// Looking
 		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Look);
 
+		EnhancedInputComponent->ClearActionBindings();
+
 		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
 		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
-		
+
 		EnhancedInputComponent->BindAction(MoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnMoveObject);
 		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
 		/********/
@@ -302,6 +307,8 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 
 void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 {
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
 	// Add Input Mapping Context
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -327,9 +334,15 @@ void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 		// Looking
 		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Look);
 
+		EnhancedInputComponent->ClearActionBindings();
+
 		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
 		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
 		
+		EnhancedInputComponent->BindAction(MoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnMoveObject);
+		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
+		/********/
+		EnhancedInputComponent->BindAction(HousingBuildAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRightMouseButtonPressed);
 
 		//상호작용 =====================================================================================================================
 		if (MyPlayerController == nullptr)
@@ -400,6 +413,8 @@ void AVICTIMSCharacter::DieFunction()
 	motionState = ECharacterMotionState::Die;
 
 	Super::DieFunction();
+
+	EnableRagdoll();
 }
 
 

@@ -30,7 +30,11 @@ public:
 	// ========================================================================================================ÇÑÀ½
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	APawn* MocapCharCP;
-		// ========================================================================================================
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString playerName;
+
+	// ========================================================================================================
 	UFUNCTION(BlueprintCallable, Category = "Runtime Inspector")
 	int GetCurrentViewMode(const APlayerController* PlayerController);
 
@@ -135,13 +139,13 @@ public:
 	void OnActorUsed(AActor* Actor1);
 
 	UFUNCTION(BlueprintCallable)
-	void RequestClientTravel(const FString& URL);
+	void RequestClientTravel(const FString& URL, const FString& Options);
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPC_RequestClientTravel(const FString& URL);
+	void ServerRPC_RequestClientTravel(const FString& URL, const FString& Options);
 
 	UFUNCTION(Client, Reliable)
-	void ClientRPC_RequestClientTravel(const FString& URL);
+	void ClientRPC_RequestClientTravel(const FString& URL, const FString& Options);
 
 protected:
 	virtual void BeginPlay() override;

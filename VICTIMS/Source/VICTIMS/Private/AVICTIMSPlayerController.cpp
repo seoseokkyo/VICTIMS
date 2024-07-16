@@ -189,6 +189,8 @@ bool AVICTIMSPlayerController::IsContainerOpen()
 
 void AVICTIMSPlayerController::ToggleInventory()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
+
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Inventory);
@@ -199,6 +201,8 @@ void AVICTIMSPlayerController::ToggleInventory()
 
 void AVICTIMSPlayerController::ToggleProfile()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
+
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Equipment);
@@ -231,6 +235,8 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 
 void AVICTIMSPlayerController::ToggleContainer()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
+
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Container);
@@ -245,6 +251,8 @@ bool AVICTIMSPlayerController::IsShopOpen()
 }
 void AVICTIMSPlayerController::ToggleShop()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
+
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Shop);
@@ -376,6 +384,8 @@ void AVICTIMSPlayerController::UseHotbarSlot5()
 
 void AVICTIMSPlayerController::Interact()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Interact Pressed"));
+
 	if (CharacterReference == nullptr)
 	{
 		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
@@ -417,19 +427,19 @@ void AVICTIMSPlayerController::OnActorUsed(AActor* Actor1)
 	}
 }
 
-void AVICTIMSPlayerController::RequestClientTravel(const FString& URL)
+void AVICTIMSPlayerController::RequestClientTravel(const FString& URL, const FString& Options)
 {
-	ServerRPC_RequestClientTravel(URL);
+	ServerRPC_RequestClientTravel(URL, Options);
 }
 
-void AVICTIMSPlayerController::ServerRPC_RequestClientTravel_Implementation(const FString& URL)
+void AVICTIMSPlayerController::ServerRPC_RequestClientTravel_Implementation(const FString& URL, const FString& Options)
 {
-	ClientRPC_RequestClientTravel(URL);
+	ClientRPC_RequestClientTravel(URL, Options);
 }
 
-void AVICTIMSPlayerController::ClientRPC_RequestClientTravel_Implementation(const FString& URL)
+void AVICTIMSPlayerController::ClientRPC_RequestClientTravel_Implementation(const FString& URL, const FString& Options)
 {
-	UGameplayStatics::OpenLevel(this, FName(*URL));
+	UGameplayStatics::OpenLevel(this, FName(*URL), true, Options);
 }
 
 void AVICTIMSPlayerController::UI_MoveContainerItem_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot)

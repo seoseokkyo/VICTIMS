@@ -8,6 +8,7 @@
 #include "VictimsGameInstance.h"
 #include "DragWidget.h"
 #include "MyHUD.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 void UWindowLayout::NativeConstruct()
 {
@@ -81,6 +82,16 @@ void UWindowLayout::NativeOnDragEnter(const FGeometry& InGeometry, const FDragDr
 }
 void UWindowLayout::ToggleWindow()
 {
+	FString strName;
+	GetName(strName);
+
+	bool bvisibleCheck = (GetVisibility() == ESlateVisibility::Hidden);
+
+	if (false == strName.IsEmpty())
+	{
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Toggle%s Called : %s"), *strName, bvisibleCheck ? TEXT("On") : TEXT("Off")));
+	}	
+
 	if (GetVisibility() == ESlateVisibility::Hidden)
 	{
 		SetVisibility(ESlateVisibility::Visible);
