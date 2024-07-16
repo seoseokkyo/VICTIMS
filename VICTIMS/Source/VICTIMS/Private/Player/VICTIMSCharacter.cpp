@@ -158,7 +158,7 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 		if (IsValid(MyPlayerController))
 		{
 			MyPlayerController->DisableUIMode();
-			MyPlayerController->Tick(DeltaSeconds);
+			//MyPlayerController->Tick(DeltaSeconds);
 		}
 		return;
 	}

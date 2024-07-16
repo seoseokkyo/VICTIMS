@@ -117,15 +117,17 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 		}
 	}
 
-	if (GetCurrentViewMode(this) == 0)
+	int viewModeCheck = GetCurrentViewMode(this);
+
+	if (viewModeCheck == 0)
 	{
 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
 	}
-	if (GetCurrentViewMode(this) == 1)
+	else if (viewModeCheck == 1)
 	{
 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
 	}
-	if (GetCurrentViewMode(this) == 2)
+	else if (viewModeCheck == 2)
 	{
 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
 	}
