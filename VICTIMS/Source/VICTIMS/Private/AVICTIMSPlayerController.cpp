@@ -111,7 +111,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			InventoryManagerComponent->Server_InitInventory();
 			InventoryManagerComponent->InitializePlayerAttributes();
 
-			CharacterReference->TestFunction(CharacterReference->InputComponent);
+			//CharacterReference->TestFunction(CharacterReference->InputComponent);
 
 			CharacterReference->EnableInput(this);
 		}

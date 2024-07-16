@@ -200,13 +200,18 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 			}
 		}
 	}
-	
+
 }
 //////////////////////////////////////////////////////////////////////////
 // Input
 
 void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->ClearActionBindings();
+	}
+
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	// Add Input Mapping Context
 
@@ -232,8 +237,6 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		// Looking
 		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Look);
-
-		EnhancedInputComponent->ClearActionBindings();
 
 		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
 		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
@@ -307,6 +310,11 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 
 void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 {
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		EnhancedInputComponent->ClearActionBindings();
+	}
+
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 	// Add Input Mapping Context
@@ -320,7 +328,7 @@ void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 	}
 
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) 
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 
@@ -334,11 +342,10 @@ void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 		// Looking
 		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Look);
 
-		EnhancedInputComponent->ClearActionBindings();
 
 		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
 		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
-		
+
 		EnhancedInputComponent->BindAction(MoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnMoveObject);
 		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
 		/********/
@@ -391,7 +398,7 @@ void AVICTIMSCharacter::DieFunction()
 		for (int i = 0; i < Items.Num(); i++)
 		{
 			PC->InventoryManagerComponent->DropItem(PC->InventoryManagerComponent->PlayerInventory, i);
-// 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DropItem : %s"), *Items[i].ItemStructure.Name.ToString()));
+			// 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DropItem : %s"), *Items[i].ItemStructure.Name.ToString()));
 		}
 	}
 
@@ -403,9 +410,9 @@ void AVICTIMSCharacter::DieFunction()
 		auto pc = Cast<APlayerController>(Controller);
 
 		if (pc)
-		{	
+		{
 			pc->bShowMouseCursor = true;
-			FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0,0,0,1);
+			FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
 			DisableInput(pc);
 		}
 	}
