@@ -16,6 +16,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 #include "ShopLayout.h"
+#include "TestSaveGame.h"
 
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
@@ -497,3 +498,32 @@ void AVICTIMSPlayerController::UI_DropInventoryItem_Implementation(const uint8& 
 	InventoryManagerComponent->Server_DropItemFromInventory(InventorySlot);
 }
 
+//====================================================================================================================
+// Save
+
+void AVICTIMSPlayerController::CreateSaveData(FString ID)
+{
+	if (IsLocalController())
+	{
+		PlayerID = ID;	// UI 에서 입력받은 문자열 ID 로 저장 
+		SavedData = CastChecked<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
+		
+	}
+
+
+}
+
+void AVICTIMSPlayerController::GetSaveDataFromID(FString ID)
+{
+
+}
+
+void AVICTIMSPlayerController::LoadData()
+{
+
+}
+
+void AVICTIMSPlayerController::SaveData()
+{
+
+}
