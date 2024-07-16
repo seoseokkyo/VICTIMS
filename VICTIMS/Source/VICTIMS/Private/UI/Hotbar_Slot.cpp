@@ -9,6 +9,8 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "MyHUD.h"
+#include "Inventory/InventoryManagerComponent.h"
+#include "Inventory/InventoryComponent.h"
 
 UHotbar_Slot::UHotbar_Slot(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -94,6 +96,8 @@ void UHotbar_Slot::NativeOnDragDetected(const FGeometry& InGeometry, const FPoin
 		UItemDragVisual* DragVisual = CreateWidget<UItemDragVisual>(this, ItemDragVisualClass);
 		DragVisual->Icon->SetBrushFromTexture(SlotStructure.ItemStructure.Icon);
 		DragVisual->ItemBorder->SetBrushColor(ItemBorder->GetBrushColor());
+		uint8 Amount = SlotStructure.Amount;
+		DragVisual->Amount->SetText(FText::AsNumber(Amount));
 
 		UDragItem* DragDropOperation = NewObject<UDragItem>();
 

@@ -9,6 +9,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "InteractText.h"
 #include "InteractiveText_Entry.h"
+#include "AVICTIMSPlayerController.h"
+#include "UI/MyHUD.h"
+#include "UI/HUDLayout.h"
+#include "UI/MainLayout.h"
 
 AUsableActor::AUsableActor()
 {
@@ -68,6 +72,11 @@ bool AUsableActor::EndOutlineFocus_Implementation()
 {
 	StaticMesh->SetRenderCustomDepth(false);
 	StaticMesh->SetCustomDepthStencilValue(0);
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+	if (PC)
+	{
+		PC->HUD_Reference->HUDReference->MainLayout->Interact->SetVisibility(ESlateVisibility::Collapsed);
+	}
 
 	return true;
 }
@@ -76,6 +85,12 @@ bool AUsableActor::BeginOutlineFocus_Implementation()
 {
 	StaticMesh->SetRenderCustomDepth(true);
 	StaticMesh->SetCustomDepthStencilValue(2);
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+	if (PC) 
+	{	
+		PC->HUD_Reference->HUDReference->MainLayout->Interact->SetVisibility(ESlateVisibility::Visible);
+	}
+
 
 	return true;
 }

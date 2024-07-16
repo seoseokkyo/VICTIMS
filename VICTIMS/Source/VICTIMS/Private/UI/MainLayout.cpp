@@ -1,5 +1,6 @@
 
 
+
 #include "MainLayout.h"
 #include "DragItem.h"
 #include "DragWidget.h"
@@ -8,6 +9,8 @@
 #include "InventoryLayout.h"
 #include "Components/UniformGridpanel.h"
 #include "ProfileLayout.h"
+#include "InteractText.h"
+#include "ShopLayout.h"
 #include "ItemDragVisual.h"
 
 void UMainLayout::NativeConstruct()
@@ -59,6 +62,10 @@ bool UMainLayout::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent
 		if (Profile->GetVisibility() == ESlateVisibility::HitTestInvisible)
 		{
 			Profile->SetVisibility(ESlateVisibility::Visible);
+		}
+		if (Shop->GetVisibility() == ESlateVisibility::HitTestInvisible)
+		{
+			Shop->SetVisibility(ESlateVisibility::Visible);
 		}
 
 		return true;

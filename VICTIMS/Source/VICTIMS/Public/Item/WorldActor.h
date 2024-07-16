@@ -26,7 +26,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FName ID;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	uint8 Amount;
 
 	UPROPERTY(Replicated)

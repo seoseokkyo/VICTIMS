@@ -10,6 +10,7 @@ enum class ELayout : int8
 	Inventory				UMETA(DisplayName="Inventory"),
 	Equipment				UMETA(DisplayName="Equipment"),
 	Container				UMETA(DisplayName="Container"),
+	Shop					UMETA(DisplayName="Shop"),
 	InteractText			UMETA(DisplayName="InteractText")
 };
 

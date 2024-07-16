@@ -52,6 +52,8 @@ public:
 	virtual void UI_EquipFromContainer_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot) override;
 	virtual void UI_UnEquipToContainer_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot) override;
 	virtual void UI_MoveHotbarItem_Implementation(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar) override;
+	virtual void UI_PerChaseItem_Implementation(const uint8& InventorySlot) override;
+	virtual void UI_SellItem_Implementation(const uint8& InventorySlot) override;
 	/* Ends Interface */
 
 	uint8 UIGetPlayerGold();
@@ -76,6 +78,8 @@ public:
 
 	UFUNCTION()
 	bool IsContainerOpen();
+	UFUNCTION()
+	bool IsShopOpen();
 	
 	UFUNCTION(BlueprintCallable, Category="Character")
 	void ToggleInventory();
@@ -84,8 +88,10 @@ public:
 	void SetInputDependingFromVisibleWidgets();
 	UFUNCTION(BlueprintCallable, Category="Character")
 	void ToggleContainer();
-	
 	UFUNCTION(BlueprintCallable, Category="Character")
+	void ToggleShop();
+	
+	UFUNCTION(BlueprintCallable, Category="Character")				// 사용 안하는 중. 
 	void ToggleMenu();
 
 	UFUNCTION(Server, Reliable)

@@ -21,15 +21,18 @@ public:
 	virtual bool BeginOutlineFocus_Implementation() override;
 	virtual bool EndOutlineFocus_Implementation() override;
 	virtual bool OnActorUsed_Implementation(APlayerController* Controller) override;
+
+
+		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* StaticMesh;
 	
 protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	USceneComponent* Scene;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UStaticMeshComponent* StaticMesh;
+
 
 	UPROPERTY(Replicated)
 	FText Name;

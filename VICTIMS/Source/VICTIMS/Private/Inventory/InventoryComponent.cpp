@@ -251,3 +251,24 @@ FReturnTupleBoolInt UInventoryComponent::GetEmptyContainerSpace()
 	return { false, 0 };
 }
 
+FReturnTupleBoolInt UInventoryComponent::GetEmptyShopSpace()
+{
+	int8 LocalInteger = -1;
+	bool LocalBoolean = false;
+	for(uint8 ArrayIndex = 0; ArrayIndex < Inventory.Num(); ArrayIndex++)
+	{
+		FSlotStructure Slot = Inventory[ArrayIndex];
+		if (!ItemIsValid(Slot))
+		{
+			LocalInteger = ArrayIndex;
+			LocalBoolean = true;
+			break;
+		}
+	}
+	if (LocalBoolean)
+	{
+		return {true, LocalInteger};
+	}
+	return {false, 0};
+}
+

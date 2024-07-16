@@ -25,6 +25,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UHotbar* Hotbar;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta =(BindWidget))
+	class UShopLayout* Shop;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta =(BindWidget))
+	class UInteractText* Interact;
+
 protected:
 	UFUNCTION()
 	virtual void NativeConstruct() override;

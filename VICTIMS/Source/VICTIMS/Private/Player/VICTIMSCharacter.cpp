@@ -25,7 +25,10 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "InteractiveText_Panel.h"
+#include "EquipmentComponent.h"
 #include "HPWidget.h"
+#include "PlayerDiedWidget.h"
+#include "InteractText.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -368,12 +371,28 @@ void AVICTIMSCharacter::DieFunction()
 
 	GetMesh()->SetCollisionResponseToChannels(param);
 
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner());		// 인벤토리+장비중 아이템 모두 드롭 
+	if (PC)
+	{
+		TArray<FSlotStructure> Items = PC->InventoryManagerComponent->PlayerInventory->Inventory;
+		for (int i = 0; i < Items.Num(); i++)
+		{
+			PC->InventoryManagerComponent->DropItem(PC->InventoryManagerComponent->PlayerInventory, i);
+// 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DropItem : %s"), *Items[i].ItemStructure.Name.ToString()));
+		}
+	}
+
 	if (IsLocallyControlled())
 	{
+		DiedWidget = CreateWidget<UPlayerDiedWidget>(GetWorld(), DiedWidget_bp);
+		DiedWidget->AddToViewport(0);
+
 		auto pc = Cast<APlayerController>(Controller);
 
 		if (pc)
-		{
+		{	
+			pc->bShowMouseCursor = true;
+			FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0,0,0,1);
 			DisableInput(pc);
 		}
 	}
@@ -675,6 +694,7 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 						if (MyPlayerController->IsContainerOpen())
 						{
 							MyPlayerController->InventoryManagerComponent->Server_CloseContainer();
+							MyPlayerController->InventoryManagerComponent->Server_CloseShop();
 						}
 
 						return;

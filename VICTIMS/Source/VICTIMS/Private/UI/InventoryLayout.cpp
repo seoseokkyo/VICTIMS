@@ -5,7 +5,9 @@
 #include "Components/TextBlock.h"
 #include "Internationalization/StringTableRegistry.h"
 #include "Components/UniformGridpanel.h"
+#include "InventoryManagerComponent.h"
 #include "AVICTIMSPlayerController.h"
+#include "Components/Button.h"
 #include "VictimsGameInstance.h"
 
 void UInventoryLayout::NativeConstruct()
@@ -16,6 +18,9 @@ void UInventoryLayout::NativeConstruct()
 	Super::SetTitleToWindow(Text);
 
 	WindowLayout = ELayout::Inventory;
+
+	
+	SellButton->OnClicked.AddUniqueDynamic(this, &UInventoryLayout::OnClickSellButton);	
 }
 
 void UInventoryLayout::UpdateGoldAmount()
@@ -25,5 +30,20 @@ void UInventoryLayout::UpdateGoldAmount()
 		uint8 LocalGoldAmount = Controller->UIGetPlayerGold();
 
 		Gold_Amount->SetText(FText::AsNumber(LocalGoldAmount));
+	}
+}
+
+void UInventoryLayout::OnClickSellButton()
+{
+	pc = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
+	if (pc->InventoryManagerComponent->IsSelling == true)
+	{
+		pc->InventoryManagerComponent->IsSelling = false;
+		SellButton->SetBackgroundColor(FLinearColor::White);
+	}
+	else
+	{
+		pc->InventoryManagerComponent->IsSelling = true;
+		SellButton->SetBackgroundColor(FLinearColor::Yellow);
 	}
 }

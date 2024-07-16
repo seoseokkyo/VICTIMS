@@ -15,7 +15,7 @@
 #include "InventoryComponent.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
-
+#include "ShopLayout.h"
 
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
@@ -131,7 +131,6 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 	}
 }
 
-
 uint8 AVICTIMSPlayerController::UIGetPlayerGold()
 {
 	return InventoryManagerComponent->Gold;
@@ -152,7 +151,6 @@ void AVICTIMSPlayerController::SetupHUDReferences()
 
 			InventoryManagerComponent->Client_LoadInventoryUI();
 			InventoryManagerComponent->Client_LoadProfileUI();
-
 			InventoryManagerComponent->Client_LoadHotbarUI();
 		}
 	}
@@ -239,9 +237,32 @@ void AVICTIMSPlayerController::ToggleContainer()
 }
 
 
+bool AVICTIMSPlayerController::IsShopOpen()
+{
+	return HUD_Reference->HUDReference->MainLayout->Shop->IsVisible();
+}
+void AVICTIMSPlayerController::ToggleShop()
+{
+	if (IsValid(HUD_Reference))
+	{
+		HUD_Reference->ToggleWindow(ELayout::Shop);
+		SetInputDependingFromVisibleWidgets();
+	}
+}
+
 void AVICTIMSPlayerController::ToggleMenu()
 {
+	
+}
 
+void AVICTIMSPlayerController::UI_PerChaseItem_Implementation(const uint8& InventorySlot)
+{
+	InventoryManagerComponent->Server_PerchaseShopItem(InventorySlot);
+}
+
+void AVICTIMSPlayerController::UI_SellItem_Implementation(const uint8& InventorySlot)
+{
+	InventoryManagerComponent->Server_SellItem(InventorySlot);
 }
 
 void AVICTIMSPlayerController::Server_OnActorUsed_Implementation(AActor* Actor)

@@ -63,6 +63,8 @@ public:
 
 	FReturnTupleBoolInt GetEmptyInventorySpace();																// 인벤토리 빈칸 가져오기
 	FReturnTupleBoolInt GetEmptyContainerSpace();																// 보관함 빈칸 가져오기
+	FReturnTupleBoolInt GetEmptyShopSpace();																	// 상점 빈칸 가져오기 
+
 	bool GetEmptyInventorySpace(uint8& OutIndex);																// 빈칸 있는지 확인
 
 	UFUNCTION()

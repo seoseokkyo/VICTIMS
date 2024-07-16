@@ -27,6 +27,10 @@
 #include "HUDLayout.h"
 #include "Character/CharacterBase.h"
 #include "HousingComponent.h"
+#include "ShopLayout.h"
+#include "ShopActor.h"
+#include "Components/ScrollBox.h"
+#include "Shop_Slo.h"
 
 UInventoryManagerComponent::UInventoryManagerComponent()
 {
@@ -624,7 +628,7 @@ void UInventoryManagerComponent::Client_UpdateInventoryTooltips_Implementation(c
 		if (!IsValid(Tooltip))
 		{
 			Tooltip = CreateWidget<UW_ItemTooltip>(GetWorld(), WidgetLayout->Widget);
-			UE_LOG(LogTemp, Verbose, TEXT("Creating Inventory Tooltip"))
+// 			UE_LOG(LogTemp, Verbose, TEXT("Creating Inventory Tooltip"))
 		}
 
 		if (Slot.ItemStructure.ItemType == EItemType::Equipment)
@@ -644,6 +648,8 @@ void UInventoryManagerComponent::Client_UpdateInventoryTooltips_Implementation(c
 
 		Index++;
 	}
+
+	int iTemp = 0;
 }
 
 void UInventoryManagerComponent::Client_UpdateContainerTooltips_Implementation(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory)
@@ -671,7 +677,7 @@ void UInventoryManagerComponent::Client_UpdateContainerTooltips_Implementation(c
 		if (!IsValid(Tooltip))
 		{
 			Tooltip = CreateWidget<UW_ItemTooltip>(GetWorld(), WidgetLayout->Widget);
-			UE_LOG(LogTemp, Verbose, TEXT("Creating Container Tooltip"))
+// 			UE_LOG(LogTemp, Verbose, TEXT("Creating Container Tooltip"))
 		}
 
 		if (Slot.ItemStructure.ItemType == EItemType::Equipment)
@@ -971,7 +977,7 @@ void UInventoryManagerComponent::RandomizeDropLocation(FSlotStructure LocalSlot,
 {
 	LocalClass = LocalSlot.ItemStructure.Class;
 
-	FVector LocalLocation{ 0.0f, 0.0f, -98.0f };
+	FVector LocalLocation{ 0.0f };
 	FVector PawnLocation = Cast<AController>(GetOwner())->GetPawn()->GetActorLocation();
 	const uint8 DropDistanceRangeX = FMath::RandRange(75, 100);
 	FVector DistanceFromPawn{ (float)DropDistanceRangeX,1.0f,1.0f };
@@ -1001,6 +1007,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 		AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransform);
 		if (WActor)
 		{
+			WActor->StaticMesh->SetSimulatePhysics(true);
 			WActor->Amount = LocalSlot.Amount;
 		}
 
@@ -1211,8 +1218,6 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 
 
 	//========================================================================================================
-
-
 	// 인벤토리 아이템의 RowName을 가져와서 BuildID를 설정
 	//FName name = InventoryItem.ItemStructure.ID;
 	//UE_LOG(LogTemp, Warning, TEXT("TESTUsing Furniture Item with ID: %s"), *name.ToString());
@@ -1481,7 +1486,6 @@ void UInventoryManagerComponent::AddGold(uint8 Amount)
 	Gold += Amount;
 	OnRep_UpdateGoldAmount();
 }
-
 void UInventoryManagerComponent::ClearContainerSlots()
 {
 	MainLayoutUI->Container->ContainerSlotsArray.Empty();
@@ -1517,7 +1521,6 @@ void UInventoryManagerComponent::CreateContainerSlots(uint8 NumberOfRows, uint8 
 			MainLayoutUI->Container->ContainerSlotsArray[i]->UpdateSlot(SlotStructure);
 			MainLayoutUI->Container->ContainerSlotsArray[i]->InventorySlotIndex = i;
 			MainLayoutUI->Container->ContainerSlotsArray[i]->NativeFromContainer = true;
-
 			MainLayoutUI->Container->ContainerSlotsArray[i]->IsStorageSlot = true;
 		}
 	}
@@ -1834,4 +1837,338 @@ AMyHUD* UInventoryManagerComponent::GetPlayerHud()
 	return HUD;
 }
 
+void UInventoryManagerComponent::Server_UseShop_Implementation(AActor* Shop)
+{
+	UseShop(Shop);
+	Client_UpdateShopTooltips(PlayerInventory->Inventory, ShopInventory->Inventory);
+}
 
+void UInventoryManagerComponent::Server_CloseShop_Implementation()
+{
+	CloseShop();
+}
+
+void UInventoryManagerComponent::Server_PerchaseShopItem_Implementation(const uint8& InventorySlot)
+{
+	PerchaseShopItem(InventorySlot);
+}
+
+void UInventoryManagerComponent::Server_SellItem_Implementation(const uint8& InventorySlot)
+{
+	SellItem(InventorySlot);
+}
+
+void UInventoryManagerComponent::Client_SetShopSlotItem_Implementation(const FSlotStructure& ContentToAdd, const uint8& InventorySlot)
+{
+	SetShopSlotItem(ContentToAdd, InventorySlot);
+}
+
+void UInventoryManagerComponent::Client_ClearShopSlotItem_Implementation(uint8 ShopSlot)
+{
+	ClearShopSlotItem(ShopSlot);
+}
+
+void UInventoryManagerComponent::Client_OpenShop_Implementation(FShopInfo ShopProperties, const TArray<FSlotStructure>& InShopInventory, const TArray<FSlotStructure>& InPlayerInventory)
+{
+	LoadShopSlots(ShopProperties, InShopInventory, InPlayerInventory);
+}
+
+void UInventoryManagerComponent::Client_CloseShop_Implementation()
+{
+	MainLayoutUI->Shop->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UInventoryManagerComponent::Client_UpdateShopTooltips_Implementation(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory)
+{
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner());
+	if (!IsValid(PC))
+	{
+		return;
+	}
+	FWidgetsLayoutBP* WidgetLayout = Cast<AMyHUD>(PC->HUD_Reference)->GetWidgetBPClass("ItemTooltip_WBP");
+	UW_ItemTooltip* Tooltip{};
+	FSlotStructure TempSlot{};
+	UShop_Slo* SlotLayout{};
+
+	uint8 Index = 0;
+	uint8 LocalIndex = 0;
+
+	for (FSlotStructure Slot : InOtherInventory)
+	{
+		TempSlot = GetEmptySlot(EEquipmentSlot::Undefined);
+		SlotLayout = MainLayoutUI->Shop->ShopSlotsArray[Index];
+		Tooltip = Cast<UW_ItemTooltip>(SlotLayout->GetToolTip());
+		if (!IsValid(Tooltip))
+		{
+			Tooltip = CreateWidget<UW_ItemTooltip>(GetWorld(), WidgetLayout->Widget);
+			UE_LOG(LogTemp, Verbose, TEXT("Creating Inventory Tooltip"))
+		}
+		if (Slot.ItemStructure.ItemType == EItemType::Equipment)
+		{
+			for (uint8 j = 0; j < (uint8)EEquipmentSlot::Count; j++)
+			{
+				if (GetItemEquipmentSlot(InPlayerInventory[j]) == GetItemEquipmentSlot(Slot))
+				{
+					TempSlot = InPlayerInventory[j];
+				}
+			}
+		}
+		Tooltip->UpdateTooltipAttributes(Slot.ItemStructure, TempSlot);
+		SlotLayout->ToggleTooltip();
+		SlotLayout->SetToolTip(Tooltip);
+
+		Index++;
+	}
+}
+
+void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
+{
+	FSlotStructure LocalInventoryItem = ShopInventory->GetInventoryItem(InventorySlot);
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner()); 
+	if (LocalInventoryItem.ItemStructure.PriceValue > PC->UIGetPlayerGold())
+	{	// 선택한 아이템을 살 돈이 충분하지 않을 때 
+//		UE_LOG(LogTemp, Warning, TEXT("Don't have enough money"));
+		MainLayoutUI->Shop->ShopSlotsArray[InventorySlot]->ShowNotification();
+		return;
+	}
+	bool bOutSuccess = false;
+	TryToAddItemToInventory(PlayerInventory, LocalInventoryItem, bOutSuccess);	// 플레이어 인벤토리에 아이템 추가
+	if (bOutSuccess)
+	{
+// 		UE_LOG(LogTemp, Warning, TEXT("Successfully Perchased!"));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Perchase Failed"));
+	}
+	Server_UpdateTooltips();
+	AddGold(-LocalInventoryItem.ItemStructure.PriceValue);	//AddGold 사용 -> Amount 를 음수값으로 넣어줌 
+}
+
+void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
+{
+	FSlotStructure LocalInventorySlot = PlayerInventory->GetInventoryItem(InventorySlot);
+	int32 TotalPriceValue = LocalInventorySlot.ItemStructure.PriceValue * LocalInventorySlot.Amount;
+	if (IsValid(CurrentShop))
+	{
+		bool bCanShopItems = IInventoryInterface::Execute_GetCanShopItems(CurrentShop);
+		if (bCanShopItems)
+		{
+			AddGold(TotalPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
+			RemoveItem(PlayerInventory, InventorySlot);
+		}
+	}
+	Server_UpdateTooltips();
+}
+
+void UInventoryManagerComponent::ClearShopSlots()
+{
+	MainLayoutUI->Shop->ShopSlotsArray.Empty();
+	MainLayoutUI->Shop->ShopGirdPanel->ClearChildren();
+}
+
+void UInventoryManagerComponent::CreateShopSlots(uint8 NumberOfRows, uint8 SlotsPerRow)
+{
+	ClearShopSlots();
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner());
+	FWidgetsLayoutBP* WidgetLayout = Cast<AMyHUD>(PC->HUD_Reference)->GetWidgetBPClass("ShopSlot_WBP");
+	if (WidgetLayout)
+	{
+		UShop_Slo* W_ShopSlot = nullptr;
+		for (int i = 0; i < NumberOfRows; i++)
+		{
+			W_ShopSlot = CreateWidget<UShop_Slo>(GetWorld(), WidgetLayout->Widget);
+			MainLayoutUI->Shop->ShopGirdPanel->AddChild(W_ShopSlot);
+			MainLayoutUI->Shop->ShopSlotsArray.Add(W_ShopSlot);
+		}
+	}
+	FSlotStructure SlotStructure = GetEmptySlot(EEquipmentSlot::Undefined);
+	for (int i = 0; i < MainLayoutUI->Shop->ShopSlotsArray.Num(); i++)
+	{
+		MainLayoutUI->Shop->ShopSlotsArray[i]->UpdateSlot(SlotStructure);
+		MainLayoutUI->Shop->ShopSlotsArray[i]->InventorySlotIndex = i;
+		MainLayoutUI->Shop->ShopSlotsArray[i]->NativeFromShop = true;
+	}
+}
+
+void UInventoryManagerComponent::CreateShopSlots2(uint8 InventorySIze, uint8 SlotsPerRow)
+{
+	ClearContainerSlots();
+	if (InventorySIze <= 0)
+	{
+		return;
+	}
+	bool bLocalIsShop = MainLayoutUI->Shop->IsShop;
+	uint8 LocalShopSize = InventorySIze;
+	uint8 LocalLoopCount = 0;
+	for (uint8 i = 0; i < LocalShopSize; i++)
+	{
+		AddShopSlot(i, 0, LocalLoopCount, bLocalIsShop);
+		LocalLoopCount++;
+		if (LocalLoopCount == LocalShopSize)
+		{
+			break;
+		}
+	}
+}
+
+void UInventoryManagerComponent::SetViewersShopSlot(uint8 ShopSLot, FSlotStructure& InventoryItem)
+{
+	TArray<APlayerState*> TempPlayersViewing = IInventoryInterface::Execute_GetPlayersViewing(CurrentShop);
+	for (APlayerState* PlayerState : TempPlayersViewing)
+	{
+		if (AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(PlayerState->GetOwner()))
+		{
+			PC->InventoryManagerComponent->Client_SetShopSlotItem(InventoryItem, ShopSLot);
+		}
+	}
+}
+
+void UInventoryManagerComponent::AddShopSlot(uint8 Row, uint8 Column, uint8 Slot, bool IsShop)
+{
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner());
+	FWidgetsLayoutBP* WidgetLayout = Cast<AMyHUD>(PC->HUD_Reference)->GetWidgetBPClass("ShopSlot_WBP");
+	UShop_Slo* LocalSlot = CreateWidget<UShop_Slo>(GetWorld(), WidgetLayout->Widget);
+	
+	MainLayoutUI->Shop->ShopGirdPanel->AddChild(LocalSlot);
+	MainLayoutUI->Shop->ShopSlotsArray.Add(LocalSlot);
+
+	LocalSlot->IsShopSlot = IsShop;
+	LocalSlot->InventorySlotIndex = Slot;
+	LocalSlot->NativeFromShop = true;
+}
+
+void UInventoryManagerComponent::ClearShopSlotItem(uint8 ShopSlot)
+{
+	UShop_Slo* SlotLayout = MainLayoutUI->Shop->ShopSlotsArray[ShopSlot];
+	SlotLayout->UpdateSlot(GetEmptySlot(EEquipmentSlot::Undefined));
+}
+
+void UInventoryManagerComponent::ClearViewersShopSlot(uint8 ShopSlot)
+{
+	TArray<APlayerState*> LocalPlayersViewing = IInventoryInterface::Execute_GetPlayersViewing(CurrentShop);
+	for (APlayerState* PlayerState : LocalPlayersViewing)
+	{
+		if (AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(PlayerState->GetOwner()))
+		{
+			PlayerController->InventoryManagerComponent->Client_ClearShopSlotItem(ShopSlot);
+		}
+	}
+}
+
+void UInventoryManagerComponent::SetShopSlotItem(const FSlotStructure& Slot, uint8 Index)
+{
+	UShop_Slo* SlotLayout = MainLayoutUI->Shop->ShopSlotsArray[Index];
+	SlotLayout->UpdateSlot(Slot);
+	SlotLayout->SetPriceValue(Slot.ItemStructure);
+}
+
+void UInventoryManagerComponent::OpenShop(AActor* Shop)
+{
+	CurrentShop = Shop;
+	UInventoryComponent* GetShopInventoryTemp{};
+	IInventoryInterface::Execute_GetShopInventory(CurrentShop, GetShopInventoryTemp);
+	ShopInventory = GetShopInventoryTemp;
+
+	TArray<FSlotStructure> LocalInventory{};
+	FSlotStructure LocalEmptySlot = GetEmptySlot(EEquipmentSlot::Undefined);
+	for (FSlotStructure Slot : ShopInventory->Inventory)
+	{
+		if (Slot.Amount == 0)
+		{
+			LocalInventory.Add(LocalEmptySlot);
+		}
+		else
+		{
+			LocalInventory.Add(Slot);
+		}
+	}
+	FName LocalName;
+	uint8 LocalNumberOfRows;
+	uint8 LocalSlotsPerRow;
+	bool LocalIsShop;
+	uint8 LocalInventorySize;
+
+	IInventoryInterface::Execute_GetShopProperties(Shop, LocalName, LocalNumberOfRows, LocalSlotsPerRow, LocalIsShop, LocalInventorySize);
+	FShopInfo S_Info;
+	S_Info.ShopName = LocalName;
+	S_Info.NumberOfRows = LocalNumberOfRows;
+	S_Info.SlotsPerRow = LocalSlotsPerRow;
+	S_Info.IsShop = LocalIsShop;
+	S_Info.ShopInventorySize = LocalInventorySize;
+
+	Client_OpenShop(S_Info, LocalInventory, PlayerInventory->Inventory);
+}
+
+void UInventoryManagerComponent::UseShop(AActor* Shop)
+{
+	if (Shop->Implements<UInventoryInterface>())
+	{
+		if (CurrentShop != Shop)
+		{
+			OpenShop(Shop);
+		}
+		else
+		{
+			Server_CloseShop();
+		}
+	}
+}
+
+void UInventoryManagerComponent::CloseShop()
+{
+	if (AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(GetOwner()))
+	{
+		if (AShopActor* CurrentShopActor = Cast<AShopActor>(CurrentShop))
+		{
+			CurrentShopActor->PlayersViewing.Remove(PlayerController->PlayerState);
+		}
+	}
+	CurrentShop = nullptr;
+	ShopInventory = nullptr;
+	Client_CloseShop();
+}
+
+void UInventoryManagerComponent::LoadShopSlots(FShopInfo ShopProperties, const TArray<FSlotStructure>& InShopInventroy, const TArray<FSlotStructure>& InPlayerInventory)
+{
+	if (!ShopProperties.IsShop)
+	{
+		MainLayoutUI->Shop->IsShop = false;
+		CreateShopSlots2(InShopInventroy.Num(), ShopProperties.SlotsPerRow);
+	}
+	else
+	{
+		MainLayoutUI->Shop->IsShop = true;
+		CreateShopSlots(ShopProperties.NumberOfRows, ShopProperties.SlotsPerRow);
+	}
+	uint8 Index = 0;
+	for (FSlotStructure Slot : InShopInventroy)
+	{
+		SetShopSlotItem(Slot, Index);
+		Index++;
+	}
+	Client_UpdateShopTooltips(InPlayerInventory, InShopInventroy);
+	if (AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner()))
+	{
+		PC->ToggleShop();
+	}
+
+}
+
+bool UInventoryManagerComponent::CanShopItems(UInventoryComponent* Inventory)
+{
+	if (IsValid(CurrentShop))
+	{
+		UInventoryComponent* LocalInventory{};
+		IInventoryInterface::Execute_GetShopInventory(CurrentShop, LocalInventory);
+		if (Inventory == LocalInventory)
+		{
+			bool LocalShopItems = IInventoryInterface::Execute_GetCanShopItems(CurrentShop);
+			if (!LocalShopItems)
+			{
+				return false;
+			}
+		}
+	}
+	return true;
+}

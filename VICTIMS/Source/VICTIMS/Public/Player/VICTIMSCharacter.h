@@ -98,6 +98,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UHPWidget> hpWidget_bp;
 
+	UPROPERTY()
+	class UPlayerDiedWidget* DiedWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UPlayerDiedWidget> DiedWidget_bp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")			// 상호작용 범위
 	class USphereComponent* InteractionField;
 
@@ -144,8 +149,6 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHeadMesh", meta = (DisplayName = "Main Head Mesh", Category = "Inventory|Equipment"))
 	USkeletalMesh* HeadMesh;	
-
-
 
 //=====================================================================================================
 //  FUNCTION
