@@ -46,7 +46,7 @@ void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (1)
+	if (0)
 	{
 		PrintInfo();
 	}
