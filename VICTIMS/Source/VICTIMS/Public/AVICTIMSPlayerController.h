@@ -166,11 +166,20 @@ public:
 	void CreateSaveData(FString ID);		// 새로 저장파일 만들기
 
 	UFUNCTION()
-	void GetSaveDataFromID(FString ID);		// TestIDWidget 에서 입력받은 문자열 ID 와 맞는 TesTSaveGame 데이터 가져오기
+	UTestSaveGame* GetSaveDataFromID(FString ID);		// TestIDWidget 에서 입력받은 문자열 ID 와 맞는 TesTSaveGame 데이터 가져오기
 
 	UFUNCTION()
-	void LoadData();						// 데이터 로드
+	void SaveData(FString ID);						// 데이터 저장 
 
 	UFUNCTION()
-	void SaveData();						// 데이터 저장 
+	void LoadData(FString ID);
+
+	UPROPERTY()
+	class UTestIDWidget* TestIDWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TSubclassOf<UTestIDWidget> TestIDWidget_bp;
+
+	UFUNCTION()
+	void CloseTestIDWidget();
 };

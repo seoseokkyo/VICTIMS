@@ -29,6 +29,7 @@
 #include "HPWidget.h"
 #include "PlayerDiedWidget.h"
 #include "InteractText.h"
+#include "TestSaveGame.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -773,4 +774,46 @@ void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
 	{
 		TargetComponent->DestroyComponent();
 	}
+}
+
+//=======================================================================================================
+// Save
+
+void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
+{
+	if (IsLocallyControlled())
+	{
+		if (Data == MyPlayerController->GetSaveDataFromID(PersonalID))			// 플레이어가 갖고있는 ID 의 데이터 가져오기
+		{
+			Data->PlayerDataStructure.HP = stateComp->GetStatePoint(HP);						  // 현재 플레이어 HP 저장
+			Data->PlayerDataStructure.Gold = MyPlayerController->InventoryManagerComponent->Gold; // 현재 인벤토리 Gold 저장
+			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
+
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
+		}
+	}
+}
+
+void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
+{
+	if (IsLocallyControlled())
+	{
+		if (Data)
+		{
+			SavedData = Data;	// 데이터 변수 저장
+			stateComp->ServerRPC_SetStatePoint(EStateType::HP, SavedData->PlayerDataStructure.HP);	// 플레이어 HP 로드
+			MyPlayerController->InventoryManagerComponent->AddGold(SavedData->PlayerDataStructure.Gold);	// Gold 로드
+
+			UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), SavedData->PlayerDataStructure.HP);
+			UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), SavedData->PlayerDataStructure.Gold);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
+		}
+	}
+
 }

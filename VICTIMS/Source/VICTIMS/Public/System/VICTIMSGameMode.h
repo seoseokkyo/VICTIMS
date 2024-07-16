@@ -14,6 +14,7 @@ class AVICTIMSGameMode : public AGameModeBase
 public:
 	AVICTIMSGameMode();
 	virtual void Logout(AController* Exiting) override;
+
 };
 
 

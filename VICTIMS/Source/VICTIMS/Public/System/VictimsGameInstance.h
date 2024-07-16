@@ -69,4 +69,10 @@ public:
 
 	UFUNCTION()
 	void TryToClientTravel(int waitIndex);
+
+	UFUNCTION()
+	virtual void ShutDown();
+
+	UPROPERTY()
+	class UTestSaveGame* SaveData;
 };

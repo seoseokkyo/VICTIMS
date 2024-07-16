@@ -20,6 +20,7 @@ void UTestIDWidget::OnClickedSignInButton()
 	if (PC)
 	{
 		PC->CreateSaveData(ID->GetText().ToString());
+		PC->CloseTestIDWidget();
 	}
 }
 
@@ -28,6 +29,7 @@ void UTestIDWidget::OnClickedContinueButton()
 	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	if (PC)
 	{
-		PC->LoadData();
+		PC->LoadData(ID->GetText().ToString());
+		PC->CloseTestIDWidget();
 	}
 }

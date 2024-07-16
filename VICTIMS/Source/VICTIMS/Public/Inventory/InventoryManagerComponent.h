@@ -189,6 +189,10 @@ public:
 	UFUNCTION(Category = "Manager|Private|Inventory")
 	void DropItem(UInventoryComponent* Inventory, uint8 InventorySlot);
 
+	
+	UFUNCTION(Category = "Manager|Private|Inventory")
+	void AddGold(uint8 Amount);
+
 protected:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateInventoryTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
@@ -285,9 +289,6 @@ private:
 
 	UFUNCTION(Category = "UserInterface|Private|Inventory")
 	FSlotStructure GetInventorySlotItem(uint8 InventorySlot);
-
-	UFUNCTION(Category = "Manager|Private|Inventory")
-	void AddGold(uint8 Amount);
 
 	UFUNCTION(Category = "UserInterface|Private|Container")
 	void ClearContainerSlots();
