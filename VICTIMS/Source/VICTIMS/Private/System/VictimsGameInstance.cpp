@@ -125,6 +125,17 @@ void UVictimsGameInstance::OnStart()
 		UE_LOG(LogTemp, Warning, TEXT("ServerType not specified in command line arguments"));
 	}
 
+	mainAddress = mainAddressCheck;
+
+	UE_LOG(LogTemp, Warning, TEXT("Main Address Number : %s"), *mainAddress);
+
+	if (FParse::Value(FCommandLine::Get(), TEXT("mainAddress="), mainAddressCheck))
+	{
+		mainAddress = mainAddressCheck;
+
+		UE_LOG(LogTemp, Warning, TEXT("Main Address Number : %s"), *mainAddress);
+	}
+
 	if (FParse::Value(FCommandLine::Get(), TEXT("PORT="), serverPort))
 	{
 		if (serverType == "MainServer")
@@ -148,27 +159,21 @@ void UVictimsGameInstance::OnStart()
 		UE_LOG(LogTemp, Warning, TEXT("PORT : %s"), *serverPort);
 	}
 
-	if (FParse::Value(FCommandLine::Get(), TEXT("mainAddress="), mainAddressCheck))
-	{
-		mainAddress = mainAddressCheck;
+	//else
+	//{
+	//	bool bCanBindAll;
+	//	TSharedPtr<FInternetAddr> Addr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
 
-		UE_LOG(LogTemp, Warning, TEXT("Main Address Number : %s"), *mainAddress);
-	}
-	else
-	{
-		bool bCanBindAll;
-		TSharedPtr<FInternetAddr> Addr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
-
-		if (Addr.IsValid() && Addr->IsValid())
-		{
-			mainAddress = Addr->ToString(false);
-			UE_LOG(LogTemp, Warning, TEXT("Not Input Main Address Set By World Address : %s"), *mainAddress);
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Address Is Not Valid"), *mainAddress);
-		}
-	}
+	//	if (Addr.IsValid() && Addr->IsValid())
+	//	{
+	//		mainAddress = Addr->ToString(false);
+	//		UE_LOG(LogTemp, Warning, TEXT("Not Input Main Address Set By World Address : %s"), *mainAddress);
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("Address Is Not Valid"), *mainAddress);
+	//	}
+	//}
 }
 
 void UVictimsGameInstance::TryToClientTravel(int waitIndex)
