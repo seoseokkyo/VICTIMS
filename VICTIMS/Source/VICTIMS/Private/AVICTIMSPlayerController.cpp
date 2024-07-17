@@ -18,8 +18,9 @@
 #include "ShopLayout.h"
 #include "TestSaveGame.h"
 #include "TestIDWIdget.h"
+#include "Components/TextBlock.h"
 #include "IDInValidWidget.h"
-#include <../../../../../../../Source/Runtime/UMG/Public/Components/TextBlock.h>
+#include "SavedWidget.h"
 
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
@@ -61,7 +62,7 @@ void AVICTIMSPlayerController::BeginPlay()
 			TestIDWidget = Cast<UTestIDWidget>(CreateWidget(GetWorld(), TestIDWidget_bp));
 			if (TestIDWidget)
 			{
-				TestIDWidget->AddToViewport();
+				TestIDWidget->AddToViewport();		
 				SetInputMode(FInputModeUIOnly());
 				bShowMouseCursor = true;
 			}
@@ -72,6 +73,15 @@ void AVICTIMSPlayerController::BeginPlay()
 			if (IDInValidWidget)
 			{
 				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+		if (SavedWidget_bp)
+		{	
+			SavedWidget = Cast<USavedWidget>(CreateWidget(GetWorld(), SavedWidget_bp));
+			if (SavedWidget)
+			{
+				SavedWidget->AddToViewport();
+				SavedWidget->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
 	}
@@ -584,6 +594,16 @@ void AVICTIMSPlayerController::SaveData(FString ID)
 			CharacterReference->SavePersonalID(ID);
 			
 			UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
+
+			if (SavedWidget)
+			{
+				SavedWidget->SetVisibility(ESlateVisibility::Visible);
+
+				FTimerHandle Timer;
+				GetWorld()->GetTimerManager().SetTimer(Timer, [&](){
+					SavedWidget->SetVisibility(ESlateVisibility::Hidden);
+				}, 0.5f, false);
+			}
 		}
 	}
 }

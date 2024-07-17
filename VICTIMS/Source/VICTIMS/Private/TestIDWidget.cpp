@@ -11,7 +11,6 @@ void UTestIDWidget::NativeConstruct()
 
 	SignInButton->OnClicked.AddUniqueDynamic(this, &UTestIDWidget::OnClickedSignInButton);
 	ContinueButton->OnClicked.AddUniqueDynamic(this, &UTestIDWidget::OnClickedContinueButton);
-
 }
 
 void UTestIDWidget::OnClickedSignInButton()
@@ -28,7 +27,7 @@ void UTestIDWidget::OnClickedSignInButton()
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Sing In Failed"));
+// 				UE_LOG(LogTemp, Warning, TEXT("Sing In Failed"));
 				return;
 			}
 		}
@@ -49,7 +48,7 @@ void UTestIDWidget::OnClickedContinueButton()
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Continue Failed"));
+// 				UE_LOG(LogTemp, Warning, TEXT("Continue Failed"));
 				return;
 			}
 		}

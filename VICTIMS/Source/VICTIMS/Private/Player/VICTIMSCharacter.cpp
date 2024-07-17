@@ -129,7 +129,6 @@ void AVICTIMSCharacter::BeginPlay()
 		equipment->OnEquipped();
 	}
 
-
 	if (HousingComponent)
 	{
 		HousingComponent->Camera = FollowCamera; // 초기화 시 카메라 컴포넌트를 할당
