@@ -97,6 +97,7 @@ void UVictimsGameInstance::OnStart()
 {
 	Super::OnStart();
 
+	FString mainAddressCheck;
 	FString ServerTypeCheck;
 	if (FParse::Value(FCommandLine::Get(), TEXT("serverType="), ServerTypeCheck))
 	{
@@ -145,6 +146,28 @@ void UVictimsGameInstance::OnStart()
 		}
 
 		UE_LOG(LogTemp, Warning, TEXT("PORT : %s"), *serverPort);
+	}
+
+	if (FParse::Value(FCommandLine::Get(), TEXT("mainAddress="), mainAddressCheck))
+	{
+		mainAddress = mainAddressCheck;
+
+		UE_LOG(LogTemp, Warning, TEXT("Main Address Number : %s"), *mainAddress);
+	}
+	else
+	{
+		bool bCanBindAll;
+		TSharedPtr<FInternetAddr> Addr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
+
+		if (Addr.IsValid() && Addr->IsValid())
+		{
+			mainAddress = Addr->ToString(false);
+			UE_LOG(LogTemp, Warning, TEXT("Not Input Main Address Set By World Address : %s"), *mainAddress);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Address Is Not Valid"), *mainAddress);
+		}
 	}
 }
 

@@ -19,16 +19,7 @@ AShopActor::AShopActor()
 
 void AShopActor::BeginPlay()
 {
-	Super::BeginPlay();
-		
-	if (HasAuthority())
-	{
-		S_NumberOfRows = InventoryComponent->NumberOfRowsInventory;
-		S_SlotsPerRow = InventoryComponent->SlotsPerRowInventory;
-		S_InventorySize = S_SlotsPerRow * S_NumberOfRows;
-		InitializeInventory();
-	}
-	Action = FText::FromString("Shopping");
+	Super::BeginPlay();		
 
 	uint8 LocalNumberOfRows = InventoryComponent->NumberOfRowsInventory;
 	uint8 LocalNumberOfSlotsPerRow = InventoryComponent->SlotsPerRowInventory;
@@ -46,13 +37,22 @@ void AShopActor::BeginPlay()
 		InventoryComponent->NumberOfRowsInventory = LocalNumberOfRows;
 		InventoryComponent->SlotsPerRowInventory = LocalNumberOfSlotsPerRow;
 	}
+
+	if (HasAuthority())
+	{
+		InitializeInventory();
+		S_NumberOfRows = InventoryComponent->NumberOfRowsInventory;
+		S_SlotsPerRow = InventoryComponent->SlotsPerRowInventory;
+		S_InventorySize = S_SlotsPerRow * S_NumberOfRows;
+	}
+	Action = FText::FromString("Shopping");
+
 }
 
 bool AShopActor::InitializeInventory()
 {
 	if (HasAuthority())
 	{
-		InventoryComponent->Server_InitInventory(S_InventorySize);
 		InventoryItems = GetShopItems();
 		LoadInventoryItems(InventoryItems.Num(), InventoryItems);
 
@@ -194,11 +194,25 @@ TArray<FSlotStructure> AShopActor::GetShopItems()
 			FShopList Shop = LootShopItems[i];
 			LocalItemIndexes.AddUnique(i);
 			FItemStructure* LocalInventoryItem = DB_ItemList->FindRow<FItemStructure>(Shop.ID, "", true);
+			if (LocalInventoryItem->ItemType == EItemType::Undefined)
+			{
+				continue;
+			}
+
 			FSlotStructure LocalInventorySlot{};
 			LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
 			SetItemAmount(LocalInventorySlot, 1);
 			ShoppingItems.Add(LocalInventorySlot);
 		}
+
+		InventoryComponent->NumberOfRowsInventory = LootShopItems.Num()-1;
+
+		uint8 LocalNumberOfSlotsPerRow = InventoryComponent->SlotsPerRowInventory;
+		InventoryComponent->SlotsPerRowInventory = LocalNumberOfSlotsPerRow;
+
+		InventoryComponent->Server_InitInventory(InventoryComponent->NumberOfRowsInventory);
+
+		int iTemp = 0;
 	}
 	return ShoppingItems;
 }

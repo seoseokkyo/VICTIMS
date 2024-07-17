@@ -49,6 +49,9 @@ public:
 	UPROPERTY()
 	FString serverPort;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString mainAddress;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	UDataTable* dt_characerStatDataTable;
 
