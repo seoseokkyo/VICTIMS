@@ -29,6 +29,8 @@
 #include "HPWidget.h"
 #include "PlayerDiedWidget.h"
 #include "InteractText.h"
+#include "TestSaveGame.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -126,7 +128,6 @@ void AVICTIMSCharacter::BeginPlay()
 	{
 		equipment->OnEquipped();
 	}
-
 
 	if (HousingComponent)
 	{
@@ -245,6 +246,8 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
 		/********/
 		EnhancedInputComponent->BindAction(HousingBuildAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRightMouseButtonPressed);
+		EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
+
 
 		//상호작용 =====================================================================================================================
 		if (MyPlayerController == nullptr)
@@ -264,6 +267,8 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar3, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot3);
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
+			EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
+
 		}
 	}
 	else
@@ -345,11 +350,15 @@ void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 
 		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
 		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
-
 		EnhancedInputComponent->BindAction(MoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnMoveObject);
 		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
+		
 		/********/
 		EnhancedInputComponent->BindAction(HousingBuildAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRightMouseButtonPressed);
+		EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
+
+		
+
 
 		//상호작용 =====================================================================================================================
 		if (MyPlayerController == nullptr)
@@ -369,7 +378,8 @@ void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 			EnhancedInputComponent->BindAction(UserHotbar3, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot3);
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
-		}
+			EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
+	}
 	}
 	else
 	{
@@ -794,5 +804,63 @@ void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
 	if (TargetComponent)
 	{
 		TargetComponent->DestroyComponent();
+	}
+}
+
+//=======================================================================================================
+// Save
+void AVICTIMSCharacter::SavePersonalID(FString ID)
+{
+	if (IsLocallyControlled())
+	{
+		PersonalID = ID;
+	}
+}
+
+void AVICTIMSCharacter::SaveDataNow()
+{
+	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, "Saved");
+	if (HasAuthority())
+	{
+		MyPlayerController->SaveData(PersonalID);
+	}
+}
+
+void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
+{
+	if (IsLocallyControlled())
+	{
+		if (Data == MyPlayerController->GetSaveDataFromID(PersonalID))			// 플레이어가 갖고있는 ID 의 데이터 가져오기
+		{
+			Data = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(PersonalID, 0));
+			Data->SavedHP = stateComp->runningStat.currentHP;					  // 현재 플레이어 HP 저장
+			Data->SavedGold = MyPlayerController->InventoryManagerComponent->Gold; // 현재 인벤토리 Gold 저장
+			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
+
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
+		}
+	}
+}
+
+void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
+{
+	if (IsLocallyControlled())
+	{
+		if (Data)
+		{
+// 			SavedData = Data;	// 데이터 변수 저장/
+			stateComp->ServerRPC_SetStatePoint(EStateType::HP, Data->SavedHP);	// 플레이어 HP 로드
+			MyPlayerController->InventoryManagerComponent->AddGold(Data->SavedGold);	// Gold 로드
+
+			UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), Data->SavedHP);
+			UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), Data->SavedGold);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
+		}
 	}
 }

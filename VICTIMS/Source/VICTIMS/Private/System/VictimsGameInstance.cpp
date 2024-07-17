@@ -7,6 +7,9 @@
 #include <ServerProcSocket.h>
 #include <InstantProcSocket.h>
 #include <functional>
+#include "VICTIMSCharacter.h"
+#include "TestSaveGame.h"
+#include "AVICTIMSPlayerController.h"
 
 FCharacterStat UVictimsGameInstance::GetCharacterDataTable(const FString& rowName)
 {
@@ -211,4 +214,24 @@ void UVictimsGameInstance::ServerRPC_PrintServerType_Implementation()
 void UVictimsGameInstance::MultiRPC_PrintServerType_Implementation(const FString& serverTypeString)
 {
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("SERVER TYPE : %s"), *serverTypeString));
+}
+
+//====================================================================================================================
+// Save
+
+void UVictimsGameInstance::ShutDown()
+{
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetFirstLocalPlayerController());
+	if (PC)
+	{
+		PC->SaveData(PC->PlayerID);
+	}
+
+	
+
+	FTimerHandle Timer;
+	GetWorld()->GetTimerManager().SetTimer(Timer, [&](){
+	
+	Super::Shutdown();
+	},0.5f, false);
 }

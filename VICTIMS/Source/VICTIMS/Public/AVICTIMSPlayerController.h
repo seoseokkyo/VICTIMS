@@ -152,4 +152,45 @@ protected:
 	
 private:
 	uint8 MaximumHotbarSlots = 10;
+
+
+//=========================================================================================================================
+// Save
+
+public:
+
+
+	UPROPERTY()
+	FString PlayerID;						
+
+	UPROPERTY()
+	class UTestSaveGame* SavedData;
+
+	UFUNCTION()
+	void CreateSaveData(FString ID);		// 새로 저장파일 만들기
+
+	UFUNCTION()
+	UTestSaveGame* GetSaveDataFromID(FString ID);		// TestIDWidget 에서 입력받은 문자열 ID 와 맞는 TesTSaveGame 데이터 가져오기
+
+	UFUNCTION()
+	void SaveData(FString ID);						// 데이터 저장 
+
+	UFUNCTION()
+	void LoadData(FString ID);
+
+	UPROPERTY()
+	class UTestIDWidget* TestIDWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TSubclassOf<UTestIDWidget> TestIDWidget_bp;
+
+	UPROPERTY()
+	class UIDInValidWidget* IDInValidWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TSubclassOf<class UIDInValidWidget> IDInvalidWidget_bp;
+
+
+	UFUNCTION()
+	void CloseTestIDWidget();
 };

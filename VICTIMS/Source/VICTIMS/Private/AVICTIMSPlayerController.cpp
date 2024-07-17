@@ -16,6 +16,11 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 #include "ShopLayout.h"
+#include "TestSaveGame.h"
+#include "TestIDWIdget.h"
+#include "Components/TextBlock.h"
+#include "IDInValidWidget.h"
+#include "SavedWidget.h"
 
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
@@ -50,7 +55,27 @@ void AVICTIMSPlayerController::BeginPlay()
 	//	UE_LOG(LogTemp, Warning, TEXT("CharacterReference Was Null, Replace : %p"), CharacterReference);
 	//}
 
-
+	if (IsLocalController())					// ID 입력 위젯  
+	{
+		if (TestIDWidget_bp)
+		{
+			TestIDWidget = Cast<UTestIDWidget>(CreateWidget(GetWorld(), TestIDWidget_bp));
+			if (TestIDWidget)
+			{
+				TestIDWidget->AddToViewport();
+				SetInputMode(FInputModeUIOnly());
+				bShowMouseCursor = true;
+			}
+		}
+		if (IDInvalidWidget_bp)
+		{
+			IDInValidWidget = Cast<UIDInValidWidget>(CreateWidget(GetWorld(), IDInvalidWidget_bp));
+			if (IDInValidWidget)
+			{
+				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+	}
 }
 
 int AVICTIMSPlayerController::GetCurrentViewMode(const APlayerController* PlayerController)
@@ -262,7 +287,7 @@ void AVICTIMSPlayerController::ToggleShop()
 
 void AVICTIMSPlayerController::ToggleMenu()
 {
-	
+
 }
 
 void AVICTIMSPlayerController::UI_PerChaseItem_Implementation(const uint8& InventorySlot)
@@ -507,3 +532,194 @@ void AVICTIMSPlayerController::UI_DropInventoryItem_Implementation(const uint8& 
 	InventoryManagerComponent->Server_DropItemFromInventory(InventorySlot);
 }
 
+//====================================================================================================================
+// Save
+
+void AVICTIMSPlayerController::CreateSaveData(FString ID)
+{
+
+	if (UGameplayStatics::DoesSaveGameExist(ID, 0))
+	{
+		if (TestIDWidget)
+		{
+			TestIDWidget->IsIDValid = false;
+			if (IDInValidWidget)
+			{
+				IDInValidWidget->AddToViewport();
+				IDInValidWidget->ValidInformText->SetText(FText::FromString("ID IS ALREADY EXIST"));
+				IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
+
+				FTimerHandle Time;
+				GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+
+					IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+					}, 0.5f, false);
+			}
+		}
+	}
+	else
+	{
+		SavedData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
+		UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
+		SaveData(ID);
+
+		if (TestIDWidget)
+		{
+			TestIDWidget->IsIDValid = true;
+		}
+	}
+}
+
+UTestSaveGame* AVICTIMSPlayerController::GetSaveDataFromID(FString ID)
+{
+	if (UGameplayStatics::DoesSaveGameExist(ID, 0))  // 해당 ID 이름의 저장된 데이터가 있으면 
+	{
+		return SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));	// 데이터 불러오기 
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
+void AVICTIMSPlayerController::SaveData(FString ID)
+{
+	if (HasAuthority())
+	{
+
+		SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+		if (SavedData)
+		{
+			SavedData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
+			SavedData->SavedGold = CharacterReference->MyPlayerController->InventoryManagerComponent->Gold;	// Gold 초기값 저장
+			CharacterReference->SavePersonalID(ID);
+
+			SavedData->SavedItemIDs.Reset();
+			SavedData->SavedItemAmounts.Reset();
+
+			int startPoint = (int)EEquipmentSlot::Count;
+
+			uint8 NumberOfRowsInventory = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->NumberOfRowsInventory;
+			uint8 SlotsPerRowInventory = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->SlotsPerRowInventory;
+
+			int inventorySize = NumberOfRowsInventory * SlotsPerRowInventory;
+
+			for (int i = 0; i < startPoint + inventorySize; i++)
+			{
+
+				FString TempItemID = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID.ToString();
+				SavedData->SavedItemIDs.Add(TempItemID);
+
+				uint8 TempItemAmount = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).Amount;
+				SavedData->SavedItemAmounts.Add(TempItemAmount);
+			}
+
+			UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
+			HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Visible);
+			FTimerHandle Timer;
+			GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
+				HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Hidden);
+				}, 0.5f, false);
+		}
+	}
+}
+
+void AVICTIMSPlayerController::LoadData(FString ID)
+{
+	if (IsLocalController())
+	{
+		if (UGameplayStatics::DoesSaveGameExist(ID, 0))
+		{
+			if (TestIDWidget)
+			{
+				TestIDWidget->IsIDValid = true;
+			}
+
+			if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference))
+			{
+				SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+				CharacterReference->stateComp->NetMulticastRPC_SetStatePoint(EStateType::HP, SavedData->SavedHP);	// 플레이어 HP 로드
+				InventoryManagerComponent->AddGold(SavedData->SavedGold);	// Gold 로드
+
+
+				int itemCount = SavedData->SavedItemIDs.Num()-1;
+				int startPoint = (int)EEquipmentSlot::Count;
+
+				for (int i = 0; i < itemCount; i++)
+				{
+					if (SavedData->SavedItemIDs[i].Contains(TEXT("ID_Empty")))
+					{
+						continue;
+					}
+
+					FSlotStructure TempSlot = CharacterReference->MyPlayerController->InventoryManagerComponent->GetItemFromItemDB(FName(*SavedData->SavedItemIDs[i]));
+
+					if (TempSlot.ItemStructure.ItemType == EItemType::Undefined)
+					{
+						continue;
+					}
+
+					TempSlot.Amount = SavedData->SavedItemAmounts[i];
+
+				//======================================================================================================
+				// 장비하고 있던 아이템 착용한 상태로 로드되고 있으나, 슬롯당 아이템 데이터가 날아가 있어서 사용시도시 nullptr 나는 중 
+								
+					//CharacterReference->MyPlayerController->InventoryManagerComponent->AddItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, TempSlot);
+
+				//======================================================================================================
+				// 클라이언트 아이템로드 안되는 중
+
+					bool bOutSuccess = false;
+					InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
+
+				//======================================================================================================
+				// 장비하고 있던 아이템은 착용한 상태로 되도록 작업 중 
+				// 
+// 					for (int j = 0; j < startPoint; j++)
+// 					{
+// 						if (TempSlot.ItemStructure.ItemType == EItemType::Equipment)
+// 						{
+// 							InventoryManagerComponent->EquipItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i);
+// 						}
+// 					}
+				}
+
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed333333333___Controller"));
+			}
+		}
+		else
+		{
+			if (TestIDWidget)
+			{
+
+				TestIDWidget->IsIDValid = false;
+				if (IDInValidWidget)
+				{
+					IDInValidWidget->AddToViewport();
+					IDInValidWidget->ValidInformText->SetText(FText::FromString("ID IS NOT EXIST"));
+					IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
+
+					FTimerHandle Time;
+					GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+
+						IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+						}, 0.5f, false);
+				}
+			}
+		}
+	}
+}
+
+void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
+{
+	if (IsLocalController())
+	{
+		TestIDWidget->RemoveFromParent();
+		IDInValidWidget->RemoveFromParent();
+		SetInputMode(FInputModeGameOnly());
+		bShowMouseCursor = false;
+	}
+}

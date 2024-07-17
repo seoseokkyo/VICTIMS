@@ -85,6 +85,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RemoveObjectAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SaveAction;
 
 
 
@@ -186,7 +189,6 @@ protected:
 // 상호작용 관련 
 //=====================================================================================================
 
-//=====================================================================================================
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -263,7 +265,30 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
 	void TestFunction(UInputComponent* PlayerInputComponent);
+
+//=====================================================================================================
+// Save
+
+public:
+	UPROPERTY()			// 저장시 사용하는 개인 ID 
+	FString PersonalID; 
+
+	UFUNCTION()
+	void SavePersonalID(FString ID);
+	
+	UPROPERTY()
+	class UTestSaveGame* SavedData;
+
+	UFUNCTION()
+	void SaveDataNow();
+
+	UFUNCTION()			// 플레이어 정보 데이터 저장
+	void SavePlayerData(UTestSaveGame* Data);
+	
+	UFUNCTION()			// 플레이어 정보 데이터 로드
+	void LoadPlayerData(UTestSaveGame* Data);
+
+
 };
 
