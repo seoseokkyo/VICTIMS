@@ -45,9 +45,9 @@ public:
 
 	UPROPERTY()
 	uint8 SavedItemSlot;
-
+	
 	UPROPERTY()
-	TArray<uint8> SavedItemSlots;
+	TArray<FString> SavedItemIDs;
 
 	UPROPERTY()
 	TArray<uint8> SavedItemAmounts;
