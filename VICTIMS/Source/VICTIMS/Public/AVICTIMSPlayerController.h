@@ -180,6 +180,12 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Test")
 	TSubclassOf<UTestIDWidget> TestIDWidget_bp;
 
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TSubclassOf<class UIDInValidWidget> IDInvalidWidget_bp;
+
+	UPROPERTY()
+	class UIDInValidWidget* IDInValidWidget;
+
 	UFUNCTION()
 	void CloseTestIDWidget();
 };

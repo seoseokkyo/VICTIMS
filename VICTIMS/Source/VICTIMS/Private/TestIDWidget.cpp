@@ -16,20 +16,42 @@ void UTestIDWidget::NativeConstruct()
 
 void UTestIDWidget::OnClickedSignInButton()
 {
-	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
-	if (PC)
+	if (ID != nullptr)
 	{
-		PC->CreateSaveData(ID->GetText().ToString());
-		PC->CloseTestIDWidget();
+		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+		if (PC)
+		{
+			PC->CreateSaveData(ID->GetText().ToString());
+			if (IsIDValid)
+			{
+				PC->CloseTestIDWidget();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Sing In Failed"));
+				return;
+			}
+		}
 	}
 }
 
 void UTestIDWidget::OnClickedContinueButton()
 {
-	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
-	if (PC)
+	if (ID != nullptr)
 	{
-		PC->LoadData(ID->GetText().ToString());
-		PC->CloseTestIDWidget();
+		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+		if (PC)
+		{
+			PC->LoadData(ID->GetText().ToString());
+			if (IsIDValid)
+			{
+				PC->CloseTestIDWidget();
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Continue Failed"));
+				return;
+			}
+		}
 	}
 }

@@ -12,7 +12,7 @@ struct FPlayerSaveData
 	GENERATED_BODY()
 public:
 
-	UPROPERTY()
+	UPROPERTY()							// Save ÆÄÀÏ ID 
 	FString PlayerID;
 
 	UPROPERTY()
@@ -28,5 +28,27 @@ class VICTIMS_API UTestSaveGame : public USaveGame
 	
 public:
 
+	UTestSaveGame();
+
 	FPlayerSaveData PlayerDataStructure;
+
+	UPROPERTY()
+	float SavedHP;
+	UPROPERTY()
+	uint8 SavedGold;
+
+	UPROPERTY()
+	FString ItemID;
+
+	UPROPERTY()
+	uint8 SavedItemAmount;
+
+	UPROPERTY()
+	uint8 SavedItemSlot;
+
+	UPROPERTY()
+	TArray<uint8> SavedItemSlots;
+
+	UPROPERTY()
+	TArray<uint8> SavedItemAmounts;
 };

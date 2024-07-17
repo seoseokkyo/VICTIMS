@@ -70,7 +70,7 @@ public:
 	UFUNCTION()
 	void TryToClientTravel(int waitIndex);
 
-	UFUNCTION()
+	UFUNCTION() 
 	virtual void ShutDown();
 
 	UPROPERTY()

@@ -85,6 +85,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RemoveObjectAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SaveAction;
 
 
 
@@ -270,14 +273,22 @@ public:
 public:
 	UPROPERTY()			// 저장시 사용하는 개인 ID 
 	FString PersonalID; 
+
+	UFUNCTION()
+	void SavePersonalID(FString ID);
 	
 	UPROPERTY()
 	class UTestSaveGame* SavedData;
+
+	UFUNCTION()
+	void SaveDataNow();
 
 	UFUNCTION()			// 플레이어 정보 데이터 저장
 	void SavePlayerData(UTestSaveGame* Data);
 	
 	UFUNCTION()			// 플레이어 정보 데이터 로드
 	void LoadPlayerData(UTestSaveGame* Data);
+
+
 };
 

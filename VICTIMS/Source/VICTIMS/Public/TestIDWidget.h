@@ -17,12 +17,15 @@ public:
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	class UButton* SignInButton;
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
-	class UButton* ContinueButton;
+	class UButton* ContinueButton; 
 
 	UFUNCTION()
 	void OnClickedSignInButton();
 	UFUNCTION()
 	void OnClickedContinueButton();
+
+	UPROPERTY()
+	bool IsIDValid = false;
 
 protected:
 

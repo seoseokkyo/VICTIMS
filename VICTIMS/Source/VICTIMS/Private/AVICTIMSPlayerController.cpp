@@ -18,6 +18,8 @@
 #include "ShopLayout.h"
 #include "TestSaveGame.h"
 #include "TestIDWIdget.h"
+#include "IDInValidWidget.h"
+#include <../../../../../../../Source/Runtime/UMG/Public/Components/TextBlock.h>
 
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
@@ -62,6 +64,14 @@ void AVICTIMSPlayerController::BeginPlay()
 				TestIDWidget->AddToViewport();
 				SetInputMode(FInputModeUIOnly());
 				bShowMouseCursor = true;
+			}
+		}
+		if (IDInvalidWidget_bp)
+		{
+			IDInValidWidget = Cast<UIDInValidWidget>(CreateWidget(GetWorld(), IDInvalidWidget_bp));
+			if (IDInValidWidget)
+			{
+				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
 	}
@@ -516,29 +526,37 @@ void AVICTIMSPlayerController::UI_DropInventoryItem_Implementation(const uint8& 
 
 void AVICTIMSPlayerController::CreateSaveData(FString ID)
 {
-// 	if (!UGameplayStatics::DoesSaveGameExist(ID, 0))		// 새로 생성하는 ID 가 기존에 없는 ID 라면 
-// 	{
-	// ID로 저장된 슬롯데이터가 있는지 검사
-	// 
-	// 있으면 LoadData로
-	// 
-	// 없으면 SaveData를 Create
-	SaveData(ID);
 
-// 
-// 		if (HasAuthority())
-// 		{
-// 			PlayerID = ID;					// UI 에서 입력받은 문자열 ID 로 저장 
-// 			SavedData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
-// 			AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference);
-// 			p->PersonalID = PlayerID;		// Player의 Personal ID 저장 
-// 			SaveData(PlayerID);				// 처음 데이터 저장이 이루어졌을 때의 플레이어 초기상태 저장 
-// 		}
-// 	}
-// 	else
-// 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("That ID is Alreay Exist"));
-// 	}
+	if (UGameplayStatics::DoesSaveGameExist(ID, 0))
+	{
+		if (TestIDWidget)
+		{
+			TestIDWidget->IsIDValid = false;
+			if (IDInValidWidget)
+			{
+				IDInValidWidget->AddToViewport();
+				IDInValidWidget->ValidInformText->SetText(FText::FromString("ID IS ALREADY EXIST"));
+				IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
+
+				FTimerHandle Time;
+				GetWorld()->GetTimerManager().SetTimer(Time,[&](){
+				
+					IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+				}, 0.5f, false);
+			}
+		}
+	}
+	else
+	{
+		SavedData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
+		UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
+		SaveData(ID);
+
+		if (TestIDWidget)
+		{
+			TestIDWidget->IsIDValid = true;
+		}
+	}
 }
 
 UTestSaveGame* AVICTIMSPlayerController::GetSaveDataFromID(FString ID)
@@ -549,7 +567,6 @@ UTestSaveGame* AVICTIMSPlayerController::GetSaveDataFromID(FString ID)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Get Save Data ---------- Failed___Controller"));
 		return nullptr;
 	}
 }
@@ -558,64 +575,60 @@ void AVICTIMSPlayerController::SaveData(FString ID)
 {
 	if (HasAuthority())
 	{
-		if (UGameplayStatics::DoesSaveGameExist(ID, 0))
-		{
-			// 있다고 가정
-			SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
-		}
-		else
-		{
-			SavedData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
-		}
 
+		SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
 		if (SavedData)
 		{
-			CharacterReference->PersonalID = PlayerID;		// Player의 Personal ID 저장 
-			SavedData->PlayerDataStructure.HP = CharacterReference->stateComp->GetStatePoint(HP);	// HP 초기값 저장 
-			SavedData->PlayerDataStructure.Gold = InventoryManagerComponent->Gold;	// Gold 초기값 저장
-
+			SavedData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
+			SavedData->SavedGold = CharacterReference->MyPlayerController->InventoryManagerComponent->Gold;	// Gold 초기값 저장
+			CharacterReference->SavePersonalID(ID);
+			
 			UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
 		}
 	}
-
-//	if (IsLocalController())
-//	{
-//// 		SavedData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
-//		SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));	// 데이터 불러오기 
-//		if (SavedData)
-//		{
-//			AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference);
-//			SavedData->PlayerDataStructure.HP = p->stateComp->GetStatePoint(HP);	// HP 초기값 저장 
-//			SavedData->PlayerDataStructure.Gold = InventoryManagerComponent->Gold;	// Gold 초기값 저장
-//			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed___Controller"));
-//		}
-//		else
-//		{
-//			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Save Data is Null11111111 ___Controller"));
-//		}
-//	}
 }
 
 void AVICTIMSPlayerController::LoadData(FString ID)
 {
 	if (IsLocalController())
 	{
-// 		if (UGameplayStatics::DoesSaveGameExist(ID, 0))  // 해당 ID 이름의 저장된 데이터가 있으면 
-// 		{
+		if (UGameplayStatics::DoesSaveGameExist(ID, 0))
+		{
+			if (TestIDWidget)
+			{
+				TestIDWidget->IsIDValid = true;
+			}
 			if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference))
 			{
-				p->LoadPlayerData(GetSaveDataFromID(ID));
-				UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Successed___Controller"));
+				SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+				CharacterReference->stateComp->NetMulticastRPC_SetStatePoint(EStateType::HP, SavedData->SavedHP);	// 플레이어 HP 로드
+				InventoryManagerComponent->AddGold(SavedData->SavedGold);	// Gold 로드
 			}
 			else
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed333333333___Controller"));
 			}
-// 		}
-// 		else
-// 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed44444444___Controller"));
-// 		}
+		}
+		else
+		{
+			if (TestIDWidget)
+			{
+
+				TestIDWidget->IsIDValid = false;
+				if (IDInValidWidget)
+				{
+					IDInValidWidget->AddToViewport();
+					IDInValidWidget->ValidInformText->SetText(FText::FromString("ID IS NOT EXIST"));
+					IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
+
+					FTimerHandle Time;
+					GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+
+						IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+						}, 0.5f, false);
+				}
+			}
+		}
 	}
 }
 
@@ -624,6 +637,7 @@ void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 	if (IsLocalController())
 	{
 		TestIDWidget->RemoveFromParent();
+		IDInValidWidget->RemoveFromParent();
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
 	}
