@@ -12,12 +12,14 @@
 #include "InteractText.h"
 #include "ShopLayout.h"
 #include "ItemDragVisual.h"
+#include "SavedWidget.h"
 
 void UMainLayout::NativeConstruct()
 {
 	Super::NativeConstruct();  
 
 	SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	Saved->SetVisibility(ESlateVisibility::Hidden);
 }
 
 bool UMainLayout::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)

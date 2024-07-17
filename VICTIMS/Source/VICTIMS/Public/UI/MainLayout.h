@@ -31,6 +31,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta =(BindWidget))
 	class UInteractText* Interact;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta =(BindWidget))
+	class USavedWidget* Saved; 
+
 protected:
 	UFUNCTION()
 	virtual void NativeConstruct() override;
