@@ -193,4 +193,6 @@ public:
 
 	UFUNCTION()
 	void CloseTestIDWidget();
+
+	bool bIsShowUI = false;
 };

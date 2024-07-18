@@ -31,6 +31,7 @@
 #include "ShopActor.h"
 #include "Components/ScrollBox.h"
 #include "Shop_Slo.h"
+#include "Inventory/InventoryComponent.h"
 
 UInventoryManagerComponent::UInventoryManagerComponent()
 {
@@ -150,7 +151,7 @@ void UInventoryManagerComponent::TryToAddItemToInventory(UInventoryComponent* In
 	}
 	if (LocalTuple.Success)
 	{
-		AddItem(LocalInventory, LocalTuple.Index, LocalInventoryItem);
+		AddItem(Inventory, LocalTuple.Index, LocalInventoryItem);
 		bOutSuccess = true;
 		return;
 	}

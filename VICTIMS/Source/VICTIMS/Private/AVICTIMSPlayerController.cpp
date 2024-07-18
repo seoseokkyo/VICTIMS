@@ -62,8 +62,10 @@ void AVICTIMSPlayerController::BeginPlay()
 			TestIDWidget = Cast<UTestIDWidget>(CreateWidget(GetWorld(), TestIDWidget_bp));
 			if (TestIDWidget)
 			{
+				bIsShowUI = true;
 				TestIDWidget->AddToViewport();
 				SetInputMode(FInputModeUIOnly());
+				EnableUIMode();
 				bShowMouseCursor = true;
 			}
 		}
@@ -240,19 +242,23 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 {
 	if (IsLocalPlayerController())
 	{
-		if (HUD_Reference->IsAnyWidgetVisible())
+		if (bIsShowUI == false)
 		{
-			SetInputMode(FInputModeGameAndUI());
-			bShowMouseCursor = true;
 
-			HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
-		}
-		else
-		{
-			SetInputMode(FInputModeGameOnly());
-			bShowMouseCursor = false;
-
-			HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			if (HUD_Reference->IsAnyWidgetVisible())
+			{
+				SetInputMode(FInputModeGameAndUI());
+				bShowMouseCursor = true;
+				
+				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
+			}
+			else
+			{
+				SetInputMode(FInputModeGameOnly());
+				bShowMouseCursor = false;
+				
+				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			}
 		}
 	}
 }
@@ -365,15 +371,18 @@ void AVICTIMSPlayerController::EnableUIMode()
 
 void AVICTIMSPlayerController::DisableUIMode()
 {
-	if (!IsValid(HUD_Reference))
+	if (bIsShowUI == false)
 	{
-		return;
-	}
+		if (!IsValid(HUD_Reference))
+		{
+			return;
+		}
 
-	if (bShowMouseCursor)
-	{
-		SetInputDependingFromVisibleWidgets();
+		if (bShowMouseCursor)
+		{
+			SetInputDependingFromVisibleWidgets();
 
+		}
 	}
 }
 
@@ -642,6 +651,7 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 				CharacterReference->stateComp->NetMulticastRPC_SetStatePoint(EStateType::HP, SavedData->SavedHP);	// 플레이어 HP 로드
 				InventoryManagerComponent->AddGold(SavedData->SavedGold);	// Gold 로드
 
+
 				// 인벤토리 아이템 로드 
 				int itemCount = SavedData->SavedItemIDs.Num()-1;
 				int startPoint = (int)EEquipmentSlot::Count;
@@ -669,7 +679,7 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 
 					CharacterReference->MyPlayerController->InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
 
-					// 장비하고 있던 아이템 로드
+					// 장비중인 아이템 로드 
 					for (int j = startPoint; j < startPoint + startPoint; j++)
 					{
 						if (TempSlot.ItemStructure.ID != FName("ID_Empty"))
@@ -711,6 +721,7 @@ void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 {
 	if (IsLocalController())
 	{
+		bIsShowUI = false;
 		TestIDWidget->RemoveFromParent();
 		IDInValidWidget->RemoveFromParent();
 		SetInputMode(FInputModeGameOnly());
