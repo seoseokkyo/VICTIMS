@@ -638,10 +638,11 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 			if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference))
 			{
 				SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+				CharacterReference->SavePersonalID(ID);
 				CharacterReference->stateComp->NetMulticastRPC_SetStatePoint(EStateType::HP, SavedData->SavedHP);	// 플레이어 HP 로드
 				InventoryManagerComponent->AddGold(SavedData->SavedGold);	// Gold 로드
 
-
+				// 인벤토리 아이템 로드 
 				int itemCount = SavedData->SavedItemIDs.Num()-1;
 				int startPoint = (int)EEquipmentSlot::Count;
 
@@ -652,7 +653,7 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 						continue;
 					}
 
-					FSlotStructure TempSlot = CharacterReference->MyPlayerController->InventoryManagerComponent->GetItemFromItemDB(FName(*SavedData->SavedItemIDs[i]));
+					FSlotStructure TempSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*SavedData->SavedItemIDs[i]));
 
 					if (TempSlot.ItemStructure.ItemType == EItemType::Undefined)
 					{
@@ -661,29 +662,22 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 
 					TempSlot.Amount = SavedData->SavedItemAmounts[i];
 
-				//======================================================================================================
-				// 장비하고 있던 아이템 착용한 상태로 로드되고 있으나, 슬롯당 아이템 데이터가 날아가 있어서 사용시도시 nullptr 나는 중 
-								
-					//CharacterReference->MyPlayerController->InventoryManagerComponent->AddItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, TempSlot);
-
-				//======================================================================================================
-				// 클라이언트 아이템로드 안되는 중
+					//======================================================================================================	
+					// 클라이언트 아이템로드 안되는 중	
 
 					bool bOutSuccess = false;
-					InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
 
-				//======================================================================================================
-				// 장비하고 있던 아이템은 착용한 상태로 되도록 작업 중 
-				// 
-// 					for (int j = 0; j < startPoint; j++)
-// 					{
-// 						if (TempSlot.ItemStructure.ItemType == EItemType::Equipment)
-// 						{
-// 							InventoryManagerComponent->EquipItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i);
-// 						}
-// 					}
+					CharacterReference->MyPlayerController->InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
+
+					// 장비하고 있던 아이템 로드
+					for (int j = startPoint; j < startPoint + startPoint; j++)
+					{
+						if (TempSlot.ItemStructure.ID != FName("ID_Empty"))
+						{
+							CharacterReference->MyPlayerController->InventoryManagerComponent->UseInventoryItem(j);
+						}
+					}
 				}
-
 			}
 			else
 			{

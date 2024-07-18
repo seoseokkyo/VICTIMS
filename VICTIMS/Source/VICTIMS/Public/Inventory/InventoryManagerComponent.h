@@ -194,8 +194,10 @@ public:
 	void AddGold(uint8 Amount);
 
 	UFUNCTION(Category = "Manager|Private|Equipment")
-	void EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,
-		UInventoryComponent* ToInventory, uint8 ToInventorySlot);
+	void EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,	UInventoryComponent* ToInventory, uint8 ToInventorySlot);
+
+	UFUNCTION(Category = "Manager|Private|Items")
+	void UseInventoryItem(const uint8& InventorySlot);
 protected:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateInventoryTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
@@ -237,7 +239,7 @@ private:
 	UFUNCTION(Category = "Helper")
 	uint8 GetItemMaxStackSize(const FSlotStructure Item);
 	UFUNCTION(Category = "Helper")
-	void AddAmountToItem(FSlotStructure& Item, uint8 AmountToAdd);
+	void AddAmountToItem(FSlotStructure& Item, uint8 AmountToAdd); 
 
 	UFUNCTION()
 	void SetAttributes(int32 Value);
@@ -247,8 +249,7 @@ private:
 
 
 	UFUNCTION(Category = "Manager|Private|Equipment")
-	void UnEquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,
-		UInventoryComponent* ToInventory, uint8 ToInventorySlot);
+	void UnEquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,UInventoryComponent* ToInventory, uint8 ToInventorySlot);
 
 	UFUNCTION(Category = "Manager|Private")
 	void RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform);
@@ -275,8 +276,7 @@ private:
 	UFUNCTION(Client, Reliable, Category = "Manager|Private|Items")
 	void ClientRPC_UseFurnitureItem(FName ItemID);
 
-	UFUNCTION(Category = "Manager|Private|Items")
-	void UseInventoryItem(const uint8& InventorySlot);
+
 	UFUNCTION(Category = "Manager|Private|Container")
 	void UseContainerItem(const uint8& InventorySlot);
 
