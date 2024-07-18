@@ -67,7 +67,7 @@
 		},
 		{
 			"Name": "YoutubeVideoAudioPlayer",
-			"Enabled": true,
+			"Enabled": false,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/4102d0282d03463faf9da2932faa3843"
 		},
 		{
