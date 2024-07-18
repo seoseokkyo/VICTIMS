@@ -21,7 +21,7 @@
 #include "Components/TextBlock.h"
 #include "IDInValidWidget.h"
 #include "SavedWidget.h"
-
+#include "Net/UnrealNetwork.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -713,6 +713,20 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 	}
 }
 
+void AVICTIMSPlayerController::ServerRPC_SetUseUIState_Implementation(bool bUse)
+{
+	bUseUIMode = bUse;
+
+	UE_LOG(LogTemp, Warning, TEXT("bUseUIMode : %s"), bUseUIMode ? TEXT("TRUE") : TEXT("FALSE"));
+
+	ClientRPC_SetUseUIState(bUseUIMode);
+}
+
+void AVICTIMSPlayerController::ClientRPC_SetUseUIState_Implementation(bool bUse)
+{
+	bUseUIMode = bUse;
+}
+
 void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 {
 	if (IsLocalController())
@@ -722,4 +736,12 @@ void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
 	}
+}
+
+
+void AVICTIMSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AVICTIMSPlayerController, bUseUIMode);
 }

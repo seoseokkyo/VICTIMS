@@ -36,7 +36,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	AVICTIMSPlayerController* useingPlayer;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool bUsingNow = false;
 
 	virtual bool OnActorUsed_Implementation(APlayerController* Controller) override;
@@ -44,8 +44,11 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_TravelRequest(AVICTIMSPlayerController* Controller);
 
-	UFUNCTION(MultiRPC, Reliable)
-	void MultiRPC_TravelRequest(AVICTIMSPlayerController* Controller);
+	UFUNCTION(NetMulticast, Reliable)
+	void ClientRPC_TravelRequest(AVICTIMSPlayerController* Controller, AVICTIMSCharacter* playerCharacter, FVector loc);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetUIMode(AVICTIMSPlayerController* Controller);
 };

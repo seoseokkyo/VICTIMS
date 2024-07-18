@@ -47,84 +47,20 @@ bool ABlackBoard::OnActorUsed_Implementation(APlayerController* Controller)
 {
 	if (bUsingNow)
 	{
-		return false;
+		return true;
 	}
 
 	useingPlayer = Cast<AVICTIMSPlayerController>(Controller);
 
 	if (nullptr != useingPlayer)
 	{
+		SetOwner(useingPlayer);
+
 		if (ViewCamera)
 		{
-			auto charCheck = Cast<AVICTIMSCharacter>(useingPlayer->GetPawn());
+			useingPlayer->ServerRPC_SetUseUIState(true);
 
-			//안먹히네..
-			//일단 투명화는 나중에
-			//charCheck->GetMesh()->SetHiddenInGame(true, false);
-			//charCheck->GetMesh()->SetVisibility(false, false);
-
-			//charCheck->GetMesh()->SetRenderCustomDepth(true);
-			//charCheck->GetMesh()->SetCustomDepthStencilValue(1);
-
-			//if (PlayerMaskMaterial)
-			//{
-			//	charCheck->GetMesh()->SetOverlayMaterial(PlayerMaskMaterial);
-			//	charCheck->GetMesh()->SetHiddenInGame(true, false);
-
-			//	for (auto findComp : charCheck->GetComponents())
-			//	{
-			//		if (findComp->ComponentTags.Contains(FName("RTG_UEFN_to_UE4_Mannequin")))
-			//		{
-			//			if (auto skeletalCheck = Cast<USkeletalMeshComponent>(findComp))
-			//			{
-			//				// 이것도 안먹힘
-			//				skeletalCheck->SetOverlayMaterial(PlayerMaskMaterial);
-
-			//				UE_LOG(LogTemp, Warning, TEXT("RTG_UEFN_to_UE4_Mannequin Found"));
-
-			//				break;
-			//			}
-			//		}
-			//	}
-			//}
-			//else
-			//{
-
-			//}
-
-			//PlayerController->EnableUIMode();			
-			//PlayerController->SetShowMouseCursor(true);
-			//PlayerController->bEnableClickEvents = true;
-			//PlayerController->bEnableMouseOverEvents = true;
-
-			float blendTime = 0.4f;
-
-			if (useingPlayer->IsLocalController())
-			{
-				useingPlayer->SetViewTargetWithBlend(this, blendTime, VTBlend_Linear);
-
-				if (1)
-				{
-					FTimerHandle timerHnd;
-					GetWorldTimerManager().SetTimer(timerHnd, [&, charCheck]() {
-
-						useingPlayer->bUseUIMode = true;
-						useingPlayer->EnableUIMode();
-						useingPlayer->SetShowMouseCursor(true);
-						useingPlayer->bEnableClickEvents = true;
-						useingPlayer->bEnableMouseOverEvents = true;
-
-						}, blendTime + 0.3f, false);
-				}
-				else
-				{
-					useingPlayer->bUseUIMode = true;
-					useingPlayer->EnableUIMode();
-					useingPlayer->SetShowMouseCursor(true);
-					useingPlayer->bEnableClickEvents = true;
-					useingPlayer->bEnableMouseOverEvents = true;
-				}
-			}
+			ServerRPC_TravelRequest(useingPlayer);
 
 			return false;
 		}
@@ -137,20 +73,37 @@ bool ABlackBoard::OnActorUsed_Implementation(APlayerController* Controller)
 
 void ABlackBoard::ServerRPC_TravelRequest_Implementation(AVICTIMSPlayerController* Controller)
 {
-	MultiRPC_TravelRequest(Controller);
-}
-
-void ABlackBoard::MultiRPC_TravelRequest_Implementation(AVICTIMSPlayerController* Controller)
-{
-	this->EnableInput(Controller);
-
 	auto charCheck = Controller->GetPawn();
 
-	if (charCheck)
+	charCheck->DisableInput(Controller);
+
+	FVector tempLocation = GetActorRightVector() * 300 + GetActorLocation();
+	//charCheck->SetActorLocation(tempLocation, false, nullptr, ETeleportType::TeleportPhysics);
+	//charCheck->TeleportTo(charCheck->GetActorLocation(), charCheck->GetActorRotation());;
+
+	this->EnableInput(Controller);
+
+	Controller->ServerRPC_SetUseUIState(true);
+
+	useingPlayer = Controller;
+
+	ClientRPC_TravelRequest(Controller, Cast<AVICTIMSCharacter>(charCheck), tempLocation);
+}
+
+void ABlackBoard::ClientRPC_TravelRequest_Implementation(AVICTIMSPlayerController* Controller, AVICTIMSCharacter* playerCharacter, FVector loc)
+{
+	if (Controller == nullptr || playerCharacter == nullptr)
 	{
-		charCheck->DisableInput(Controller);
-		charCheck->SetActorLocation(GetActorRightVector() * 300 + GetActorLocation());
+		return;
 	}
+
+	//playerCharacter->DisableInput(Controller);
+	playerCharacter->SetActorLocation(loc, false, nullptr, ETeleportType::TeleportPhysics);
+	//playerCharacter->TeleportTo(playerCharacter->GetActorLocation(), playerCharacter->GetActorRotation());;
+
+	playerCharacter->DisableInput(Controller);
+
+	this->EnableInput(Controller);
 
 	float blendTime = 0.4f;
 
@@ -158,8 +111,10 @@ void ABlackBoard::MultiRPC_TravelRequest_Implementation(AVICTIMSPlayerController
 
 	FTimerHandle timerHnd;
 
-	GetWorldTimerManager().SetTimer(timerHnd, [&]() {
+	GetWorldTimerManager().SetTimer(timerHnd, [&, Controller]() {
 
+		ServerRPC_SetUIMode(Controller);
+		Controller->ServerRPC_SetUseUIState(true);
 		Controller->bUseUIMode = true;
 		Controller->EnableUIMode();
 		Controller->SetShowMouseCursor(true);
@@ -167,6 +122,15 @@ void ABlackBoard::MultiRPC_TravelRequest_Implementation(AVICTIMSPlayerController
 		Controller->bEnableMouseOverEvents = true;
 
 		}, blendTime + 0.3f, false);
+}
+
+void ABlackBoard::ServerRPC_SetUIMode_Implementation(AVICTIMSPlayerController* Controller)
+{
+	useingPlayer->bUseUIMode = true;
+	useingPlayer->EnableUIMode();
+	useingPlayer->SetShowMouseCursor(true);
+	useingPlayer->bEnableClickEvents = true;
+	useingPlayer->bEnableMouseOverEvents = true;
 }
 
 void ABlackBoard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

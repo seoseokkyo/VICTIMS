@@ -148,7 +148,7 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_RequestClientTravel(const FString& URL, const FString& Options);
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	bool bUseUIMode = false;
 
 protected:
@@ -195,6 +195,14 @@ public:
 	TSubclassOf<class UIDInValidWidget> IDInvalidWidget_bp;
 
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetUseUIState(bool bUse);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_SetUseUIState(bool bUse);
+
 	UFUNCTION()
 	void CloseTestIDWidget();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 };
