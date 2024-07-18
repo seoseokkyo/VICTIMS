@@ -867,22 +867,3 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 	}
 }
 
-//=====================================================================================================
-//	Inventory Weapon Item -> Motion Capture Character Weapon Equipping
-//  Connected With Blueprint MocapSelect Functions 
-
-void AVICTIMSCharacter::UsePistol()
-{
-}
-
-void AVICTIMSCharacter::UseRifle()
-{
-}
-
-void AVICTIMSCharacter::UseKnife()
-{
-}
-
-void AVICTIMSCharacter::UseAxe()
-{
-}

@@ -289,19 +289,5 @@ public:
 	UFUNCTION()			// 플레이어 정보 데이터 로드
 	void LoadPlayerData(UTestSaveGame* Data);
 
-//=====================================================================================================
-//	Inventory Weapon Item -> Motion Capture Character Weapon Equipping
-
-	UFUNCTION(BlueprintCallable)
-	void UsePistol();
-
-	UFUNCTION(BlueprintCallable)
-	void UseRifle();
-
-	UFUNCTION(BlueprintCallable)
-	void UseKnife();
-
-	UFUNCTION(BlueprintCallable)
-	void UseAxe();
 };
 
