@@ -13,18 +13,6 @@ UYoutubeStreamingComponent::UYoutubeStreamingComponent()
 	// ...
 }
 
-void UYoutubeStreamingComponent::GetYoutubeUrls(FString youtube_url)
-{
-	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = Http->CreateRequest();
-	Request->OnProcessRequestComplete().BindUObject(this, &UYoutubeStreamingComponent::OnResponseReceived);
-	FString jsonData = TEXT("{\"url\":\"" + youtube_url + "\"}");
-	Request->SetContentAsString(jsonData);
-	Request->SetVerb("POST");
-	Request->SetURL("http://predictiontr.com/get_youtube_data");
-	Request->SetHeader("Content-Type", TEXT("application/json"));
-	Request->ProcessRequest();
-}
-
 void UYoutubeStreamingComponent::OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	TSharedPtr<FJsonObject> pResponse;
@@ -40,7 +28,7 @@ void UYoutubeStreamingComponent::OnResponseReceived(FHttpRequestPtr Request, FHt
 	}
 }
 
-void UYoutubeStreamingComponent::GetYoutubeUrlsWithQuality(FString youtube_url, TEnumAsByte<VideoQuality> video_quality)
+void UYoutubeStreamingComponent::GetYoutubeUrlsWithQuality(FString youtube_url, TEnumAsByte<VideoQuality2> video_quality)
 {
 	FString vq;
 	switch (video_quality)
