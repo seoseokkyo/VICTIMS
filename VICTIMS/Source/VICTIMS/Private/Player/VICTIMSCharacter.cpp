@@ -202,6 +202,8 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 		}
 	}
 
+
+
 }
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -863,4 +865,24 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
 		}
 	}
+}
+
+//=====================================================================================================
+//	Inventory Weapon Item -> Motion Capture Character Weapon Equipping
+//  Connected With Blueprint MocapSelect Functions 
+
+void AVICTIMSCharacter::UsePistol()
+{
+}
+
+void AVICTIMSCharacter::UseRifle()
+{
+}
+
+void AVICTIMSCharacter::UseKnife()
+{
+}
+
+void AVICTIMSCharacter::UseAxe()
+{
 }

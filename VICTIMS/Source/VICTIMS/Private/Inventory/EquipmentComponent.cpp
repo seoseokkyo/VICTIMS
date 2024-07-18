@@ -53,8 +53,25 @@ void UEquipmentComponent::UpdateEquippedMeshes(uint8 InventorySlot)
 			switch (InventorySlot)
 			{
 			case (uint8)EEquipmentSlot::Weapon:
-				EquipmentCharacterReference->MainWeaponMesh = NewMesh;
-				EquipmentCharacterReference->OnRep_MainWeaponMesh();
+// 				if (Slot.ItemStructure.ID == (FName("ID_Pistol")))
+// 				{
+// 					EquipmentCharacterReference->UsePistol();
+// 				}
+// 				if (Slot.ItemStructure.ID == (FName("ID_Rifle")))
+// 				{
+// 					EquipmentCharacterReference->UseRifle();
+// 				}
+// 				if(Slot.ItemStructure.ID == (FName("ID_Knife")))
+// 				{
+// 					EquipmentCharacterReference->UseKnife();
+// 				}
+// 				if (Slot.ItemStructure.ID == (FName("ID_Axe")))
+// 				{
+// 					EquipmentCharacterReference->UseAxe();
+// 				}
+								
+// 				EquipmentCharacterReference->MainWeaponMesh = NewMesh;
+// 				EquipmentCharacterReference->OnRep_MainWeaponMesh();
 				break;
 			case (uint8)EEquipmentSlot::Chest:
 				EquipmentCharacterReference->ChestMesh = NewMesh;

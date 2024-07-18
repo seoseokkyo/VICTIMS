@@ -904,6 +904,48 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 				RemoveItem(FromInventory, FromInventorySlot);
 			}
 
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")))
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+				}
+// 				playerReference->UsePistol();
+			}
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")))
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+				}
+// 				playerReference->UseRifle();
+			}
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")))
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+				}
+// 				playerReference->UseKnife();
+			}
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")))
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+				}
+// 				playerReference->UseAxe();
+			}
+
+
 			UpdateEquippedStats();
 			Server_UpdateTooltips();
 			return;
@@ -970,8 +1012,51 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 		AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
 		RemoveItem(FromInventory, FromInventorySlot);
 	}
+
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")))
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+		}
+		// 				playerReference->UsePistol();
+	}
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")))
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+		}
+		// 				playerReference->UseRifle();
+	}
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")))
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+		}
+		// 				playerReference->UseKnife();
+	}
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")))
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+		}
+		// 				playerReference->UseAxe();
+	}
 	UpdateEquippedStats();
 	Server_UpdateTooltips();
+
+
 }
 
 void UInventoryManagerComponent::RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform)
