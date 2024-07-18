@@ -38,6 +38,14 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+
+	//=============================================================================================================
+	// UI Mode °ü¸®¿ë 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsShowUI = false; 
+
+
 	/* Interface */
 	virtual void UI_MoveInventoryItem_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot) override;
 	virtual void UI_DropInventoryItem_Implementation(const uint8& InventorySlot) override;

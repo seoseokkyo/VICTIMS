@@ -211,19 +211,22 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 {
 	if (IsLocalPlayerController())
 	{
-		if (HUD_Reference->IsAnyWidgetVisible())
+		if (bIsShowUI == false)
 		{
-			SetInputMode(FInputModeGameAndUI());
-			bShowMouseCursor = true;
+			if (HUD_Reference->IsAnyWidgetVisible())
+			{
+				SetInputMode(FInputModeGameAndUI());
+				bShowMouseCursor = true;
 
-			HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
-		}
-		else
-		{
-			SetInputMode(FInputModeGameOnly());
-			bShowMouseCursor = false;
+				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
+			}
+			else
+			{	
+				SetInputMode(FInputModeGameOnly());
+				bShowMouseCursor = false;
 
-			HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			}
 		}
 	}
 }
@@ -309,15 +312,17 @@ void AVICTIMSPlayerController::EnableUIMode()
 
 void AVICTIMSPlayerController::DisableUIMode()
 {
-	if (!IsValid(HUD_Reference))
+	if (bIsShowUI == false)
 	{
-		return;
-	}
+		if (!IsValid(HUD_Reference))
+		{
+			return;
+		}
 
-	if (bShowMouseCursor)
-	{
-		SetInputDependingFromVisibleWidgets();
-
+		if (bShowMouseCursor)
+		{
+			SetInputDependingFromVisibleWidgets();
+		}
 	}
 }
 
