@@ -365,7 +365,7 @@ void AVICTIMSPlayerController::EnableUIMode()
 
 void AVICTIMSPlayerController::DisableUIMode()
 {
-	if (!IsValid(HUD_Reference))
+	if (!IsValid(HUD_Reference) || bUseUIMode)
 	{
 		return;
 	}

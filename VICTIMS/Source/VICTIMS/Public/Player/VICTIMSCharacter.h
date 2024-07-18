@@ -265,8 +265,6 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void TestFunction(UInputComponent* PlayerInputComponent);
-
 //=====================================================================================================
 // Save
 
