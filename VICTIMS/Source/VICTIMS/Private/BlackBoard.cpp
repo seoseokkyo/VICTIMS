@@ -56,6 +56,22 @@ bool ABlackBoard::OnActorUsed_Implementation(APlayerController* Controller)
 	{
 		SetOwner(useingPlayer);
 
+		TArray<AActor*> arrayFoundPictures;
+		arrayFoundPictures.Reset();
+
+		GetAllChildActors(arrayFoundPictures);
+
+		for (auto find : arrayFoundPictures)
+		{
+			find->SetOwner(useingPlayer);
+
+			// ??????
+			//if (find->Tags.Contains(TEXT("Picture")))
+			//{
+			//	find->SetOwner(useingPlayer);
+			//}
+		}
+		
 		if (ViewCamera)
 		{
 			useingPlayer->ServerRPC_SetUseUIState(true);
