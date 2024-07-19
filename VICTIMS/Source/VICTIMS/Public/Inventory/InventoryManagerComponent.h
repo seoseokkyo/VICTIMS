@@ -193,9 +193,6 @@ public:
 	UFUNCTION(Category = "Manager|Private|Inventory")
 	void AddGold(uint8 Amount);
 
-	UFUNCTION(Category = "Manager|Private|Equipment")
-	void EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,
-		UInventoryComponent* ToInventory, uint8 ToInventorySlot);
 protected:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateInventoryTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
@@ -245,6 +242,9 @@ private:
 	UFUNCTION()
 	void RemoveFromItemAmount(FSlotStructure& InventoryItem, const uint8& AmountToRemove, bool& WasFullAmountRemoved, uint8& AmountRemoved);
 
+	UFUNCTION(Category = "Manager|Private|Equipment")
+	void EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,
+		UInventoryComponent* ToInventory, uint8 ToInventorySlot);
 
 	UFUNCTION(Category = "Manager|Private|Equipment")
 	void UnEquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,

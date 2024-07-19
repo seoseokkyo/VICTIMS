@@ -265,6 +265,28 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(BlueprintReadOnly, Category = "House")
+	class AShelter* AssignedHouse;
+
+	void SetAssignedHouse(AShelter* NewHouse);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetAssignedHouse(AShelter* NewHouse);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_SetAssignedHouse(AShelter* NewHouse);
+
+	// 	UFUNCTION(BlueprintCallable)
+	// 	void GoToHouse();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_GoToHouse();
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
+	void MultiCast_GoToHouse(AShelter* NewHouse);
+
+
+
 //=====================================================================================================
 // Save
 

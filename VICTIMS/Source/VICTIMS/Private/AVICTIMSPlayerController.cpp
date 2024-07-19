@@ -22,6 +22,8 @@
 #include "IDInValidWidget.h"
 #include "SavedWidget.h"
 #include "Net/UnrealNetwork.h"
+#include "Shelter.h"
+#include "System/VICTIMSGameMode.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -613,6 +615,9 @@ void AVICTIMSPlayerController::SaveData(FString ID)
 				uint8 TempItemAmount = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).Amount;
 				SavedData->SavedItemAmounts.Add(TempItemAmount);
 			}
+			
+			// 집 번호 저장
+			SavedData->HouseNumber = CharacterReference->AssignedHouse ? CharacterReference->AssignedHouse->HouseNumber : -1;
 
 			UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
 			HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Visible);
@@ -643,10 +648,11 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 
 
 				int itemCount = SavedData->SavedItemIDs.Num()-1;
-				int startPoint = (int)EEquipmentSlot::Count;
+				//int startPoint = (int)EEquipmentSlot::Count;
 
 				for (int i = 0; i < itemCount; i++)
 				{
+					// 아이템 ID FString -> FName 변환해서 Slot 에 넣기 			
 					if (SavedData->SavedItemIDs[i].Contains(TEXT("ID_Empty")))
 					{
 						continue;
@@ -660,28 +666,17 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 					}
 
 					TempSlot.Amount = SavedData->SavedItemAmounts[i];
-
-				//======================================================================================================
-				// 장비하고 있던 아이템 착용한 상태로 로드되고 있으나, 슬롯당 아이템 데이터가 날아가 있어서 사용시도시 nullptr 나는 중 
-								
-					//CharacterReference->MyPlayerController->InventoryManagerComponent->AddItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, TempSlot);
-
-				//======================================================================================================
-				// 클라이언트 아이템로드 안되는 중
-
+	//				CharacterReference->MyPlayerController->InventoryManagerComponent->AddItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, TempSlot);
 					bool bOutSuccess = false;
-					InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
+					CharacterReference->MyPlayerController->InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
 
-				//======================================================================================================
-				// 장비하고 있던 아이템은 착용한 상태로 되도록 작업 중 
-				// 
-// 					for (int j = 0; j < startPoint; j++)
-// 					{
-// 						if (TempSlot.ItemStructure.ItemType == EItemType::Equipment)
-// 						{
-// 							InventoryManagerComponent->EquipItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i);
-// 						}
-// 					}
+				}
+
+				// 집 번호 로드 및 할당
+				if (SavedData->HouseNumber >= 0 && SavedData->HouseNumber < GameModeReference->Houses.Num())
+				{
+					AShelter* AssignedHouse = GameModeReference->Houses[SavedData->HouseNumber];
+					CharacterReference->SetAssignedHouse(AssignedHouse);
 				}
 
 			}

@@ -31,6 +31,8 @@
 #include "InteractText.h"
 #include "TestSaveGame.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "Shelter.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -277,8 +279,6 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar3, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot3);
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
-			EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
-
 		}
 	}
 	else
@@ -798,5 +798,43 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
 		}
+	}
+}
+
+void AVICTIMSCharacter::SetAssignedHouse(AShelter* NewHouse)
+{
+	ServerRPC_SetAssignedHouse(NewHouse);
+}
+
+void AVICTIMSCharacter::ServerRPC_SetAssignedHouse_Implementation(AShelter* NewHouse)
+{
+	AssignedHouse = NewHouse;
+
+	NetMulticastRPC_SetAssignedHouse(AssignedHouse);
+}
+
+void AVICTIMSCharacter::NetMulticastRPC_SetAssignedHouse_Implementation(AShelter* NewHouse)
+{
+	AssignedHouse = NewHouse;
+}
+
+// void AVICTIMSCharacter::GoToHouse()
+// {
+// 	if (AssignedHouse)
+// 	{
+// 		SetActorLocation(AssignedHouse->GetActorLocation());
+// 	}
+// }
+
+void AVICTIMSCharacter::Server_GoToHouse_Implementation()
+{
+	MultiCast_GoToHouse(AssignedHouse);
+}
+
+void AVICTIMSCharacter::MultiCast_GoToHouse_Implementation(AShelter* NewHouse)
+{
+	if (NewHouse)
+	{
+		SetActorLocation(NewHouse->GetActorLocation() + FVector(0, 0, 1) * 3000.f);
 	}
 }

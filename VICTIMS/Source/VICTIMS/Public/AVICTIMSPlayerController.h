@@ -205,4 +205,6 @@ public:
 	void CloseTestIDWidget();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	class AVICTIMSGameMode* GameModeReference;
 };
