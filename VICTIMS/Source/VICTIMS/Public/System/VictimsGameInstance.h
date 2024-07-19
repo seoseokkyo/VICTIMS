@@ -49,6 +49,9 @@ public:
 	UPROPERTY()
 	FString serverPort;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	FString mainAddress;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	UDataTable* dt_characerStatDataTable;
 
@@ -69,4 +72,10 @@ public:
 
 	UFUNCTION()
 	void TryToClientTravel(int waitIndex);
+
+	UFUNCTION() 
+	virtual void ShutDown();
+
+	UPROPERTY()
+	class UTestSaveGame* SaveData;
 };

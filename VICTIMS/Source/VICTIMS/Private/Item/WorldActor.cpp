@@ -11,12 +11,18 @@ AWorldActor::AWorldActor()
 	PrimaryActorTick.bCanEverTick = false;
 	ID = FName(TEXT("None"));
 	Amount = 1;
-	StartWithPhysicsEnabled = true;
+
 }
 
 void AWorldActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (StaticMesh)
+	{
+		StaticMesh->SetSimulatePhysics(true);
+		StaticMesh->SetAllMassScale(8.0f);
+	}
 
 	UDataTable* BP_ItemDB = LoadObject<UDataTable>(this, TEXT("/Game/Item/Data/Item_DB.Item_DB"));
 	if (IsValid(BP_ItemDB))
@@ -84,7 +90,6 @@ bool AWorldActor::OnActorUsed_Implementation(APlayerController* Controller)
 			if (OutSuccess)
 			{
 				InventoryManager->Server_UpdateTooltips();
-
 				Destroy();
 			}
 

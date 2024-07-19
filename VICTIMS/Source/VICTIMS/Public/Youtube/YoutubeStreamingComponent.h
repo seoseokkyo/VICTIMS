@@ -39,17 +39,7 @@ public:
 	FString Title;
 	
 	UFUNCTION(BlueprintCallable, Category = "Youtube Component")
-	void GetYoutubeUrls(FString youtube_url)
-	{
-		TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = Http->CreateRequest();
-		Request->OnProcessRequestComplete().BindUObject(this, &UYoutubeStreamingComponent::OnResponseReceived);
-		FString jsonData = TEXT("{\"url\":\"" + youtube_url + "\"}");
-		Request->SetContentAsString(jsonData);
-		Request->SetVerb("POST");
-		Request->SetURL("http://predictiontr.com/get_youtube_data");
-		Request->SetHeader("Content-Type", TEXT("application/json"));
-		Request->ProcessRequest();
-	}
+    void GetYoutubeUrls(FString youtube_url);
 	void OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	UFUNCTION(BlueprintCallable, Category = "Youtube Component")

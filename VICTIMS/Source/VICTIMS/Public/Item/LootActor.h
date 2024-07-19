@@ -33,7 +33,7 @@ public:
 	uint8 MinLootItems = 1;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	uint8 MaxLootItems = 4;
+	uint8 MaxLootItems = 3;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* DB_ItemList;

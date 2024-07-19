@@ -7,6 +7,8 @@
 #include "EItemType.h"
 #include "FContainerInfo.h"
 #include "FSlotStructure.h"
+#include "FShopInfo.h"
+#include "FShopList.h"
 #include "InventoryManagerComponent.generated.h"
 
 class UDataTable;
@@ -178,11 +180,27 @@ public:
 	UPROPERTY()
 	AActor* CurrentContainer;
 
+
 	/*Defined on Player Controller*/
 	uint8 NumberOfRowsInventory = 0;
 	uint8 SlotsPerRowInventory = 0;
 	uint8 NumberOfSlotsOnHotbar = 0;
 
+	UFUNCTION(Category = "Manager|Private|Inventory")
+	void DropItem(UInventoryComponent* Inventory, uint8 InventorySlot);
+
+	
+	UFUNCTION(Category = "Manager|Private|Inventory")
+	void AddGold(uint8 Amount);
+
+	UFUNCTION(Category = "Manager|Private|Equipment")
+	void EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,	UInventoryComponent* ToInventory, uint8 ToInventorySlot);
+
+	UFUNCTION(Category = "Manager|Private|Items")
+	void UseInventoryItem(const uint8& InventorySlot);
+
+	UFUNCTION(Category = "Manager|Private")
+	void RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform);
 protected:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateInventoryTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
@@ -224,7 +242,7 @@ private:
 	UFUNCTION(Category = "Helper")
 	uint8 GetItemMaxStackSize(const FSlotStructure Item);
 	UFUNCTION(Category = "Helper")
-	void AddAmountToItem(FSlotStructure& Item, uint8 AmountToAdd);
+	void AddAmountToItem(FSlotStructure& Item, uint8 AmountToAdd); 
 
 	UFUNCTION()
 	void SetAttributes(int32 Value);
@@ -233,18 +251,7 @@ private:
 	void RemoveFromItemAmount(FSlotStructure& InventoryItem, const uint8& AmountToRemove, bool& WasFullAmountRemoved, uint8& AmountRemoved);
 
 	UFUNCTION(Category = "Manager|Private|Equipment")
-	void EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,
-		UInventoryComponent* ToInventory, uint8 ToInventorySlot);
-
-	UFUNCTION(Category = "Manager|Private|Equipment")
-	void UnEquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,
-		UInventoryComponent* ToInventory, uint8 ToInventorySlot);
-
-	UFUNCTION(Category = "Manager|Private")
-	void RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform);
-
-	UFUNCTION(Category = "Manager|Private|Inventory")
-	void DropItem(UInventoryComponent* Inventory, uint8 InventorySlot);
+	void UnEquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,UInventoryComponent* ToInventory, uint8 ToInventorySlot);
 
 	UFUNCTION(Category = "Manager|Private|Inventory")
 	void MoveItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot);
@@ -266,8 +273,7 @@ private:
 	UFUNCTION(Client, Reliable, Category = "Manager|Private|Items")
 	void ClientRPC_UseFurnitureItem(FName ItemID);
 
-	UFUNCTION(Category = "Manager|Private|Items")
-	void UseInventoryItem(const uint8& InventorySlot);
+
 	UFUNCTION(Category = "Manager|Private|Container")
 	void UseContainerItem(const uint8& InventorySlot);
 
@@ -280,9 +286,6 @@ private:
 
 	UFUNCTION(Category = "UserInterface|Private|Inventory")
 	FSlotStructure GetInventorySlotItem(uint8 InventorySlot);
-
-	UFUNCTION(Category = "Manager|Private|Inventory")
-	void AddGold(uint8 Amount);
 
 	UFUNCTION(Category = "UserInterface|Private|Container")
 	void ClearContainerSlots();
@@ -334,4 +337,90 @@ private:
 
 	UFUNCTION()
 	class AMyHUD* GetPlayerHud();
+
+//===========================================================================================================================================
+//SHOP
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (DisplayName = "Shop Inventory", Category = "Default", OverrideNativeName = "Shop Inventory"))
+	UInventoryComponent* ShopInventory;
+
+	UPROPERTY()
+	AActor* CurrentShop;
+
+	UPROPERTY()
+	bool IsSelling = false;
+
+	UFUNCTION(Server,Reliable)
+	void Server_UseShop(AActor* Shop); 
+	UFUNCTION(Server, Reliable)
+	void Server_CloseShop();		  
+
+	UFUNCTION(Server,Reliable)
+	void Server_PerchaseShopItem(const uint8& InventorySlot);
+	UFUNCTION(Server,Reliable)
+	void Server_SellItem(const uint8& InventorySlot); 
+	UFUNCTION(Client, Reliable)
+	void Client_SetShopSlotItem(const FSlotStructure& ContentToAdd, const uint8& InventorySlot);
+	UFUNCTION(Client, Reliable)
+	void Client_ClearShopSlotItem(uint8 ShopSlot);
+	UFUNCTION(Client, Reliable)
+	void Client_OpenShop(FShopInfo ShopProperties, const TArray<FSlotStructure>& InShopInventory, const TArray<FSlotStructure>& InPlayerInventory);
+	UFUNCTION(Client, Reliable)
+	void Client_CloseShop();
+	UFUNCTION(Client, Reliable)
+	void Client_UpdateShopTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
+protected:
+
+private:
+	
+	UFUNCTION(Category = "Manager|Private|Shop")
+	void PerchaseShopItem(const uint8& InventorySlot);
+	UFUNCTION(Category = "Manager|Private|Shop")
+	void SellItem(const uint8& InventorySlot);
+	
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void ClearShopSlots();
+
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void CreateShopSlots(uint8 NumberOfRows, uint8 SlotsPerRow);
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void CreateShopSlots2(uint8 InventorySIze, uint8 SlotsPerRow);
+
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void SetViewersShopSlot(uint8 ShopSLot, FSlotStructure& InventoryItem);
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void AddShopSlot(uint8 Row, uint8 Column, uint8 Slot, bool IsShop);
+
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void ClearShopSlotItem(uint8 ShopSlot);
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void ClearViewersShopSlot(uint8 ShopSlot);
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void SetShopSlotItem(const FSlotStructure& Slot, uint8 Index);
+	
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void OpenShop(AActor* Shop);
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void UseShop(AActor* Shop);
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void CloseShop();
+	
+	UFUNCTION(Category = "UserInterface|Private|Shop")
+	void LoadShopSlots(FShopInfo ShopProperties, const TArray<FSlotStructure>& InShopInventroy, const TArray<FSlotStructure>& InPlayerInventory);
+	UFUNCTION(Category = "Manager|Private")
+	bool CanShopItems(UInventoryComponent* Inventory);
+
+public:
+	
+	UFUNCTION(Client, Reliable, Category = "USerInterface|public|DropMoney")
+	void Client_ShowDropMoneyLayout();
+
+	UFUNCTION(Client, Reliable, Category = "USerInterface|public|DropMoney")
+	void Client_CloseDropMoneyLayout();
+
+	UFUNCTION(Category = "UserInterface|Public|DropMoney")
+	void DropMoney();
+
+	UPROPERTY()
+	uint8 DropMoneyAmount;
 };

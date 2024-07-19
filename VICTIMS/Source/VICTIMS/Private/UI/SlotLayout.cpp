@@ -16,6 +16,7 @@
 #include "VictimsGameInstance.h"
 #include "Components/MenuAnchor.h"
 #include "HUDLayout.h"
+#include "InventoryManagerComponent.h"
 
 USlotLayout::USlotLayout(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
 {
@@ -96,6 +97,7 @@ void USlotLayout::NativeOnDragDetected(const FGeometry& InGeometry, const FPoint
 		UItemDragVisual* DragVisual = CreateWidget<UItemDragVisual>(this, ItemDragVisualClass);
 		DragVisual->Icon->SetBrushFromTexture(SlotStructure.ItemStructure.Icon);
 		DragVisual->ItemBorder->SetBrushColor(ItemBorder->GetBrushColor());
+		DragVisual->Amount->SetText(FText::AsNumber(SlotStructure.Amount));
 
 		UDragItem* DragDropOperation = NewObject<UDragItem>();
 
@@ -113,7 +115,6 @@ void USlotLayout::NativeOnDragDetected(const FGeometry& InGeometry, const FPoint
 		{
 			DragDropOperation->IsDraggedFromContainer = true;
 		}
-
 		OutOperation = DragDropOperation;
 	}
 	else
@@ -258,6 +259,7 @@ void USlotLayout::UpdateSlotInfo()
 
 	Icon->SetBrushFromTexture(SlotStructure.ItemStructure.Icon);
 	ItemBorder->SetBrushColor(GetBorderColor());
+	
 }
 
 void USlotLayout::SetNameBoxVisibility()
@@ -268,7 +270,7 @@ void USlotLayout::SetNameBoxVisibility()
 		NameText->SetText(FText::GetEmpty());
 	}
 	else {
-		FString ItemName = SlotStructure.ItemStructure.ID.ToString();
+		FString ItemName = SlotStructure.ItemStructure.Name.ToString();
 		FText ItemNameText = FText::FromString(ItemName);
 		NameBox->SetVisibility(ESlateVisibility::Visible);
 		NameText->SetText(ItemNameText);
@@ -281,12 +283,23 @@ void USlotLayout::UseItem()
 	{
 		IInventoryHUDInterface::Execute_UI_UseContainerItem(PlayerController, InventorySlotIndex);
 	}
-	else
+	else if(NativeFromInventory)
 	{
 		if (HasItem())
-		{
-			IInventoryHUDInterface::Execute_UI_UseInventoryItem(PlayerController, InventorySlotIndex);
+		{	
+			if (PlayerController->InventoryManagerComponent->IsSelling == false)
+			{
+				IInventoryHUDInterface::Execute_UI_UseInventoryItem(PlayerController, InventorySlotIndex);
+			}
+			else
+			{
+				IInventoryHUDInterface::Execute_UI_SellItem(PlayerController, InventorySlotIndex);
+			}
 		}
+	}
+	else if (NativeFromShop)
+	{
+		IInventoryHUDInterface::Execute_UI_PerChaseItem(PlayerController, InventorySlotIndex);
 	}
 }
 

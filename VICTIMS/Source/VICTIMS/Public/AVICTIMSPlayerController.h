@@ -12,6 +12,7 @@ class AVICTIMSCharacter;
 class UEquipmentComponent;
 class UInventoryManagerComponent;
 class UInteractiveText_Entry;
+class UTestIDWidget;
 
 UCLASS()
 class VICTIMS_API AVICTIMSPlayerController : public APlayerController, public IInventoryHUDInterface
@@ -30,21 +31,17 @@ public:
 	// ========================================================================================================한음
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	APawn* MocapCharCP;
-		// ========================================================================================================
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString playerName;
+
+	// ========================================================================================================
 	UFUNCTION(BlueprintCallable, Category = "Runtime Inspector")
 	int GetCurrentViewMode(const APlayerController* PlayerController);
 
 	virtual void OnPossess(APawn* aPawn) override;
 
 	virtual void Tick(float DeltaTime) override;
-
-
-	//=============================================================================================================
-	// UI Mode 관리용 
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsShowUI = false; 
-
 
 	/* Interface */
 	virtual void UI_MoveInventoryItem_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot) override;
@@ -60,6 +57,8 @@ public:
 	virtual void UI_EquipFromContainer_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot) override;
 	virtual void UI_UnEquipToContainer_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot) override;
 	virtual void UI_MoveHotbarItem_Implementation(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar) override;
+	virtual void UI_PerChaseItem_Implementation(const uint8& InventorySlot) override;
+	virtual void UI_SellItem_Implementation(const uint8& InventorySlot) override;
 	/* Ends Interface */
 
 	uint8 UIGetPlayerGold();
@@ -84,6 +83,8 @@ public:
 
 	UFUNCTION()
 	bool IsContainerOpen();
+	UFUNCTION()
+	bool IsShopOpen();
 	
 	UFUNCTION(BlueprintCallable, Category="Character")
 	void ToggleInventory();
@@ -92,8 +93,10 @@ public:
 	void SetInputDependingFromVisibleWidgets();
 	UFUNCTION(BlueprintCallable, Category="Character")
 	void ToggleContainer();
-	
 	UFUNCTION(BlueprintCallable, Category="Character")
+	void ToggleShop();
+	
+	UFUNCTION(BlueprintCallable, Category="Character")				// 사용 안하는 중. 
 	void ToggleMenu();
 
 	UFUNCTION(Server, Reliable)
@@ -137,17 +140,78 @@ public:
 	void OnActorUsed(AActor* Actor1);
 
 	UFUNCTION(BlueprintCallable)
-	void RequestClientTravel(const FString& URL);
+	void RequestClientTravel(const FString& URL, const FString& Options);
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPC_RequestClientTravel(const FString& URL);
+	void ServerRPC_RequestClientTravel(const FString& URL, const FString& Options);
 
 	UFUNCTION(Client, Reliable)
-	void ClientRPC_RequestClientTravel(const FString& URL);
+	void ClientRPC_RequestClientTravel(const FString& URL, const FString& Options);
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	bool bUseUIMode = false;
 
 protected:
 	virtual void BeginPlay() override;
 	
 private:
 	uint8 MaximumHotbarSlots = 10;
+
+
+//=========================================================================================================================
+// Save
+
+public:
+
+
+	UPROPERTY()
+	FString PlayerID;						
+
+	UPROPERTY()
+	class UTestSaveGame* SavedData;
+
+	UFUNCTION()
+	void CreateSaveData(FString ID);		// 새로 저장파일 만들기
+
+	UFUNCTION()
+	UTestSaveGame* GetSaveDataFromID(FString ID);		// TestIDWidget 에서 입력받은 문자열 ID 와 맞는 TesTSaveGame 데이터 가져오기
+
+	UFUNCTION()
+	void SaveData(FString ID);						// 데이터 저장 
+
+	UFUNCTION()
+	void LoadData(FString ID);
+
+	UPROPERTY()
+	UTestIDWidget* TestIDWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TSubclassOf<UTestIDWidget> TestIDWidget_bp;
+
+	UPROPERTY()
+	class UIDInValidWidget* IDInValidWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TSubclassOf<class UIDInValidWidget> IDInvalidWidget_bp;
+
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetUseUIState(bool bUse);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_SetUseUIState(bool bUse);
+
+	UFUNCTION()
+	void CloseTestIDWidget();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+	class AVICTIMSGameMode* GameModeReference;
+	
+	bool bIsShowUI = false;
+
+//=========================================================================================================================
+
+	UFUNCTION()
+	void CloseLayouts();
 };

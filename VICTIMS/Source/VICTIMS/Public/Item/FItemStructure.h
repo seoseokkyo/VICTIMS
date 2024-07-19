@@ -37,6 +37,9 @@ public:
 	EItemQuality Quality;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsInShop;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 PriceValue;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)

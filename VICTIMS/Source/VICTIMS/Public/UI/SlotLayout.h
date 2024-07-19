@@ -31,12 +31,17 @@ public:
 	bool NativeFromEquipment = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Default")
 	bool NativeFromContainer = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Default")
+	bool NativeFromShop = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FSlotStructure SlotStructure;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ContainerSlots")
 	bool IsStorageSlot = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "ShopSlots")
+	bool IsShopSlot = false;
 	
 	UFUNCTION()
 	void ToggleTooltip();

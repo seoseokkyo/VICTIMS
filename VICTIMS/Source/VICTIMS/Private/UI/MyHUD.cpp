@@ -11,6 +11,7 @@
 #include "ProfileLayout.h"
 #include "InventoryManagerComponent.h"
 #include "AVICTIMSPlayerController.h"
+#include "ShopLayout.h"
 
 AMyHUD::AMyHUD()
 {
@@ -67,6 +68,8 @@ bool AMyHUD::IsAnyWidgetVisible()
 		HUDReference->MainLayout->Profile->IsVisible()
 		||
 		HUDReference->MainLayout->Container->IsVisible()
+		||
+		HUDReference->MainLayout->Shop->IsVisible()
 		)
 	{
 		return true;
@@ -95,6 +98,13 @@ void AMyHUD::ToggleWindow(const ELayout Layout)
 		if (HUDReference->MainLayout->Container)
 		{
 			HUDReference->MainLayout->Container->ToggleWindow();
+		}
+	}
+	else if (Layout == ELayout::Shop)
+	{
+		if (HUDReference->MainLayout->Shop)
+		{
+			HUDReference->MainLayout->Shop->ToggleWindow();
 		}
 	}
 }

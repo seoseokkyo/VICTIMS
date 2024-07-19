@@ -1,7 +1,6 @@
 
 
 #include "ContainerLayout.h"
-#include "Internationalization/StringTableRegistry.h"
 #include "VictimsGameInstance.h"
 #include "AVICTIMSPlayerController.h"
 #include "LootActor.h"

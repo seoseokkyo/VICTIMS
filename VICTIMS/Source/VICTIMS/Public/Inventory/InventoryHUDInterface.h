@@ -56,4 +56,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Default")							// 보관함 아이템 이동
 		void UI_MoveContainerItem(const uint8& FromInventorySlot, const uint8& ToInventorySlot);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Default")
+	void UI_PerChaseItem(const uint8& InventorySlot);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Default")
+	void UI_SellItem(const uint8& InventorySlot);
 };
