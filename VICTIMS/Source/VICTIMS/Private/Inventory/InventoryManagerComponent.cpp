@@ -1059,8 +1059,6 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 	}
 	UpdateEquippedStats();
 	Server_UpdateTooltips();
-
-
 }
 
 void UInventoryManagerComponent::RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform)

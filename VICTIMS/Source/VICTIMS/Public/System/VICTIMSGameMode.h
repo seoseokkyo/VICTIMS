@@ -14,6 +14,14 @@ class AVICTIMSGameMode : public AGameModeBase
 public:
 	AVICTIMSGameMode();
 	virtual void Logout(AController* Exiting) override;
+	virtual void BeginPlay() override;
+	virtual void PostLogin(class APlayerController* pc) override;
+
+	void AssignHouseToPlayer(class AVICTIMSPlayerController* NewPlayer);
+
+	TArray<class AShelter*> Houses;
+	int32 TotalHouses;
+	int32 NextHouseIndex;
 
 };
 

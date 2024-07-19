@@ -49,6 +49,7 @@ void UEquipmentComponent::UpdateEquippedMeshes(uint8 InventorySlot)
 		{
 			FSlotStructure Slot = GetInventoryItem(InventorySlot);
 			USkeletalMesh* NewMesh = Slot.ItemStructure.SkeletalMesh;
+
 			switch (InventorySlot)
 			{
 			case (uint8)EEquipmentSlot::Weapon:

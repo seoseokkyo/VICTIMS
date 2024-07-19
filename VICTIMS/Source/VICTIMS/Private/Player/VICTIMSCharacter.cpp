@@ -31,6 +31,7 @@
 #include "InteractText.h"
 #include "TestSaveGame.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "Shelter.h"
 #include "UI/HUDLayout.h"
 #include "DropMoneyLayout.h"
 
@@ -116,7 +117,7 @@ void AVICTIMSCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	DisableInput(Cast<APlayerController>(GetController()));
+	//DisableInput(Cast<APlayerController>(GetController()));
 
 	FActorSpawnParameters spawnParam;
 	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -183,28 +184,36 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 					TempUsableActor->SetScreenPosition(ScreenPosition);
 					if (MyPlayerController->ProjectWorldLocationToScreen(UsableActor->GetActorLocation(), ScreenPosition))
 					{
-						if (TempUsableActor->InteractUserWidget->GetVisibility() == ESlateVisibility::Hidden)
+						if (nullptr != TempUsableActor->InteractUserWidget)
 						{
-							TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Visible);
-							TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+							if (TempUsableActor->InteractUserWidget->GetVisibility() == ESlateVisibility::Hidden)
+							{
+								TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Visible);
+								TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+							}
 						}
 
 						TempUsableActor->SetScreenPosition(ScreenPosition);
 					}
 					else
 					{
-						TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+						if (nullptr != TempUsableActor->InteractUserWidget)
+						{
+							TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+						}
 					}
 				}
 				else {
 					IUsableActorInterface::Execute_EndOutlineFocus(TempUsableActor);
-					TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+
+					if (nullptr != TempUsableActor->InteractUserWidget)
+					{
+						TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+					}
 				}
 			}
 		}
 	}
-
-
 
 }
 //////////////////////////////////////////////////////////////////////////
@@ -212,10 +221,10 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 
 void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->ClearActionBindings();
-	}
+	//if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	//{
+	//	EnhancedInputComponent->ClearActionBindings();
+	//}
 
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	// Add Input Mapping Context
@@ -271,9 +280,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar3, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot3);
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
-			EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
 			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
-
 		}
 	}
 	else
@@ -315,81 +322,6 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
-	}
-}
-
-void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
-{
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->ClearActionBindings();
-	}
-
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	// Add Input Mapping Context
-
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
-
-	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
-
-		// Jumping
-		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
-		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
-		//EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Move);
-
-		// Looking
-		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Look);
-
-
-		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
-		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
-		EnhancedInputComponent->BindAction(MoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnMoveObject);
-		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
-		
-		/********/
-		EnhancedInputComponent->BindAction(HousingBuildAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRightMouseButtonPressed);
-		EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
-
-		
-
-
-		//상호작용 =====================================================================================================================
-		if (MyPlayerController == nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController == nullptr"));
-		}
-		else
-		{
-			EnhancedInputComponent->BindAction(Interact, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::Interact);
-			EnhancedInputComponent->BindAction(ToggleProfile, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::ToggleProfile);
-			EnhancedInputComponent->BindAction(ToggleInventory, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::ToggleInventory);
-			EnhancedInputComponent->BindAction(ToggleMenu, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::ToggleMenu);
-			EnhancedInputComponent->BindAction(ToggleUIMode, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::EnableUIMode);
-			EnhancedInputComponent->BindAction(ToggleUIMode, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::DisableUIMode);
-			EnhancedInputComponent->BindAction(UserHotbar1, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot1);
-			EnhancedInputComponent->BindAction(UserHotbar2, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot2);
-			EnhancedInputComponent->BindAction(UserHotbar3, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot3);
-			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
-			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
-			EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
-			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
 }
 
@@ -870,7 +802,7 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 	{
 		if (Data)
 		{
-// 			SavedData = Data;	// 데이터 변수 저장/
+			// 			SavedData = Data;	// 데이터 변수 저장/
 			stateComp->ServerRPC_SetStatePoint(EStateType::HP, Data->SavedHP);	// 플레이어 HP 로드
 			MyPlayerController->InventoryManagerComponent->AddGold(Data->SavedGold);	// Gold 로드
 
@@ -884,3 +816,40 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 	}
 }
 
+void AVICTIMSCharacter::SetAssignedHouse(AShelter* NewHouse)
+{
+	ServerRPC_SetAssignedHouse(NewHouse);
+}
+
+void AVICTIMSCharacter::ServerRPC_SetAssignedHouse_Implementation(AShelter* NewHouse)
+{
+	AssignedHouse = NewHouse;
+
+	NetMulticastRPC_SetAssignedHouse(AssignedHouse);
+}
+
+void AVICTIMSCharacter::NetMulticastRPC_SetAssignedHouse_Implementation(AShelter* NewHouse)
+{
+	AssignedHouse = NewHouse;
+}
+
+// void AVICTIMSCharacter::GoToHouse()
+// {
+// 	if (AssignedHouse)
+// 	{
+// 		SetActorLocation(AssignedHouse->GetActorLocation());
+// 	}
+// }
+
+void AVICTIMSCharacter::Server_GoToHouse_Implementation()
+{
+	MultiCast_GoToHouse(AssignedHouse);
+}
+
+void AVICTIMSCharacter::MultiCast_GoToHouse_Implementation(AShelter* NewHouse)
+{
+	if (NewHouse)
+	{
+		SetActorLocation(NewHouse->GetActorLocation() + FVector(0, 0, 1) * 3000.f);
+	}
+}

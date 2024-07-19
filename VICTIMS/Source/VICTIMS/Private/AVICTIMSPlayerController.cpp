@@ -21,10 +21,12 @@
 #include "Components/TextBlock.h"
 #include "IDInValidWidget.h"
 #include "SavedWidget.h"
+#include "Net/UnrealNetwork.h"
+#include "Shelter.h"
+#include "System/VICTIMSGameMode.h"
 #include "UI/InventoryLayout.h"
 #include "UI/ProfileLayout.h"
 #include "DropMoneyLayout.h"
-
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -376,7 +378,7 @@ void AVICTIMSPlayerController::DisableUIMode()
 {
 	if (bIsShowUI == false)
 	{
-		if (!IsValid(HUD_Reference))
+		if (!IsValid(HUD_Reference) || bUseUIMode)
 		{
 			return;
 		}
@@ -624,6 +626,9 @@ void AVICTIMSPlayerController::SaveData(FString ID)
 				uint8 TempItemAmount = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).Amount;
 				SavedData->SavedItemAmounts.Add(TempItemAmount);
 			}
+			
+			// 집 번호 저장
+			SavedData->HouseNumber = CharacterReference->AssignedHouse ? CharacterReference->AssignedHouse->HouseNumber : -1;
 
 			UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
 			HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Visible);
@@ -690,6 +695,14 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 						}
 					}
 				}
+
+				// 집 번호 로드 및 할당
+				if (SavedData->HouseNumber >= 0 && SavedData->HouseNumber < GameModeReference->Houses.Num())
+				{
+					AShelter* AssignedHouse = GameModeReference->Houses[SavedData->HouseNumber];
+					CharacterReference->SetAssignedHouse(AssignedHouse);
+				}
+
 			}
 			else
 			{
@@ -719,6 +732,20 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 	}
 }
 
+void AVICTIMSPlayerController::ServerRPC_SetUseUIState_Implementation(bool bUse)
+{
+	bUseUIMode = bUse;
+
+	UE_LOG(LogTemp, Warning, TEXT("bUseUIMode : %s"), bUseUIMode ? TEXT("TRUE") : TEXT("FALSE"));
+
+	ClientRPC_SetUseUIState(bUseUIMode);
+}
+
+void AVICTIMSPlayerController::ClientRPC_SetUseUIState_Implementation(bool bUse)
+{
+	bUseUIMode = bUse;
+}
+
 void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 {
 	if (IsLocalController())
@@ -729,6 +756,14 @@ void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
 	}
+}
+
+
+void AVICTIMSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AVICTIMSPlayerController, bUseUIMode);
 }
 
 void AVICTIMSPlayerController::CloseLayouts()
