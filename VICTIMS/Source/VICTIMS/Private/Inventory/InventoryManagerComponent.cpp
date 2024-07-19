@@ -1278,31 +1278,58 @@ void UInventoryManagerComponent::ClientRPC_UseConsumableItem_Implementation(cons
 
 void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Using Furniture Item - Slot: %d, Item ID: %s, Amount: %d"), InventorySlot, *InventoryItem.ItemStructure.ID.ToString(), InventoryItem.Amount);
-	UE_LOG(LogTemp, Warning, TEXT("Item Structure Info - ID: %s, Name: %s, ItemType: %d"), *InventoryItem.ItemStructure.ID.ToString(), *InventoryItem.ItemStructure.Name.ToString(), (int32)InventoryItem.ItemStructure.ItemType);
+	FVector StartLocation = GetPlayerRef()->GetActorLocation();
+	FVector DownVector = FVector(0, 0, -1);
+	FVector EndLocation = StartLocation + (DownVector * 200.0f);
 
-	FName ItemID = InventoryItem.ItemStructure.ID;
+	//UE_LOG(LogTemp, Warning, TEXT("Using Furniture Item - Slot: %d, Item ID: %s, Amount: %d"), InventorySlot, *InventoryItem.ItemStructure.ID.ToString(), InventoryItem.Amount);
+	//UE_LOG(LogTemp, Warning, TEXT("Item Structure Info - ID: %s, Name: %s, ItemType: %d"), *InventoryItem.ItemStructure.ID.ToString(), *InventoryItem.ItemStructure.Name.ToString(), (int32)InventoryItem.ItemStructure.ItemType);
 
-	uint8 AmountToRemove = 1;
-	bool WasFullAmountRemoved = false;
-	uint8 AmountRemoved = 0;
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(playerReference);
 
-	RemoveFromItemAmount(InventoryItem, AmountToRemove, WasFullAmountRemoved, AmountRemoved);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_GameTraceChannel6, Params);
 
-	if (WasFullAmountRemoved)
+	//UE_LOG(LogTemp, Warning, TEXT("HitResult : %p, bHit : %s"), HitResult.GetActor(), bHit ? TEXT("Hit") : TEXT("NoHit"));
+
+	if (bHit && HitResult.GetActor()->ActorHasTag(FName("Allow")))
 	{
-		InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
+		//UE_LOG(LogTemp, Warning, TEXT("IMIN"));
+		//UE_LOG(LogTemp, Warning, TEXT("Using Furniture Item - Slot: %d, Item ID: %s, Amount: %d"), InventorySlot, *InventoryItem.ItemStructure.ID.ToString(), InventoryItem.Amount);
+		//UE_LOG(LogTemp, Warning, TEXT("Item Structure Info - ID: %s, Name: %s, ItemType: %d"), *InventoryItem.ItemStructure.ID.ToString(), *InventoryItem.ItemStructure.Name.ToString(), (int32)InventoryItem.ItemStructure.ItemType);
 
-		RemoveItem(PlayerInventory, InventorySlot);
+		FName ItemID = InventoryItem.ItemStructure.ID;
+
+		uint8 AmountToRemove = 1;
+		bool WasFullAmountRemoved = false;
+		uint8 AmountRemoved = 0;
+
+		RemoveFromItemAmount(InventoryItem, AmountToRemove, WasFullAmountRemoved, AmountRemoved);
+
+		if (WasFullAmountRemoved)
+		{
+			InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
+
+			RemoveItem(PlayerInventory, InventorySlot);
+		}
+		else
+		{
+			AddItem(PlayerInventory, InventorySlot, InventoryItem);
+		}
+
+		ClientRPC_UseFurnitureItem(ItemID);
 	}
 	else
 	{
-		AddItem(PlayerInventory, InventorySlot, InventoryItem);
+		// UE_LOG(LogTemp, Warning, TEXT("Cannot use furniture item here. GO HOME."));
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cannot use furniture item here. GO HOME."));
+		}
 	}
-	
 
-	ClientRPC_UseFurnitureItem(ItemID);
-
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
 
 
 	//========================================================================================================
@@ -1369,13 +1396,13 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 		for (int32 i = 0; i < housingComponent->Buildables.Num(); i++)
 		{
 			FName BuildableID = housingComponent->Buildables[i].ID;
-			UE_LOG(LogTemp, Warning, TEXT("Comparing Item ID: %s with Buildable ID: %s"), *ItemID.ToString(), *BuildableID.ToString());
+			//UE_LOG(LogTemp, Warning, TEXT("Comparing Item ID: %s with Buildable ID: %s"), *ItemID.ToString(), *BuildableID.ToString());
 
 			if (BuildableID == ItemID)
 			{
 				housingComponent->BuildID = i;
 				bBuildIDSet = true;
-				UE_LOG(LogTemp, Warning, TEXT("Matching BuildID found: %d for Item ID: %s"), i, *ItemID.ToString());
+				//UE_LOG(LogTemp, Warning, TEXT("Matching BuildID found: %d for Item ID: %s"), i, *ItemID.ToString());
 				break;
 			}
 		}
