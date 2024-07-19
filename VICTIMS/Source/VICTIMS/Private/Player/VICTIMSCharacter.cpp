@@ -31,6 +31,8 @@
 #include "InteractText.h"
 #include "TestSaveGame.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "UI/HUDLayout.h"
+#include "DropMoneyLayout.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -412,7 +414,20 @@ void AVICTIMSCharacter::DieFunction()
 		for (int i = 0; i < Items.Num(); i++)
 		{
 			PC->InventoryManagerComponent->DropItem(PC->InventoryManagerComponent->PlayerInventory, i);
-			// 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DropItem : %s"), *Items[i].ItemStructure.Name.ToString()));
+		}
+		for(int i = 0; i < PC->InventoryManagerComponent->Gold; i++)
+		{
+			FSlotStructure LocalSlot = PC->InventoryManagerComponent->PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
+			UClass* LocalClass = nullptr;
+			FTransform OutTransform;
+			PC->InventoryManagerComponent->RandomizeDropLocation(LocalSlot, LocalClass, OutTransform);
+			AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransform);
+			if (WActor)
+			{
+				WActor->StaticMesh->SetSimulatePhysics(true);
+				WActor->Amount = 1;
+				PC->InventoryManagerComponent->AddGold(-1);
+			}
 		}
 	}
 

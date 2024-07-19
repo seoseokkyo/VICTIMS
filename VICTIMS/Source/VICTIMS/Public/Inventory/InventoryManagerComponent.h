@@ -198,6 +198,9 @@ public:
 
 	UFUNCTION(Category = "Manager|Private|Items")
 	void UseInventoryItem(const uint8& InventorySlot);
+
+	UFUNCTION(Category = "Manager|Private")
+	void RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform);
 protected:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateInventoryTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
@@ -247,14 +250,8 @@ private:
 	UFUNCTION()
 	void RemoveFromItemAmount(FSlotStructure& InventoryItem, const uint8& AmountToRemove, bool& WasFullAmountRemoved, uint8& AmountRemoved);
 
-
 	UFUNCTION(Category = "Manager|Private|Equipment")
 	void UnEquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,UInventoryComponent* ToInventory, uint8 ToInventorySlot);
-
-	UFUNCTION(Category = "Manager|Private")
-	void RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform);
-
-
 
 	UFUNCTION(Category = "Manager|Private|Inventory")
 	void MoveItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot);
