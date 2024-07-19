@@ -1,6 +1,8 @@
 
 
 #include "InventoryComponent.h"
+#include "AVICTIMSPlayerController.h"
+#include "Inventory/InventoryManagerComponent.h"
 
 UInventoryComponent::UInventoryComponent()
 {
@@ -139,6 +141,15 @@ FReturnTupleBoolInt UInventoryComponent::GetEmptyInventorySpace()
 	int8 LocalInteger = -1;
 	bool LocalBoolean = false;
 
+	if (uint8 ArrayIndex = (uint8)EEquipmentSlot::Count > Inventory.Num())
+	{
+		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner());
+		if (PC)
+		{
+			Server_InitInventory_Implementation(PC->InventoryManagerComponent->TotalNumberOfSlots);
+		//	InitInventory(PC->InventoryManagerComponent->TotalNumberOfSlots);
+		}
+	}
 	for (uint8 ArrayIndex = (uint8)EEquipmentSlot::Count; ArrayIndex < Inventory.Num(); ArrayIndex++)	
 	{
 		FSlotStructure Slot = Inventory[ArrayIndex];
@@ -249,5 +260,26 @@ FReturnTupleBoolInt UInventoryComponent::GetEmptyContainerSpace()
 		return { true, LocalInteger };
 	}
 	return { false, 0 };
+}
+
+FReturnTupleBoolInt UInventoryComponent::GetEmptyShopSpace()
+{
+	int8 LocalInteger = -1;
+	bool LocalBoolean = false;
+	for(uint8 ArrayIndex = 0; ArrayIndex < Inventory.Num(); ArrayIndex++)
+	{
+		FSlotStructure Slot = Inventory[ArrayIndex];
+		if (!ItemIsValid(Slot))
+		{
+			LocalInteger = ArrayIndex;
+			LocalBoolean = true;
+			break;
+		}
+	}
+	if (LocalBoolean)
+	{
+		return {true, LocalInteger};
+	}
+	return {false, 0};
 }
 

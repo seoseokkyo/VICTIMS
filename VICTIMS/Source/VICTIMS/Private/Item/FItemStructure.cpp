@@ -9,6 +9,7 @@ FItemStructure::FItemStructure()
 	Description = FText::FromString("None");
 	ItemType = EItemType::Undefined;
 	Quality = EItemQuality::Undefined;
+	IsInShop = false;
 	PriceValue = 0;
 	IsStackable = false;
 	MaxStackSize = 0;

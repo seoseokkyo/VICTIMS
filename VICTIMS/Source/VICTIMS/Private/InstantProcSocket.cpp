@@ -1,7 +1,5 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "InstantProcSocket.h"
+#include "VictimsGameInstance.h"
 
 UInstantProcSocket::UInstantProcSocket()
 {
@@ -11,7 +9,10 @@ void UInstantProcSocket::InitializeSocket()
 {
     Socket = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateSocket(NAME_Stream, TEXT("InstantProcSocket"), false);
 
-    FString Address = TEXT("192.168.0.147");
+    auto gameInst = GetWorld()->GetGameInstanceChecked<UVictimsGameInstance>();
+
+    //FString Address = TEXT("192.168.0.147");
+    FString Address = gameInst->mainAddress;
     int32 Port = 8001;
 
     UE_LOG(LogTemp, Log, TEXT("Connected to server at %d"), Port);

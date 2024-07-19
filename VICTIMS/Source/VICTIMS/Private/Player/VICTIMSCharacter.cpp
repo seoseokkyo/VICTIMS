@@ -12,7 +12,7 @@
 #include "InputActionValue.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include "CombatComponent.h"
-//#include "BaseWeapon.h"
+#include "BaseWeapon.h"
 #include "Components/SphereComponent.h"
 #include "AVICTIMSPlayerController.h"
 #include "HousingComponent.h"
@@ -25,7 +25,15 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "InteractiveText_Panel.h"
+#include "EquipmentComponent.h"
 #include "HPWidget.h"
+#include "PlayerDiedWidget.h"
+#include "InteractText.h"
+#include "TestSaveGame.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "Shelter.h"
+#include "UI/HUDLayout.h"
+#include "DropMoneyLayout.h"
 #include "CollisionComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -113,7 +121,7 @@ void AVICTIMSCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	DisableInput(Cast<APlayerController>(GetController()));
+	//DisableInput(Cast<APlayerController>(GetController()));
 
 	FActorSpawnParameters spawnParam;
 	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -163,7 +171,7 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 		if (IsValid(MyPlayerController))
 		{
 			MyPlayerController->DisableUIMode();
-			MyPlayerController->Tick(DeltaSeconds);
+			//MyPlayerController->Tick(DeltaSeconds);
 		}
 		return;
 	}
@@ -185,33 +193,49 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 					TempUsableActor->SetScreenPosition(ScreenPosition);
 					if (MyPlayerController->ProjectWorldLocationToScreen(UsableActor->GetActorLocation(), ScreenPosition))
 					{
-						if (TempUsableActor->InteractUserWidget->GetVisibility() == ESlateVisibility::Hidden)
+						if (nullptr != TempUsableActor->InteractUserWidget)
 						{
-							TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Visible);
-							TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+							if (TempUsableActor->InteractUserWidget->GetVisibility() == ESlateVisibility::Hidden)
+							{
+								TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Visible);
+								TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+							}
 						}
 
 						TempUsableActor->SetScreenPosition(ScreenPosition);
 					}
 					else
 					{
-						TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+						if (nullptr != TempUsableActor->InteractUserWidget)
+						{
+							TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+						}
 					}
 				}
 				else {
 					IUsableActorInterface::Execute_EndOutlineFocus(TempUsableActor);
-					TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+
+					if (nullptr != TempUsableActor->InteractUserWidget)
+					{
+						TempUsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+					}
 				}
 			}
 		}
 	}
-	
+
 }
 //////////////////////////////////////////////////////////////////////////
 // Input
 
 void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
+	//if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	//{
+	//	EnhancedInputComponent->ClearActionBindings();
+	//}
+
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	// Add Input Mapping Context
 
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
@@ -223,7 +247,9 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	}
 
 	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 
 		// Jumping
 		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
@@ -237,11 +263,13 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
 		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
-		
+
 		EnhancedInputComponent->BindAction(MoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnMoveObject);
 		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
 		/********/
 		EnhancedInputComponent->BindAction(HousingBuildAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRightMouseButtonPressed);
+		EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
+
 
 		//상호작용 =====================================================================================================================
 		if (MyPlayerController == nullptr)
@@ -261,6 +289,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar3, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot3);
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
+			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
 		}
 	}
 	else
@@ -305,64 +334,6 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
-{
-	// Add Input Mapping Context
-
-	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
-	{
-		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
-		{
-			Subsystem->AddMappingContext(DefaultMappingContext, 0);
-		}
-	}
-
-	// Set up action bindings
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) 
-	{
-		MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
-
-		// Jumping
-		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
-		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
-
-		// Moving
-		//EnhancedInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Move);
-
-		// Looking
-		//EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AVICTIMSCharacter::Look);
-
-		EnhancedInputComponent->BindAction(ia_ToggleCombat, ETriggerEvent::Started, this, &AVICTIMSCharacter::ToggleCombat);
-		EnhancedInputComponent->BindAction(ia_LeftClickAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::LeftClick);
-		
-
-		//상호작용 =====================================================================================================================
-		if (MyPlayerController == nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController == nullptr"));
-		}
-		else
-		{
-			EnhancedInputComponent->BindAction(Interact, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::Interact);
-			EnhancedInputComponent->BindAction(ToggleProfile, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::ToggleProfile);
-			EnhancedInputComponent->BindAction(ToggleInventory, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::ToggleInventory);
-			EnhancedInputComponent->BindAction(ToggleMenu, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::ToggleMenu);
-			EnhancedInputComponent->BindAction(ToggleUIMode, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::EnableUIMode);
-			EnhancedInputComponent->BindAction(ToggleUIMode, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::DisableUIMode);
-			EnhancedInputComponent->BindAction(UserHotbar1, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot1);
-			EnhancedInputComponent->BindAction(UserHotbar2, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot2);
-			EnhancedInputComponent->BindAction(UserHotbar3, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot3);
-			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
-			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
-		}
-	}
-	else
-	{
-		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
-	}
-}
-
-
 float AVICTIMSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -377,14 +348,41 @@ void AVICTIMSCharacter::DieFunction()
 
 	GetMesh()->SetCollisionResponseToChannels(param);
 
-	EnableRagdoll();
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner());		// 인벤토리+장비중 아이템 모두 드롭 
+	if (PC)
+	{
+		TArray<FSlotStructure> Items = PC->InventoryManagerComponent->PlayerInventory->Inventory;
+		for (int i = 0; i < Items.Num(); i++)
+		{
+			PC->InventoryManagerComponent->DropItem(PC->InventoryManagerComponent->PlayerInventory, i);
+		}
+		for(int i = 0; i < PC->InventoryManagerComponent->Gold; i++)
+		{
+			FSlotStructure LocalSlot = PC->InventoryManagerComponent->PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
+			UClass* LocalClass = nullptr;
+			FTransform OutTransform;
+			PC->InventoryManagerComponent->RandomizeDropLocation(LocalSlot, LocalClass, OutTransform);
+			AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransform);
+			if (WActor)
+			{
+				WActor->StaticMesh->SetSimulatePhysics(true);
+				WActor->Amount = 1;
+				PC->InventoryManagerComponent->AddGold(-1);
+			}
+		}
+	}
 
 	if (IsLocallyControlled())
 	{
+		DiedWidget = CreateWidget<UPlayerDiedWidget>(GetWorld(), DiedWidget_bp);
+		DiedWidget->AddToViewport(0);
+
 		auto pc = Cast<APlayerController>(Controller);
 
 		if (pc)
 		{
+			pc->bShowMouseCursor = true;
+			FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
 			DisableInput(pc);
 		}
 	}
@@ -392,6 +390,8 @@ void AVICTIMSCharacter::DieFunction()
 	motionState = ECharacterMotionState::Die;
 
 	Super::DieFunction();
+
+	EnableRagdoll();
 }
 
 
@@ -498,7 +498,6 @@ void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation(bool bCombat
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
 		}
-		
 	}
 
 	//<< SSK 이거 먹히는지 테스트는 해봐야 됨
@@ -690,6 +689,7 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 						if (MyPlayerController->IsContainerOpen())
 						{
 							MyPlayerController->InventoryManagerComponent->Server_CloseContainer();
+							MyPlayerController->InventoryManagerComponent->Server_CloseShop();
 						}
 
 						return;
@@ -767,5 +767,101 @@ void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
 	if (TargetComponent)
 	{
 		TargetComponent->DestroyComponent();
+	}
+}
+
+//=======================================================================================================
+// Save
+void AVICTIMSCharacter::SavePersonalID(FString ID)
+{
+	if (IsLocallyControlled())
+	{
+		PersonalID = ID;
+	}
+}
+
+void AVICTIMSCharacter::SaveDataNow()
+{
+	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, "Saved");
+	if (HasAuthority())
+	{
+		MyPlayerController->SaveData(PersonalID);
+	}
+}
+
+void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
+{
+	if (IsLocallyControlled())
+	{
+		if (Data == MyPlayerController->GetSaveDataFromID(PersonalID))			// 플레이어가 갖고있는 ID 의 데이터 가져오기
+		{
+			Data = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(PersonalID, 0));
+			Data->SavedHP = stateComp->runningStat.currentHP;					  // 현재 플레이어 HP 저장
+			Data->SavedGold = MyPlayerController->InventoryManagerComponent->Gold; // 현재 인벤토리 Gold 저장
+			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
+
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
+		}
+	}
+}
+
+void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
+{
+	if (IsLocallyControlled())
+	{
+		if (Data)
+		{
+			// 			SavedData = Data;	// 데이터 변수 저장/
+			stateComp->ServerRPC_SetStatePoint(EStateType::HP, Data->SavedHP);	// 플레이어 HP 로드
+			MyPlayerController->InventoryManagerComponent->AddGold(Data->SavedGold);	// Gold 로드
+
+			UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), Data->SavedHP);
+			UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), Data->SavedGold);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
+		}
+	}
+}
+
+void AVICTIMSCharacter::SetAssignedHouse(AShelter* NewHouse)
+{
+	ServerRPC_SetAssignedHouse(NewHouse);
+}
+
+void AVICTIMSCharacter::ServerRPC_SetAssignedHouse_Implementation(AShelter* NewHouse)
+{
+	AssignedHouse = NewHouse;
+
+	NetMulticastRPC_SetAssignedHouse(AssignedHouse);
+}
+
+void AVICTIMSCharacter::NetMulticastRPC_SetAssignedHouse_Implementation(AShelter* NewHouse)
+{
+	AssignedHouse = NewHouse;
+}
+
+// void AVICTIMSCharacter::GoToHouse()
+// {
+// 	if (AssignedHouse)
+// 	{
+// 		SetActorLocation(AssignedHouse->GetActorLocation());
+// 	}
+// }
+
+void AVICTIMSCharacter::Server_GoToHouse_Implementation()
+{
+	MultiCast_GoToHouse(AssignedHouse);
+}
+
+void AVICTIMSCharacter::MultiCast_GoToHouse_Implementation(AShelter* NewHouse)
+{
+	if (NewHouse)
+	{
+		SetActorLocation(NewHouse->GetActorLocation() + FVector(0, 0, 1) * 3000.f);
 	}
 }

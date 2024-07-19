@@ -86,8 +86,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* RemoveObjectAction;
-
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* SaveAction;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* CloseLayoutAction;
 
 	/***********/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -99,6 +103,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UHPWidget> hpWidget_bp;
 
+	UPROPERTY()
+	class UPlayerDiedWidget* DiedWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<UPlayerDiedWidget> DiedWidget_bp;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")			// 상호작용 범위
 	class USphereComponent* InteractionField;
 
@@ -146,8 +155,6 @@ public:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHeadMesh", meta = (DisplayName = "Main Head Mesh", Category = "Inventory|Equipment"))
 	USkeletalMesh* HeadMesh;	
 
-
-
 //=====================================================================================================
 //  FUNCTION
 
@@ -184,7 +191,6 @@ protected:
 // 상호작용 관련 
 //=====================================================================================================
 
-//=====================================================================================================
 
 	/** Called for movement input */
 	void Move(const FInputActionValue& Value);
@@ -261,8 +267,49 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	UPROPERTY(BlueprintReadOnly, Category = "House")
+	class AShelter* AssignedHouse;
 
-	void TestFunction(UInputComponent* PlayerInputComponent);
+	void SetAssignedHouse(AShelter* NewHouse);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetAssignedHouse(AShelter* NewHouse);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_SetAssignedHouse(AShelter* NewHouse);
+
+	// 	UFUNCTION(BlueprintCallable)
+	// 	void GoToHouse();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void Server_GoToHouse();
+
+	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
+	void MultiCast_GoToHouse(AShelter* NewHouse);
+
+
+
+//=====================================================================================================
+// Save
+
+public:
+	UPROPERTY()			// 저장시 사용하는 개인 ID 
+	FString PersonalID; 
+
+	UFUNCTION()
+	void SavePersonalID(FString ID);
+	
+	UPROPERTY()
+	class UTestSaveGame* SavedData;
+
+	UFUNCTION()
+	void SaveDataNow();
+
+	UFUNCTION()			// 플레이어 정보 데이터 저장
+	void SavePlayerData(UTestSaveGame* Data);
+	
+	UFUNCTION()			// 플레이어 정보 데이터 로드
+	void LoadPlayerData(UTestSaveGame* Data);
 
 	//che
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
@@ -271,6 +318,5 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void AddDamage(ACharacterBase* DamagedChar);
-
 };
 

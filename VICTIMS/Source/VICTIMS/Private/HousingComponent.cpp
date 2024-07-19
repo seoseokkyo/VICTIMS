@@ -196,65 +196,50 @@ void UHousingComponent::BuildCycle()
 	FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
 
 	FHitResult HitResult;
+	FHitResult HitResult2;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
 
 	ECollisionChannel temp = UEngineTypes::ConvertToCollisionChannel(Buildable.TraceChannel);
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, temp, Params);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
+	bool bHit2 = GetWorld()->LineTraceSingleByChannel(HitResult2, StartLocation, EndLocation, ECC_GameTraceChannel6, Params);
 
-	//if (bHit)
-	//{
-	//    BuildTransform.SetLocation(HitResult.ImpactPoint);
-	//    // BuildTransform.SetRotation(FQuat(HitResult.ImpactNormal.Rotation()));
-	//    if (IsValid(PreviewMesh))
-	//    {
-	//        GiveBuildColor(true);
-	//        BuildDelay();
-	//    }
-	//    else
-	//    {
-	//        SpawnPreviewMesh();
-	//        BuildDelay();
-	//    }
-	//}
-	//else
-	//{
-	//    BuildTransform.SetLocation(EndLocation);
-	//    // BuildTransform.SetRotation(FQuat(ForwardVector.Rotation()));
-	//    if (IsValid(PreviewMesh))
-	//    {
-	//        GiveBuildColor(false);
-	//        BuildDelay();
-	//    }
-	//    else
-	//    {
-	//        SpawnPreviewMesh();
-	//        BuildDelay();
-	//    }
-	//}
-	if (bHit)
+	if (bHit2)
 	{
-		FVector ImpactPoint = HitResult.ImpactPoint;
+		AActor* HitActor = HitResult2.GetActor();
+		if (HitActor->ActorHasTag(FName("Allow")))
+		{
+			if (bHit)
+			{
+				FVector ImpactPoint = HitResult.ImpactPoint;
 
-		BuildTransform.SetLocation(ImpactPoint + FVector(0, 0, 10));
+				BuildTransform.SetLocation(ImpactPoint + FVector(0, 0, 10));
+				if (IsValid(PreviewMesh))
+				{
+					GiveBuildColor();
+				}
+				else
+				{
+					SpawnPreviewMesh();
+				}
+			}
+			else
+			{
+				BuildTransform.SetLocation(EndLocation);
+				if (IsValid(PreviewMesh))
+				{
+					GiveBuildColor();
+					//BuildDelay();
+				}
+				else
+				{
+					SpawnPreviewMesh();
+					//BuildDelay();
+				}
+			}
+		}
 	}
-	else
-	{
-		BuildTransform.SetLocation(EndLocation);
-	}
-
-	//BuildTransform.SetRotation(FQuat(ForwardVector.Rotation()));
-
-	if (IsValid(PreviewMesh))
-	{
-		GiveBuildColor();
-	}
-	else
-	{
-		SpawnPreviewMesh();
-		GiveBuildColor();
-	}
-
+	
 	if (IsBuildModeOn)
 	{
 		GetWorld()->GetTimerManager().SetTimer(BuildCycleTimerHandle, this, &UHousingComponent::BuildDelay, 0.1f, false);

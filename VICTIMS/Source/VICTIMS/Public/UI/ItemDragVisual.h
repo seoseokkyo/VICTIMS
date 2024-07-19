@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "ItemDragVisual.generated.h"
 
+class UTextBlock;
 class UBorder;
 class UImage;
 UCLASS()
@@ -17,4 +18,7 @@ public:
 	UImage* Icon;
 	UPROPERTY(BlueprintReadOnly, Category="Drag Item Visual", meta=(BindWidget))
 	UBorder* ItemBorder;
+	UPROPERTY(BlueprintReadOnly, Category="Drag Item Visual", meta=(BindWidget))
+	UTextBlock* Amount;
+
 };

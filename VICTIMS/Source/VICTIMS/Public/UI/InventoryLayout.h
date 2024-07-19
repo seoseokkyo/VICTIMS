@@ -5,6 +5,7 @@
 #include "WindowLayout.h"
 #include "InventoryLayout.generated.h"
 
+class UButton;
 class UTextBlock;
 class USlotLayout;
 class UUniformGridPanel;
@@ -18,6 +19,10 @@ private:
 	virtual void NativeConstruct() override;
 
 public:
+	
+	UPROPERTY()
+	AVICTIMSPlayerController* pc;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (BindWidget))
 	UUniformGridPanel* InventoryGridPanel;
 	
@@ -27,5 +32,18 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* Gold_Amount;
 
+	UPROPERTY(meta = (BindWidget))
+	UButton* SellButton;
+
+	UPROPERTY(meta=(BindWidget))
+	UButton* DropMoneyButton;
+
+
 	void UpdateGoldAmount();
-};
+
+	UFUNCTION()
+	void OnClickSellButton();
+
+	UFUNCTION()
+	void OnClickDropMoneyButton();
+}; 

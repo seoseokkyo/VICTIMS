@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.4",
+	"EngineAssociation": "{F4B79965-4288-8303-E5FE-3B941E1EE628}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -66,13 +66,11 @@
 			"Enabled": true
 		},
 		{
-			"Name": "YoutubeVideoAudioPlayer",
-			"Enabled": false,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/4102d0282d03463faf9da2932faa3843"
-		},
-		{
-			"Name": "WebBrowserWidget",
+			"Name": "ChaosVehiclesPlugin",
 			"Enabled": true
 		}
+	],
+	"TargetPlatforms": [
+		"Windows"
 	]
 }
