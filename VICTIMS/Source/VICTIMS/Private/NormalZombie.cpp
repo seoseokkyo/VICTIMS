@@ -100,6 +100,17 @@ void ANormalZombie::DieFunction()
 
 	Super::DieFunction();
 
+	//if (HasAuthority())
+	//{
+	//	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Server : %s is Dead"), *this->GetActorNameOrLabel()), true, true, //FLinearColor::Red, 10.0f);
+	//}
+	//else
+	//{
+	//	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Client : %s is Dead"), *this->GetActorNameOrLabel()), true, true, //FLinearColor::Red, 10.0f);
+	//}
+	
+	
+	
 	if (DeathSound && motionState != ECharacterMotionState::Die)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
@@ -114,6 +125,12 @@ void ANormalZombie::ServerRPC_DieFunction_Implementation()
 
 	GetController<ANormalZombieController>()->SetFocus(nullptr);
 
+	NetMulticastRPC_DieFunction();
+}
+
+void ANormalZombie::NetMulticastRPC_DieFunction_Implementation()
+{
+
 	FTimerHandle hnd;
 	GetWorldTimerManager().SetTimer(hnd, [&]() {
 
@@ -122,11 +139,6 @@ void ANormalZombie::ServerRPC_DieFunction_Implementation()
 
 		}, 2.0f, false);
 
-	NetMulticastRPC_DieFunction();
-}
-
-void ANormalZombie::NetMulticastRPC_DieFunction_Implementation()
-{
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{

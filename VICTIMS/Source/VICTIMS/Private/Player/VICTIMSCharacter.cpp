@@ -377,6 +377,8 @@ void AVICTIMSCharacter::DieFunction()
 
 	GetMesh()->SetCollisionResponseToChannels(param);
 
+	EnableRagdoll();
+
 	if (IsLocallyControlled())
 	{
 		auto pc = Cast<APlayerController>(Controller);

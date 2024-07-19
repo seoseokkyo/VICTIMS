@@ -43,12 +43,12 @@ void AVICTIMSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//if (CharacterReference == nullptr)
-	//{
-	//	CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
+	if (CharacterReference == nullptr)
+	{
+		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
 
-	//	UE_LOG(LogTemp, Warning, TEXT("CharacterReference Was Null, Replace : %p"), CharacterReference);
-	//}
+		UE_LOG(LogTemp, Warning, TEXT("CharacterReference Was Null, Replace : %p"), CharacterReference);
+	}
 
 
 }

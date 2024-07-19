@@ -64,6 +64,11 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
 	stateComp->NetMulticastRPC_SetStatePoint(HP, temp);
 
+	if (stateComp->GetStatePoint(HP) <= 0)
+	{
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s is Dead By %s"), *this->GetActorNameOrLabel(), *DamageCauser->GetActorNameOrLabel()), true, true, FLinearColor::Red, 10.0f);
+	}
+
 	if (HitSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
@@ -165,7 +170,7 @@ void ACharacterBase::ContinueAttack_Implementation()
 	{
 		combatComponent->bAttackSaved = false;
 
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ContinueAttack_Implementation")));
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ContinueAttack_Implementation")));
 
 		AttackEvent();
 	}
@@ -233,6 +238,17 @@ void ACharacterBase::EnableRagdoll()
 			GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 			FAttachmentTransformRules attachTransformRules(EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true);
+
+			auto TestComps = GetComponentsByTag(USkeletalMeshComponent::StaticClass(), (TEXT("Ragdoll")));
+			for (auto test : TestComps)
+			{
+				if (auto skeletal = Cast<USkeletalMeshComponent>(test))
+				{
+					skeletal->SetCollisionProfileName(TEXT("ragdoll"));
+					skeletal->SetAllBodiesBelowSimulatePhysics(pelvisBoneName, true, true);
+					skeletal->SetAllBodiesBelowPhysicsBlendWeight(pelvisBoneName, 1.0f, false, true);
+				}
+			}
 
 			if (GetMesh())
 			{
