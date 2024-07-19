@@ -28,4 +28,14 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(DisplayName="Equipment Character Reference", Category="Default", OverrideNativeName="EquipmentCharacterReference"))
 	AVICTIMSCharacter* EquipmentCharacterReference;
+
+	UPROPERTY()
+	USkeletalMeshComponent* ChestMesh;
+	UPROPERTY()
+	USkeletalMeshComponent* BottomMesh;
+	UPROPERTY()
+	USkeletalMeshComponent* FeetMesh;
+	UPROPERTY()
+	USkeletalMeshComponent* HeadMesh;
+
 };

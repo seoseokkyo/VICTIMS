@@ -49,33 +49,45 @@ void UEquipmentComponent::UpdateEquippedMeshes(uint8 InventorySlot)
 		{
 			FSlotStructure Slot = GetInventoryItem(InventorySlot);
 			USkeletalMesh* NewMesh = Slot.ItemStructure.SkeletalMesh;
-
 			switch (InventorySlot)
 			{
 			case (uint8)EEquipmentSlot::Weapon:
 	
 // 				EquipmentCharacterReference->MainWeaponMesh = NewMesh;
 // 				EquipmentCharacterReference->OnRep_MainWeaponMesh();
+
 				break;
 			case (uint8)EEquipmentSlot::Chest:
-				EquipmentCharacterReference->ChestMesh = NewMesh;
-				EquipmentCharacterReference->OnRep_MainChestMesh();
+				ChestMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Chest"));
+				ChestMesh->SetSkeletalMesh(NewMesh);
+
+// 				EquipmentCharacterReference->ChestMesh = NewMesh;
+// 				EquipmentCharacterReference->OnRep_MainChestMesh();
 				break;
 			case (uint8)EEquipmentSlot::Feet:
-				EquipmentCharacterReference->FeetMesh = NewMesh;
-				EquipmentCharacterReference->OnRep_MainFeetMesh();
+				FeetMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Feet"));
+				FeetMesh->SetSkeletalMesh(NewMesh);
+
+// 				EquipmentCharacterReference->FeetMesh = NewMesh;
+// 				EquipmentCharacterReference->OnRep_MainFeetMesh();
 				break;
 			case (uint8)EEquipmentSlot::Hands:
 				EquipmentCharacterReference->HandsMesh = NewMesh;
 				EquipmentCharacterReference->OnRep_MainHandsMesh();
 				break;
 			case (uint8)EEquipmentSlot::Legs:
-				EquipmentCharacterReference->LegsMesh = NewMesh;
-				EquipmentCharacterReference->OnRep_MainLegsMesh();
+				BottomMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Bottom"));
+				BottomMesh->SetSkeletalMesh(NewMesh);
+// 
+// 				EquipmentCharacterReference->LegsMesh = NewMesh;
+// 				EquipmentCharacterReference->OnRep_MainLegsMesh();
 				break;
 			case (uint8)EEquipmentSlot::Head:
-				EquipmentCharacterReference->HeadMesh = NewMesh;
-				EquipmentCharacterReference->OnRep_MainHeadMesh();
+				HeadMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Head"));
+				HeadMesh->SetSkeletalMesh(NewMesh);
+
+// 				EquipmentCharacterReference->HeadMesh = NewMesh;
+//  				EquipmentCharacterReference->OnRep_MainHeadMesh();
 				break;
 			default:
 				break;
