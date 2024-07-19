@@ -35,6 +35,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* SellButton;
 
+
 	void UpdateGoldAmount();
 
 	UFUNCTION()

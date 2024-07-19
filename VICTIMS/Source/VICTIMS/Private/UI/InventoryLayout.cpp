@@ -21,6 +21,7 @@ void UInventoryLayout::NativeConstruct()
 
 	
 	SellButton->OnClicked.AddUniqueDynamic(this, &UInventoryLayout::OnClickSellButton);	
+	SellButton->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UInventoryLayout::UpdateGoldAmount()

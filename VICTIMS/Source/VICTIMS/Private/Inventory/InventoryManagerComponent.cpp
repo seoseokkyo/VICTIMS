@@ -32,6 +32,7 @@
 #include "Components/ScrollBox.h"
 #include "Shop_Slo.h"
 #include "Inventory/InventoryComponent.h"
+#include <../../../../../../../Source/Runtime/UMG/Public/Components/Button.h>
 
 UInventoryManagerComponent::UInventoryManagerComponent()
 {
@@ -1962,6 +1963,7 @@ void UInventoryManagerComponent::Client_OpenShop_Implementation(FShopInfo ShopPr
 void UInventoryManagerComponent::Client_CloseShop_Implementation()
 {
 	MainLayoutUI->Shop->SetVisibility(ESlateVisibility::Hidden);
+	MainLayoutUI->Inventory->SellButton->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UInventoryManagerComponent::Client_UpdateShopTooltips_Implementation(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory)
@@ -2237,6 +2239,7 @@ void UInventoryManagerComponent::LoadShopSlots(FShopInfo ShopProperties, const T
 	if (AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner()))
 	{
 		PC->ToggleShop();
+		MainLayoutUI->Inventory->SellButton->SetVisibility(ESlateVisibility::Visible);
 	}
 
 }
