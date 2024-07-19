@@ -46,6 +46,10 @@ void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (0)
+	{
+		PrintInfo();
+	}
 }
 
 // Called to bind functionality to input
@@ -58,6 +62,12 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
+	stateComp->NetMulticastRPC_SetStatePoint(HP, temp);
+
+	if (stateComp->GetStatePoint(HP) <= 0)
+	{
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s is Dead By %s"), *this->GetActorNameOrLabel(), *DamageCauser->GetActorNameOrLabel()), true, true, FLinearColor::Red, 10.0f);
+	}
 
 	if (HitSound)
 	{
@@ -84,7 +94,7 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	}
 
 	// µð¹ö±×
-	if (0)
+	if (1)
 	{
 		if (EventInstigator != nullptr)
 		{
@@ -98,6 +108,35 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	}
 
 	return 0.0f;
+}
+
+void ACharacterBase::PrintInfo()
+{
+	// localRole
+	FString localRole = UEnum::GetValueAsString(GetLocalRole());
+
+	// remoteRole
+	FString remoteRole = UEnum::GetValueAsString(GetRemoteRole());
+
+	// owner
+	FString owner = GetOwner() ? GetOwner()->GetName() : "";
+
+	// netConn
+	FString netConn = GetNetConnection() ? "Valid" : "Invalid";
+
+	//FString netMode = UEnum::GetValueAsString(GetNetMode());
+
+	FString hasController = Controller ? TEXT("HasController") : TEXT("NoController");
+
+	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
+	FString strSP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::SP));
+
+	FString strState = UEnum::GetValueAsString(motionState);
+
+	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nhasController : %s\n HP : %s\n SP : %s\n strState : %s\n"), *localRole, *remoteRole, *owner, *netConn, *hasController, *strHP, *strSP, *strState);
+
+	FVector loc = GetActorLocation() + FVector(0, 0, 50);
+	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
 }
 
 void ACharacterBase::ServerRPC_HitReact_Implementation()
@@ -131,7 +170,7 @@ void ACharacterBase::ContinueAttack_Implementation()
 	{
 		combatComponent->bAttackSaved = false;
 
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ContinueAttack_Implementation")));
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ContinueAttack_Implementation")));
 
 		AttackEvent();
 	}
@@ -199,6 +238,17 @@ void ACharacterBase::EnableRagdoll()
 			GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 
 			FAttachmentTransformRules attachTransformRules(EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, EAttachmentRule::KeepWorld, true);
+
+			auto TestComps = GetComponentsByTag(USkeletalMeshComponent::StaticClass(), (TEXT("Ragdoll")));
+			for (auto test : TestComps)
+			{
+				if (auto skeletal = Cast<USkeletalMeshComponent>(test))
+				{
+					skeletal->SetCollisionProfileName(TEXT("ragdoll"));
+					skeletal->SetAllBodiesBelowSimulatePhysics(pelvisBoneName, true, true);
+					skeletal->SetAllBodiesBelowPhysicsBlendWeight(pelvisBoneName, 1.0f, false, true);
+				}
+			}
 
 			if (GetMesh())
 			{

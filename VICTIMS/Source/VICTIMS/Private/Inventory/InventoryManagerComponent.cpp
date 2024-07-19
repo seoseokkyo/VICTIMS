@@ -653,8 +653,6 @@ void UInventoryManagerComponent::Client_UpdateInventoryTooltips_Implementation(c
 
 		Index++;
 	}
-
-	int iTemp = 0;
 }
 
 void UInventoryManagerComponent::Client_UpdateContainerTooltips_Implementation(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory)

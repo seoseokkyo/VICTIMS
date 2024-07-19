@@ -14,7 +14,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FDelegate_OnUrlLoadedCallback, FStr
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_ThreeParams(FDelegate_OnUrlLoaded2Callback, FString, _video_url, FString, _audio_url, FString, _title);
 
 UENUM()
-enum VideoQuality
+enum VideoQuality2
 {
 	q144_p     UMETA(DisplayName = "144p"),
 	q240_p     UMETA(DisplayName = "240p"),
@@ -43,7 +43,7 @@ public:
 	void OnResponseReceived(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	UFUNCTION(BlueprintCallable, Category = "Youtube Component")
-	void GetYoutubeUrlsWithQuality(FString youtube_url, TEnumAsByte<VideoQuality> video_quality);
+	void GetYoutubeUrlsWithQuality(FString youtube_url, TEnumAsByte<VideoQuality2> video_quality);
 	void OnResponseReceived2(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 	
 	UPROPERTY(BlueprintAssignable)

@@ -86,6 +86,8 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 
+	void PrintInfo();
+
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_HitReact();
 

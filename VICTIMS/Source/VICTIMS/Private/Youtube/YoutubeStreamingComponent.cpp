@@ -40,7 +40,7 @@ void UYoutubeStreamingComponent::OnResponseReceived(FHttpRequestPtr Request, FHt
 	}
 }
 
-void UYoutubeStreamingComponent::GetYoutubeUrlsWithQuality(FString youtube_url, TEnumAsByte<VideoQuality> video_quality)
+void UYoutubeStreamingComponent::GetYoutubeUrlsWithQuality(FString youtube_url, TEnumAsByte<VideoQuality2> video_quality)
 {
 	FString vq;
 	switch (video_quality)

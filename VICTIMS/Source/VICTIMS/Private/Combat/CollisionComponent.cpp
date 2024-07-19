@@ -2,6 +2,8 @@
 
 
 #include "CollisionComponent.h"
+#include "Character/CharacterBase.h"
+#include "VICTIMSCharacter.h"
 
 
 // Sets default values for this component's properties
@@ -26,6 +28,12 @@ UCollisionComponent::UCollisionComponent()
 void UCollisionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	AActor*ownetCharTemp= this->GetOwner();
+	AVICTIMSCharacter*OwnerCharRef =Cast<AVICTIMSCharacter>(ownetCharTemp);
+	if (OwnerCharRef!=nullptr)
+	{
+		ownerChar=OwnerCharRef;
+	}
 }
 
 
@@ -76,6 +84,13 @@ void UCollisionComponent::CollisionTrace()
 		if (alreadyHitActors.Contains(lastHitStruct.GetActor()) == false)
 		{
 			hittedActor = lastHitStruct.GetActor();
+			ACharacterBase* AddDamageChar = Cast<ACharacterBase>(hittedActor);
+			if (AddDamageChar!=nullptr)
+			{
+				
+				ownerChar->AddDamage(AddDamageChar);
+
+			}
 
 			alreadyHitActors.Add(hittedActor);
 

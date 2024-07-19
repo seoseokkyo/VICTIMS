@@ -34,6 +34,7 @@
 #include "Shelter.h"
 #include "UI/HUDLayout.h"
 #include "DropMoneyLayout.h"
+#include "CollisionComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -110,6 +111,9 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	HandsMesh = nullptr;
 	LegsMesh = nullptr;
 	HeadMesh = nullptr;
+
+	//che
+	collisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
 }
 
 void AVICTIMSCharacter::BeginPlay()
@@ -125,12 +129,13 @@ void AVICTIMSCharacter::BeginPlay()
 	spawnParam.Owner = this;
 	spawnParam.Instigator = this;
 
-	ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
+	/*ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
 
 	if (equipment)
 	{
 		equipment->OnEquipped();
 	}
+	*/
 
 	if (HousingComponent)
 	{
@@ -140,6 +145,10 @@ void AVICTIMSCharacter::BeginPlay()
 	MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 	InteractionField->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlap);
 	InteractionField->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlap);
+	InteractionField->ComponentTags.Add(TEXT("InteractionField"));
+
+	InteractionField->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECR_Ignore);
+	InteractionField->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel5, ECR_Ignore);
 
 	if (hpWidget_bp)
 	{
@@ -412,6 +421,7 @@ void AVICTIMSCharacter::CharacterJump(const FInputActionValue& Value)
 
 void AVICTIMSCharacter::ToggleCombat(const FInputActionValue& Value)
 {
+	/*
 	auto mainWeaponPtr = combatComponent->GetMainWeapon();
 	if (IsValid(mainWeaponPtr))
 	{
@@ -422,6 +432,7 @@ void AVICTIMSCharacter::ToggleCombat(const FInputActionValue& Value)
 			ServerRPC_ToggleCombat();
 		}
 	}
+	*/
 }
 
 void AVICTIMSCharacter::LeftClick(const FInputActionValue& Value)
@@ -460,7 +471,7 @@ void AVICTIMSCharacter::ServerRPC_ToggleCombat_Implementation()
 
 void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation(bool bCombatEnable)
 {
-	auto mainWeaponPtr = combatComponent->GetMainWeapon();
+	/*auto mainWeaponPtr = combatComponent->GetMainWeapon();
 
 	combatComponent->bCombatEnable = bCombatEnable;
 
@@ -501,6 +512,7 @@ void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation(bool bCombat
 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
 
 		}, animPlayTime, false, 1.0f);
+		*/
 }
 
 void AVICTIMSCharacter::PrintInfo()

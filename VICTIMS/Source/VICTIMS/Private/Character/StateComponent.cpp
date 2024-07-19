@@ -144,6 +144,15 @@ void UStateComponent::NetMulticastRPC_SetStatePoint_Implementation(EStateType st
 	{
 	case HP:
 		runningStat.currentHP = value;
+
+		if (runningStat.currentHP <= 0)
+		{
+			if (dieDelegate.IsBound())
+			{
+				dieDelegate.Execute();
+			}
+		}
+
 		break;
 	case SP:
 		runningStat.currentSP = value;
