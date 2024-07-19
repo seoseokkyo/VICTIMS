@@ -45,7 +45,6 @@ void UTestIDWidget::OnClickedContinueButton()
 			if (IsIDValid)
 			{
 				PC->CloseTestIDWidget();
-
 			}
 			else
 			{

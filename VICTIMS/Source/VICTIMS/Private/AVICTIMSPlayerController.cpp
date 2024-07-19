@@ -21,9 +21,9 @@
 #include "Components/TextBlock.h"
 #include "IDInValidWidget.h"
 #include "SavedWidget.h"
+#include "Net/UnrealNetwork.h"
 #include "Shelter.h"
 #include "System/VICTIMSGameMode.h"
-
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -216,6 +216,8 @@ bool AVICTIMSPlayerController::IsContainerOpen()
 
 void AVICTIMSPlayerController::ToggleInventory()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
+
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Inventory);
@@ -226,6 +228,8 @@ void AVICTIMSPlayerController::ToggleInventory()
 
 void AVICTIMSPlayerController::ToggleProfile()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
+
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Equipment);
@@ -258,6 +262,8 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 
 void AVICTIMSPlayerController::ToggleContainer()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
+
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Container);
@@ -272,6 +278,8 @@ bool AVICTIMSPlayerController::IsShopOpen()
 }
 void AVICTIMSPlayerController::ToggleShop()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
+
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Shop);
@@ -359,7 +367,7 @@ void AVICTIMSPlayerController::EnableUIMode()
 
 void AVICTIMSPlayerController::DisableUIMode()
 {
-	if (!IsValid(HUD_Reference))
+	if (!IsValid(HUD_Reference) || bUseUIMode)
 	{
 		return;
 	}
@@ -403,6 +411,8 @@ void AVICTIMSPlayerController::UseHotbarSlot5()
 
 void AVICTIMSPlayerController::Interact()
 {
+	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Interact Pressed"));
+
 	if (CharacterReference == nullptr)
 	{
 		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
@@ -444,19 +454,19 @@ void AVICTIMSPlayerController::OnActorUsed(AActor* Actor1)
 	}
 }
 
-void AVICTIMSPlayerController::RequestClientTravel(const FString& URL)
+void AVICTIMSPlayerController::RequestClientTravel(const FString& URL, const FString& Options)
 {
-	ServerRPC_RequestClientTravel(URL);
+	ServerRPC_RequestClientTravel(URL, Options);
 }
 
-void AVICTIMSPlayerController::ServerRPC_RequestClientTravel_Implementation(const FString& URL)
+void AVICTIMSPlayerController::ServerRPC_RequestClientTravel_Implementation(const FString& URL, const FString& Options)
 {
-	ClientRPC_RequestClientTravel(URL);
+	ClientRPC_RequestClientTravel(URL, Options);
 }
 
-void AVICTIMSPlayerController::ClientRPC_RequestClientTravel_Implementation(const FString& URL)
+void AVICTIMSPlayerController::ClientRPC_RequestClientTravel_Implementation(const FString& URL, const FString& Options)
 {
-	UGameplayStatics::OpenLevel(this, FName(*URL));
+	UGameplayStatics::OpenLevel(this, FName(*URL), true, Options);
 }
 
 void AVICTIMSPlayerController::UI_MoveContainerItem_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot)
@@ -629,6 +639,7 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 			{
 				TestIDWidget->IsIDValid = true;
 			}
+
 			if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference))
 			{
 				SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
@@ -697,6 +708,20 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 	}
 }
 
+void AVICTIMSPlayerController::ServerRPC_SetUseUIState_Implementation(bool bUse)
+{
+	bUseUIMode = bUse;
+
+	UE_LOG(LogTemp, Warning, TEXT("bUseUIMode : %s"), bUseUIMode ? TEXT("TRUE") : TEXT("FALSE"));
+
+	ClientRPC_SetUseUIState(bUseUIMode);
+}
+
+void AVICTIMSPlayerController::ClientRPC_SetUseUIState_Implementation(bool bUse)
+{
+	bUseUIMode = bUse;
+}
+
 void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 {
 	if (IsLocalController())
@@ -706,4 +731,12 @@ void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
 	}
+}
+
+
+void AVICTIMSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AVICTIMSPlayerController, bUseUIMode);
 }

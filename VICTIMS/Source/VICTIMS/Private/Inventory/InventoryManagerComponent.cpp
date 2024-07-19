@@ -1924,7 +1924,7 @@ void UInventoryManagerComponent::Client_UpdateShopTooltips_Implementation(const 
 void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 {
 	FSlotStructure LocalInventoryItem = ShopInventory->GetInventoryItem(InventorySlot);
-	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner()); 
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner());
 	if (LocalInventoryItem.ItemStructure.PriceValue > PC->UIGetPlayerGold())
 	{	// 선택한 아이템을 살 돈이 충분하지 않을 때 
 //		UE_LOG(LogTemp, Warning, TEXT("Don't have enough money"));

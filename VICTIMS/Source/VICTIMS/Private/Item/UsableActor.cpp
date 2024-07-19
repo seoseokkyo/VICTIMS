@@ -86,8 +86,8 @@ bool AUsableActor::BeginOutlineFocus_Implementation()
 	StaticMesh->SetRenderCustomDepth(true);
 	StaticMesh->SetCustomDepthStencilValue(2);
 	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
-	if (PC) 
-	{	
+	if (PC)
+	{
 		PC->HUD_Reference->HUDReference->MainLayout->Interact->SetVisibility(ESlateVisibility::Visible);
 	}
 
@@ -97,7 +97,7 @@ bool AUsableActor::BeginOutlineFocus_Implementation()
 
 bool AUsableActor::GetIsActorUsable_Implementation()
 {
- 	return IsUsable;
+	return IsUsable;
 }
 
 FText AUsableActor::GetUseActionText_Implementation()
@@ -135,6 +135,13 @@ void AUsableActor::SetInteractText(FText Text)
 
 void AUsableActor::SetScreenPosition(FVector2D ScreenPosition)
 {
-	InteractUserWidget->SetPositionInViewport(ScreenPosition);
+	if (nullptr != InteractUserWidget)
+	{
+		InteractUserWidget->SetPositionInViewport(ScreenPosition);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("AUsableActor::SetScreenPosition :: InteractUserWidget Is Nullptr"));
+	}
 }
 

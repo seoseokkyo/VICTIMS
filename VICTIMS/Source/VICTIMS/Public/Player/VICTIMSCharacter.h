@@ -265,10 +265,6 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	void TestFunction(UInputComponent* PlayerInputComponent);
-
-
-
 	UPROPERTY(BlueprintReadOnly, Category = "House")
 	class AShelter* AssignedHouse;
 
@@ -312,18 +308,6 @@ public:
 	
 	UFUNCTION()			// 플레이어 정보 데이터 로드
 	void LoadPlayerData(UTestSaveGame* Data);
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 };

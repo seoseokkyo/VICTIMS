@@ -12,6 +12,7 @@ class AVICTIMSCharacter;
 class UEquipmentComponent;
 class UInventoryManagerComponent;
 class UInteractiveText_Entry;
+class UTestIDWidget;
 
 UCLASS()
 class VICTIMS_API AVICTIMSPlayerController : public APlayerController, public IInventoryHUDInterface
@@ -30,7 +31,11 @@ public:
 	// ========================================================================================================ÇÑÀ½
 	UPROPERTY(BlueprintReadWrite,EditAnywhere)
 	APawn* MocapCharCP;
-		// ========================================================================================================
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FString playerName;
+
+	// ========================================================================================================
 	UFUNCTION(BlueprintCallable, Category = "Runtime Inspector")
 	int GetCurrentViewMode(const APlayerController* PlayerController);
 
@@ -135,13 +140,16 @@ public:
 	void OnActorUsed(AActor* Actor1);
 
 	UFUNCTION(BlueprintCallable)
-	void RequestClientTravel(const FString& URL);
+	void RequestClientTravel(const FString& URL, const FString& Options);
 
 	UFUNCTION(Server, Reliable)
-	void ServerRPC_RequestClientTravel(const FString& URL);
+	void ServerRPC_RequestClientTravel(const FString& URL, const FString& Options);
 
 	UFUNCTION(Client, Reliable)
-	void ClientRPC_RequestClientTravel(const FString& URL);
+	void ClientRPC_RequestClientTravel(const FString& URL, const FString& Options);
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	bool bUseUIMode = false;
 
 protected:
 	virtual void BeginPlay() override;
@@ -155,8 +163,6 @@ private:
 
 public:
 
-	//UPROPERTY(BlueprintReadWrite, Category = "Player")
-	//int32 PlayerID;
 
 	UPROPERTY()
 	FString PlayerID;						
@@ -177,7 +183,7 @@ public:
 	void LoadData(FString ID);
 
 	UPROPERTY()
-	class UTestIDWidget* TestIDWidget;
+	UTestIDWidget* TestIDWidget;
 
 	UPROPERTY(EditAnywhere, Category = "Test")
 	TSubclassOf<UTestIDWidget> TestIDWidget_bp;
@@ -189,9 +195,16 @@ public:
 	TSubclassOf<class UIDInValidWidget> IDInvalidWidget_bp;
 
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetUseUIState(bool bUse);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_SetUseUIState(bool bUse);
+
 	UFUNCTION()
 	void CloseTestIDWidget();
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
 	class AVICTIMSGameMode* GameModeReference;
 };
