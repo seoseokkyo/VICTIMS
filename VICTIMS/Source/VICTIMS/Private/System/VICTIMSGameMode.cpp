@@ -73,7 +73,7 @@ void AVICTIMSGameMode::PostLogin(APlayerController* pc)
 			}
 			else
 			{
- 				AssignHouseToPlayer(NewPlayer);
+				AssignHouseToPlayer(NewPlayer);
 			}
 		}
 	}
@@ -155,10 +155,10 @@ void AVICTIMSGameMode::AssignHouseToPlayer(AVICTIMSPlayerController* NewPlayer)
 
 void AVICTIMSGameMode::Logout(AController* Exiting)
 {
-    Super::Logout(Exiting);
+	Super::Logout(Exiting);
 
-    if (APlayerController* PlayerController = Cast<APlayerController>(Exiting))
-    {
+	if (APlayerController* PlayerController = Cast<APlayerController>(Exiting))
+	{
 		if (AVICTIMSPlayerController* victimsPlayerController = Cast<AVICTIMSPlayerController>(PlayerController))
 		{
 			if (victimsPlayerController != nullptr)
@@ -168,9 +168,12 @@ void AVICTIMSGameMode::Logout(AController* Exiting)
 				auto playerCheck = Cast<AVICTIMSCharacter>(victimsPlayerController->GetPawn());
 				if (playerCheck != nullptr)
 				{
-					playerCheck->defaultWeapon->BeginDestroy();
+					if (playerCheck->defaultWeapon)
+					{
+						playerCheck->defaultWeapon->BeginDestroy();
+					}
 				}
 			}
 		}
-    }
+	}
 }
