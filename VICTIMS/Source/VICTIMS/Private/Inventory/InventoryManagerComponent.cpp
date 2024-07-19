@@ -31,8 +31,11 @@
 #include "ShopActor.h"
 #include "Components/ScrollBox.h"
 #include "Shop_Slo.h"
+#include "Components/EditableText.h"
+#include "DropMoneyLayout.h"
 #include "Inventory/InventoryComponent.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/Button.h>
+#include <../../../../../../../Source/Runtime/UMG/Public/Components/Border.h>
 
 UInventoryManagerComponent::UInventoryManagerComponent()
 {
@@ -2260,4 +2263,61 @@ bool UInventoryManagerComponent::CanShopItems(UInventoryComponent* Inventory)
 		}
 	}
 	return true;
+}
+
+//=====================================================================================================================
+// Drop Money
+
+void UInventoryManagerComponent::Client_ShowDropMoneyLayout_Implementation()
+{	
+	MainLayoutUI->DropMoneyLayout->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UInventoryManagerComponent::Client_CloseDropMoneyLayout_Implementation()
+{
+	MainLayoutUI->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UInventoryManagerComponent::DropMoney()
+{
+	int iTemp = FCString::Atoi(*MainLayoutUI->DropMoneyLayout->Amount->GetText().ToString());
+
+	uint8 money = (uint8)iTemp;
+	DropMoneyAmount = iTemp;
+
+	if (money <= 0)
+	{
+		MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Visible);
+
+		FTimerHandle Time;
+		GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+			MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Collapsed);
+			return;
+			}, 0.5f, false);
+	}
+	if (money > Gold)
+	{	
+		MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Visible);
+
+		FTimerHandle Time;
+		GetWorld()->GetTimerManager().SetTimer(Time, [&](){
+		MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+		}, 0.5f, false);
+	}
+	else if (money <= Gold)
+	{
+		FSlotStructure LocalSlot = PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
+		UClass* LocalClass = nullptr;
+		FTransform OutTransfrom;
+		RandomizeDropLocation(LocalSlot, LocalClass, OutTransfrom);
+		AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransfrom);
+		if (WActor)
+		{
+			WActor->StaticMesh->SetSimulatePhysics(true);
+			WActor->Amount = money;
+		}
+		AddGold(-money);
+		MainLayoutUI->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }

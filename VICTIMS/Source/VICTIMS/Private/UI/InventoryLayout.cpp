@@ -22,6 +22,8 @@ void UInventoryLayout::NativeConstruct()
 	
 	SellButton->OnClicked.AddUniqueDynamic(this, &UInventoryLayout::OnClickSellButton);	
 	SellButton->SetVisibility(ESlateVisibility::Hidden);
+
+	DropMoneyButton->OnClicked.AddUniqueDynamic(this, &UInventoryLayout::OnClickDropMoneyButton);
 }
 
 void UInventoryLayout::UpdateGoldAmount()
@@ -46,5 +48,14 @@ void UInventoryLayout::OnClickSellButton()
 	{
 		pc->InventoryManagerComponent->IsSelling = true;
 		SellButton->SetBackgroundColor(FLinearColor::Yellow);
+	}
+}
+
+void UInventoryLayout::OnClickDropMoneyButton()
+{
+	pc = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
+	if (pc)
+	{
+		pc->InventoryManagerComponent->Client_ShowDropMoneyLayout();
 	}
 }

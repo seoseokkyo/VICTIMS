@@ -359,9 +359,9 @@ public:
 	void Server_CloseShop();		  
 
 	UFUNCTION(Server,Reliable)
-	void Server_PerchaseShopItem(const uint8& InventorySlot);//UseContainerItem AI¢Òu ¨¬n¨öA - ¨ú¨¡AIAU ¡¾¢¬AO
+	void Server_PerchaseShopItem(const uint8& InventorySlot);
 	UFUNCTION(Server,Reliable)
-	void Server_SellItem(const uint8& InventorySlot); // DepositContianerItem AI¢Òu ¨¬n¨öA - ¨ú¨¡AIAU ¨¡C¢¬A
+	void Server_SellItem(const uint8& InventorySlot); 
 	UFUNCTION(Client, Reliable)
 	void Client_SetShopSlotItem(const FSlotStructure& ContentToAdd, const uint8& InventorySlot);
 	UFUNCTION(Client, Reliable)
@@ -412,4 +412,18 @@ private:
 	void LoadShopSlots(FShopInfo ShopProperties, const TArray<FSlotStructure>& InShopInventroy, const TArray<FSlotStructure>& InPlayerInventory);
 	UFUNCTION(Category = "Manager|Private")
 	bool CanShopItems(UInventoryComponent* Inventory);
+
+public:
+	
+	UFUNCTION(Client, Reliable, Category = "USerInterface|public|DropMoney")
+	void Client_ShowDropMoneyLayout();
+
+	UFUNCTION(Client, Reliable, Category = "USerInterface|public|DropMoney")
+	void Client_CloseDropMoneyLayout();
+
+	UFUNCTION(Category = "UserInterface|Public|DropMoney")
+	void DropMoney();
+
+	UPROPERTY()
+	uint8 DropMoneyAmount;
 };

@@ -270,6 +270,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
 			EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
+			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
 
 		}
 	}
@@ -381,7 +382,8 @@ void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
 			EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
-	}
+			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
+		}
 	}
 	else
 	{

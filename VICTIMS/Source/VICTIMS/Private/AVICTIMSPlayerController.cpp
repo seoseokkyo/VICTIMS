@@ -21,6 +21,9 @@
 #include "Components/TextBlock.h"
 #include "IDInValidWidget.h"
 #include "SavedWidget.h"
+#include "UI/InventoryLayout.h"
+#include "UI/ProfileLayout.h"
+#include "DropMoneyLayout.h"
 
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
@@ -546,8 +549,7 @@ void AVICTIMSPlayerController::UI_DropInventoryItem_Implementation(const uint8& 
 
 void AVICTIMSPlayerController::CreateSaveData(FString ID)
 {
-
-	if (UGameplayStatics::DoesSaveGameExist(ID, 0))
+	if (UGameplayStatics::DoesSaveGameExist(ID, 0) || ID.IsEmpty())
 	{
 		if (TestIDWidget)
 		{
@@ -727,4 +729,34 @@ void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget Áö¿ì±â
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
 	}
+}
+
+void AVICTIMSPlayerController::CloseLayouts()
+{
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Inventory->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Shop->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->Shop->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}	
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Profile->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}	
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Container->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->Container->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}	
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->DropMoneyLayout->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}	
+// 	return;
 }

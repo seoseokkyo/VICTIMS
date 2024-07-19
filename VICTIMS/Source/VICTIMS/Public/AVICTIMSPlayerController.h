@@ -190,9 +190,13 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Test")
 	TSubclassOf<class UIDInValidWidget> IDInvalidWidget_bp;
 
-
 	UFUNCTION()
 	void CloseTestIDWidget();
 
 	bool bIsShowUI = false;
+
+//=========================================================================================================================
+
+	UFUNCTION()
+	void CloseLayouts();
 };
