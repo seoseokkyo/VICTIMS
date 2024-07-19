@@ -2,6 +2,8 @@
 
 
 #include "CollisionComponent.h"
+#include "Character/CharacterBase.h"
+#include "VICTIMSCharacter.h"
 
 
 // Sets default values for this component's properties
@@ -14,7 +16,7 @@ UCollisionComponent::UCollisionComponent()
 	this->startSocketName = FName("Weapon Start");
 	this->endSocketName = FName("Weapon End");
 	this->traceRadius = 20;
-	this->drawDebugType = EDrawDebugTrace::None;
+	this->drawDebugType = EDrawDebugTrace::ForDuration;
 
 	collisionObjectTypes.Reset();
 	collisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
@@ -26,6 +28,12 @@ UCollisionComponent::UCollisionComponent()
 void UCollisionComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	AActor*ownetCharTemp= this->GetOwner();
+	AVICTIMSCharacter*OwnerCharRef =Cast<AVICTIMSCharacter>(ownetCharTemp);
+	if (OwnerCharRef!=nullptr)
+	{
+		ownerChar=OwnerCharRef;
+	}
 }
 
 
@@ -76,6 +84,13 @@ void UCollisionComponent::CollisionTrace()
 		if (alreadyHitActors.Contains(lastHitStruct.GetActor()) == false)
 		{
 			hittedActor = lastHitStruct.GetActor();
+			ACharacterBase* AddDamageChar = Cast<ACharacterBase>(hittedActor);
+			if (AddDamageChar!=nullptr)
+			{
+				
+				ownerChar->AddDamage(AddDamageChar);
+
+			}
 
 			alreadyHitActors.Add(hittedActor);
 
@@ -86,6 +101,8 @@ void UCollisionComponent::CollisionTrace()
 		}
 	}
 }
+
+
 
 void UCollisionComponent::AddActorToIgnore(AActor* addActor)
 {

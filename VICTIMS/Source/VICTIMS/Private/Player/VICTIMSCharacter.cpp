@@ -12,7 +12,7 @@
 #include "InputActionValue.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include "CombatComponent.h"
-#include "BaseWeapon.h"
+//#include "BaseWeapon.h"
 #include "Components/SphereComponent.h"
 #include "AVICTIMSPlayerController.h"
 #include "HousingComponent.h"
@@ -26,6 +26,7 @@
 #include "Net/UnrealNetwork.h"
 #include "InteractiveText_Panel.h"
 #include "HPWidget.h"
+#include "CollisionComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -102,6 +103,9 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	HandsMesh = nullptr;
 	LegsMesh = nullptr;
 	HeadMesh = nullptr;
+
+	//che
+	collisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
 }
 
 void AVICTIMSCharacter::BeginPlay()
@@ -117,13 +121,13 @@ void AVICTIMSCharacter::BeginPlay()
 	spawnParam.Owner = this;
 	spawnParam.Instigator = this;
 
-	ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
+	/*ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
 
 	if (equipment)
 	{
 		equipment->OnEquipped();
 	}
-
+	*/
 
 	if (HousingComponent)
 	{
@@ -358,6 +362,7 @@ void AVICTIMSCharacter::TestFunction(UInputComponent* PlayerInputComponent)
 	}
 }
 
+
 float AVICTIMSCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -414,6 +419,7 @@ void AVICTIMSCharacter::CharacterJump(const FInputActionValue& Value)
 
 void AVICTIMSCharacter::ToggleCombat(const FInputActionValue& Value)
 {
+	/*
 	auto mainWeaponPtr = combatComponent->GetMainWeapon();
 	if (IsValid(mainWeaponPtr))
 	{
@@ -424,6 +430,7 @@ void AVICTIMSCharacter::ToggleCombat(const FInputActionValue& Value)
 			ServerRPC_ToggleCombat();
 		}
 	}
+	*/
 }
 
 void AVICTIMSCharacter::LeftClick(const FInputActionValue& Value)
@@ -462,7 +469,7 @@ void AVICTIMSCharacter::ServerRPC_ToggleCombat_Implementation()
 
 void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation(bool bCombatEnable)
 {
-	auto mainWeaponPtr = combatComponent->GetMainWeapon();
+	/*auto mainWeaponPtr = combatComponent->GetMainWeapon();
 
 	combatComponent->bCombatEnable = bCombatEnable;
 
@@ -489,6 +496,7 @@ void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation(bool bCombat
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
 		}
+		
 	}
 
 	//<< SSK ÀÌ°Å ¸ÔÈ÷´ÂÁö Å×½ºÆ®´Â ÇØºÁ¾ß µÊ
@@ -503,6 +511,7 @@ void AVICTIMSCharacter::NetMulticastRPC_ToggleCombat_Implementation(bool bCombat
 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
 
 		}, animPlayTime, false, 1.0f);
+		*/
 }
 
 void AVICTIMSCharacter::PrintInfo()

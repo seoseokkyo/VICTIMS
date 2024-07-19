@@ -5,6 +5,7 @@
 #include "CombatComponent.h"
 #include "BaseWeapon.h"
 #include "CollisionComponent.h"
+#include "Player/VICTIMSCharacter.h"
 
 
 void UCollisionTrace_ANS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
@@ -15,7 +16,7 @@ void UCollisionTrace_ANS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 		if (owenrActor != nullptr)
 		{
 
-			auto comps = owenrActor->GetComponentsByTag(UCombatComponent::StaticClass(), FName(TEXT("CombatComp")));
+			/*auto comps = owenrActor->GetComponentsByTag(UCombatComponent::StaticClass(), FName(TEXT("CombatComp")));
 			for (auto Comp : comps)
 			{
 				auto combatComp = Cast<UCombatComponent>(Comp);
@@ -32,6 +33,26 @@ void UCollisionTrace_ANS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 					}
 				}
 			}
+			*/
+			//myPlayer에 달려있는 애를 메인 웨폰으로 찾아서, myPlayer에 Weapon 태그 달린 HandSkeletal을 mainWeapon으로 설정하고, 주인이 콜리전컴프를 가지고 있다면 켜줌. 콜리전 컴프는 알아서 스타트 지점과 엔드 지점을 찾아서 콜리전 검사 해 
+			auto comps = owenrActor->GetComponentsByTag(USkeletalMeshComponent::StaticClass(),(TEXT("Weapon")));
+			for (auto Comp : comps)
+			{
+				auto mainWeapon = Cast<USkeletalMeshComponent>(Comp);
+				if (mainWeapon != nullptr)
+				{
+
+					AVICTIMSCharacter*myPlayer= Cast<AVICTIMSCharacter>(mainWeapon->GetOwner());
+					if (IsValid(myPlayer))
+					{
+						if (myPlayer->collisionComponent != nullptr)
+						{
+							myPlayer->collisionComponent->SetEnableCollision(true);	// Enable
+						}
+					}
+				}
+			}
+
 		}
 	}
 }
@@ -43,19 +64,18 @@ void UCollisionTrace_ANS::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeque
 		AActor* owenrActor = MeshComp->GetOwner();
 		if (owenrActor != nullptr)
 		{
-			auto comps = owenrActor->GetComponentsByTag(UCombatComponent::StaticClass(), FName(TEXT("CombatComp")));
+			auto comps = owenrActor->GetComponentsByTag(USkeletalMeshComponent::StaticClass(), (TEXT("Weapon")));
 			for (auto Comp : comps)
 			{
-				auto combatComp = Cast<UCombatComponent>(Comp);
-				if (combatComp != nullptr)
+				auto mainWeapon = Cast<USkeletalMeshComponent>(Comp);
+				if (mainWeapon != nullptr)
 				{
-					ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
-
-					if (IsValid(mainWeapon))
+					AVICTIMSCharacter* myPlayer = Cast<AVICTIMSCharacter>(mainWeapon->GetOwner());
+					if (IsValid(myPlayer))
 					{
-						if (mainWeapon->collisionComponent != nullptr)
+						if (myPlayer->collisionComponent != nullptr)
 						{
-							mainWeapon->collisionComponent->SetEnableCollision(false);	// Disable
+							myPlayer->collisionComponent->SetEnableCollision(false);	// Enable
 						}
 					}
 				}

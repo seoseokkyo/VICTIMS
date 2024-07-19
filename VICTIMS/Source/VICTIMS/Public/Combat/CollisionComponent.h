@@ -8,7 +8,7 @@
 #include <Engine/HitResult.h>
 #include "CollisionComponent.generated.h"
 
-
+class AVICTIMSCharacter;
 
 DECLARE_DELEGATE_OneParam(FOnHitDeligate, FHitResult);
 
@@ -67,9 +67,25 @@ public:
 	TArray<AActor*>			GetActorsToIgnore() { return actorsToIgnore; };
 
 	// FromCustomEvent
+	UFUNCTION(BlueprintCallable)
 	void SetCollisionMesh(UPrimitiveComponent* meshComp);
+	UFUNCTION(BlueprintCallable)
 	void SetEnableCollision(bool bEnable);
+	UFUNCTION(BlueprintCallable)
 	void ClearHitActor();
+	UFUNCTION(BlueprintCallable)
 	void CollisionTrace();
-		
+	UPROPERTY()
+	AVICTIMSCharacter* ownerChar;
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Initialization")
+	float daggerDamage=20.0f;
+	
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Initialization")
+	float AxeDamage=40.0f;
+	*/
+	
+
+
+
 };

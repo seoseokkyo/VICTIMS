@@ -14,6 +14,7 @@ class UCameraComponent;
 class UInputMappingContext;
 class UInputAction;
 class UHPWidget;
+class UCollisionComponent;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -245,8 +246,8 @@ public:
 	void Server_SpawnBuild(UHousingComponent* Comp, bool Moving, AActor* Movable, const FTransform& Transform, const TArray<FBuildablesStructs>& DB, int32 ID);
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
-	TSubclassOf<class ABaseWeapon> defaultWeapon;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
+	//TSubclassOf<class ABaseWeapon> defaultWeapon;
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ToggleCombat();
@@ -262,5 +263,14 @@ public:
 
 
 	void TestFunction(UInputComponent* PlayerInputComponent);
+
+	//che
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+
+	UCollisionComponent* collisionComponent;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void AddDamage(ACharacterBase* DamagedChar);
+
 };
 
