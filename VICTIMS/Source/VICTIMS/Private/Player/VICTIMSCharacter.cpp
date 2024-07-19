@@ -32,7 +32,8 @@
 #include "TestSaveGame.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 #include "Shelter.h"
-
+#include "UI/HUDLayout.h"
+#include "DropMoneyLayout.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -228,12 +229,8 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	// Add Input Mapping Context
 
-	UE_LOG(LogTemp, Warning, TEXT("%s's SetupPlayerInputComponent Called"), *this->GetActorNameOrLabel());
-
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("%s Is Valid"), *PlayerController->GetActorNameOrLabel());
-
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
@@ -244,8 +241,6 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
-
-		UE_LOG(LogTemp, Warning, TEXT("%s Is Valid"), *MyPlayerController->GetActorNameOrLabel());
 
 		// Jumping
 		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
@@ -285,6 +280,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar3, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot3);
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
+			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
 		}
 	}
 	else
@@ -350,7 +346,20 @@ void AVICTIMSCharacter::DieFunction()
 		for (int i = 0; i < Items.Num(); i++)
 		{
 			PC->InventoryManagerComponent->DropItem(PC->InventoryManagerComponent->PlayerInventory, i);
-			// 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("DropItem : %s"), *Items[i].ItemStructure.Name.ToString()));
+		}
+		for(int i = 0; i < PC->InventoryManagerComponent->Gold; i++)
+		{
+			FSlotStructure LocalSlot = PC->InventoryManagerComponent->PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
+			UClass* LocalClass = nullptr;
+			FTransform OutTransform;
+			PC->InventoryManagerComponent->RandomizeDropLocation(LocalSlot, LocalClass, OutTransform);
+			AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransform);
+			if (WActor)
+			{
+				WActor->StaticMesh->SetSimulatePhysics(true);
+				WActor->Amount = 1;
+				PC->InventoryManagerComponent->AddGold(-1);
+			}
 		}
 	}
 

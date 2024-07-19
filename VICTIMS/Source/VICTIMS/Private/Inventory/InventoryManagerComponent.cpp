@@ -31,6 +31,11 @@
 #include "ShopActor.h"
 #include "Components/ScrollBox.h"
 #include "Shop_Slo.h"
+#include "Components/EditableText.h"
+#include "DropMoneyLayout.h"
+#include "Inventory/InventoryComponent.h"
+#include <../../../../../../../Source/Runtime/UMG/Public/Components/Button.h>
+#include <../../../../../../../Source/Runtime/UMG/Public/Components/Border.h>
 
 UInventoryManagerComponent::UInventoryManagerComponent()
 {
@@ -150,7 +155,7 @@ void UInventoryManagerComponent::TryToAddItemToInventory(UInventoryComponent* In
 	}
 	if (LocalTuple.Success)
 	{
-		AddItem(LocalInventory, LocalTuple.Index, LocalInventoryItem);
+		AddItem(Inventory, LocalTuple.Index, LocalInventoryItem);
 		bOutSuccess = true;
 		return;
 	}
@@ -903,6 +908,48 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 				RemoveItem(FromInventory, FromInventorySlot);
 			}
 
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")))
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+				}
+// 				playerReference->UsePistol();
+			}
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")))
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+				}
+// 				playerReference->UseRifle();
+			}
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")))
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+				}
+// 				playerReference->UseKnife();
+			}
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")))
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+				}
+// 				playerReference->UseAxe();
+			}
+
+
 			UpdateEquippedStats();
 			Server_UpdateTooltips();
 			return;
@@ -968,6 +1015,47 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 
 		AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
 		RemoveItem(FromInventory, FromInventorySlot);
+	}
+
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")))
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+		}
+		// 				playerReference->UsePistol();
+	}
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")))
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+		}
+		// 				playerReference->UseRifle();
+	}
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")))
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+		}
+		// 				playerReference->UseKnife();
+	}
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")))
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+		}
+		// 				playerReference->UseAxe();
 	}
 	UpdateEquippedStats();
 	Server_UpdateTooltips();
@@ -1876,6 +1964,7 @@ void UInventoryManagerComponent::Client_OpenShop_Implementation(FShopInfo ShopPr
 void UInventoryManagerComponent::Client_CloseShop_Implementation()
 {
 	MainLayoutUI->Shop->SetVisibility(ESlateVisibility::Hidden);
+	MainLayoutUI->Inventory->SellButton->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UInventoryManagerComponent::Client_UpdateShopTooltips_Implementation(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory)
@@ -2151,6 +2240,7 @@ void UInventoryManagerComponent::LoadShopSlots(FShopInfo ShopProperties, const T
 	if (AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner()))
 	{
 		PC->ToggleShop();
+		MainLayoutUI->Inventory->SellButton->SetVisibility(ESlateVisibility::Visible);
 	}
 
 }
@@ -2171,4 +2261,61 @@ bool UInventoryManagerComponent::CanShopItems(UInventoryComponent* Inventory)
 		}
 	}
 	return true;
+}
+
+//=====================================================================================================================
+// Drop Money
+
+void UInventoryManagerComponent::Client_ShowDropMoneyLayout_Implementation()
+{	
+	MainLayoutUI->DropMoneyLayout->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UInventoryManagerComponent::Client_CloseDropMoneyLayout_Implementation()
+{
+	MainLayoutUI->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
+}
+
+void UInventoryManagerComponent::DropMoney()
+{
+	int iTemp = FCString::Atoi(*MainLayoutUI->DropMoneyLayout->Amount->GetText().ToString());
+
+	uint8 money = (uint8)iTemp;
+	DropMoneyAmount = iTemp;
+
+	if (money <= 0)
+	{
+		MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Visible);
+
+		FTimerHandle Time;
+		GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+			MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Collapsed);
+			return;
+			}, 0.5f, false);
+	}
+	if (money > Gold)
+	{	
+		MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Visible);
+
+		FTimerHandle Time;
+		GetWorld()->GetTimerManager().SetTimer(Time, [&](){
+		MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+		}, 0.5f, false);
+	}
+	else if (money <= Gold)
+	{
+		FSlotStructure LocalSlot = PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
+		UClass* LocalClass = nullptr;
+		FTransform OutTransfrom;
+		RandomizeDropLocation(LocalSlot, LocalClass, OutTransfrom);
+		AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransfrom);
+		if (WActor)
+		{
+			WActor->StaticMesh->SetSimulatePhysics(true);
+			WActor->Amount = money;
+		}
+		AddGold(-money);
+		MainLayoutUI->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }

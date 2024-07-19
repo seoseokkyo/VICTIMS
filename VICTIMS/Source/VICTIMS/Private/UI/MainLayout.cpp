@@ -11,6 +11,7 @@
 #include "ProfileLayout.h"
 #include "InteractText.h"
 #include "ShopLayout.h"
+#include "DropMoneyLayout.h"
 #include "ItemDragVisual.h"
 #include "SavedWidget.h"
 
@@ -19,6 +20,7 @@ void UMainLayout::NativeConstruct()
 	Super::NativeConstruct();  
 
 	SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+	DropMoneyLayout->SetVisibility(ESlateVisibility::Hidden);
 	Saved->SetVisibility(ESlateVisibility::Hidden);
 }
 

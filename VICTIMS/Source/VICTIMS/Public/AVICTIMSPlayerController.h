@@ -207,4 +207,11 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
 	class AVICTIMSGameMode* GameModeReference;
+	
+	bool bIsShowUI = false;
+
+//=========================================================================================================================
+
+	UFUNCTION()
+	void CloseLayouts();
 };

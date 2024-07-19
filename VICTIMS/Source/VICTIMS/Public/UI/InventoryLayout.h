@@ -35,8 +35,15 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	UButton* SellButton;
 
+	UPROPERTY(meta=(BindWidget))
+	UButton* DropMoneyButton;
+
+
 	void UpdateGoldAmount();
 
 	UFUNCTION()
-	virtual void OnClickSellButton();
-};
+	void OnClickSellButton();
+
+	UFUNCTION()
+	void OnClickDropMoneyButton();
+}; 

@@ -24,6 +24,9 @@
 #include "Net/UnrealNetwork.h"
 #include "Shelter.h"
 #include "System/VICTIMSGameMode.h"
+#include "UI/InventoryLayout.h"
+#include "UI/ProfileLayout.h"
+#include "DropMoneyLayout.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -64,8 +67,10 @@ void AVICTIMSPlayerController::BeginPlay()
 			TestIDWidget = Cast<UTestIDWidget>(CreateWidget(GetWorld(), TestIDWidget_bp));
 			if (TestIDWidget)
 			{
+				bIsShowUI = true;
 				TestIDWidget->AddToViewport();
 				SetInputMode(FInputModeUIOnly());
+				EnableUIMode();
 				bShowMouseCursor = true;
 			}
 		}
@@ -242,19 +247,23 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 {
 	if (IsLocalPlayerController())
 	{
-		if (HUD_Reference->IsAnyWidgetVisible())
+		if (bIsShowUI == false)
 		{
-			SetInputMode(FInputModeGameAndUI());
-			bShowMouseCursor = true;
 
-			HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
-		}
-		else
-		{
-			SetInputMode(FInputModeGameOnly());
-			bShowMouseCursor = false;
-
-			HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			if (HUD_Reference->IsAnyWidgetVisible())
+			{
+				SetInputMode(FInputModeGameAndUI());
+				bShowMouseCursor = true;
+				
+				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
+			}
+			else
+			{
+				SetInputMode(FInputModeGameOnly());
+				bShowMouseCursor = false;
+				
+				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+			}
 		}
 	}
 }
@@ -367,15 +376,18 @@ void AVICTIMSPlayerController::EnableUIMode()
 
 void AVICTIMSPlayerController::DisableUIMode()
 {
-	if (!IsValid(HUD_Reference) || bUseUIMode)
+	if (bIsShowUI == false)
 	{
-		return;
-	}
+		if (!IsValid(HUD_Reference) || bUseUIMode)
+		{
+			return;
+		}
 
-	if (bShowMouseCursor)
-	{
-		SetInputDependingFromVisibleWidgets();
+		if (bShowMouseCursor)
+		{
+			SetInputDependingFromVisibleWidgets();
 
+		}
 	}
 }
 
@@ -539,8 +551,7 @@ void AVICTIMSPlayerController::UI_DropInventoryItem_Implementation(const uint8& 
 
 void AVICTIMSPlayerController::CreateSaveData(FString ID)
 {
-
-	if (UGameplayStatics::DoesSaveGameExist(ID, 0))
+	if (UGameplayStatics::DoesSaveGameExist(ID, 0) || ID.IsEmpty())
 	{
 		if (TestIDWidget)
 		{
@@ -643,22 +654,23 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 			if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference))
 			{
 				SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+				CharacterReference->SavePersonalID(ID);
 				CharacterReference->stateComp->NetMulticastRPC_SetStatePoint(EStateType::HP, SavedData->SavedHP);	// 플레이어 HP 로드
 				InventoryManagerComponent->AddGold(SavedData->SavedGold);	// Gold 로드
 
 
+				// 인벤토리 아이템 로드 
 				int itemCount = SavedData->SavedItemIDs.Num()-1;
-				//int startPoint = (int)EEquipmentSlot::Count;
+				int startPoint = (int)EEquipmentSlot::Count;
 
 				for (int i = 0; i < itemCount; i++)
 				{
-					// 아이템 ID FString -> FName 변환해서 Slot 에 넣기 			
 					if (SavedData->SavedItemIDs[i].Contains(TEXT("ID_Empty")))
 					{
 						continue;
 					}
 
-					FSlotStructure TempSlot = CharacterReference->MyPlayerController->InventoryManagerComponent->GetItemFromItemDB(FName(*SavedData->SavedItemIDs[i]));
+					FSlotStructure TempSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*SavedData->SavedItemIDs[i]));
 
 					if (TempSlot.ItemStructure.ItemType == EItemType::Undefined)
 					{
@@ -666,10 +678,22 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 					}
 
 					TempSlot.Amount = SavedData->SavedItemAmounts[i];
-	//				CharacterReference->MyPlayerController->InventoryManagerComponent->AddItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, TempSlot);
+
+					//======================================================================================================	
+					// 클라이언트 아이템로드 안되는 중	
+
 					bool bOutSuccess = false;
+
 					CharacterReference->MyPlayerController->InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
 
+					// 장비중인 아이템 로드 
+					for (int j = startPoint; j < startPoint + startPoint; j++)
+					{
+						if (TempSlot.ItemStructure.ID != FName("ID_Empty"))
+						{
+							CharacterReference->MyPlayerController->InventoryManagerComponent->UseInventoryItem(j);
+						}
+					}
 				}
 
 				// 집 번호 로드 및 할당
@@ -726,6 +750,7 @@ void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 {
 	if (IsLocalController())
 	{
+		bIsShowUI = false;
 		TestIDWidget->RemoveFromParent();
 		IDInValidWidget->RemoveFromParent();
 		SetInputMode(FInputModeGameOnly());
@@ -739,4 +764,34 @@ void AVICTIMSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AVICTIMSPlayerController, bUseUIMode);
+}
+
+void AVICTIMSPlayerController::CloseLayouts()
+{
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Inventory->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Shop->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->Shop->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}	
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Profile->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}	
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Container->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->Container->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}	
+	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->DropMoneyLayout->GetVisibility())
+	{
+		HUDLayoutReference->MainLayout->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
+		return;
+	}	
+// 	return;
 }

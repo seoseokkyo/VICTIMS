@@ -88,8 +88,9 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* SaveAction;
-
-
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* CloseLayoutAction;
 
 	/***********/
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -308,7 +309,6 @@ public:
 	
 	UFUNCTION()			// 플레이어 정보 데이터 로드
 	void LoadPlayerData(UTestSaveGame* Data);
-
 
 };
 
