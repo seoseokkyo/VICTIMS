@@ -116,7 +116,7 @@ void AVICTIMSCharacter::BeginPlay()
 	// Call the base class  
 	Super::BeginPlay();
 
-	DisableInput(Cast<APlayerController>(GetController()));
+	//DisableInput(Cast<APlayerController>(GetController()));
 
 	FActorSpawnParameters spawnParam;
 	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
@@ -220,16 +220,20 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 
 void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
-	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
-	{
-		EnhancedInputComponent->ClearActionBindings();
-	}
+	//if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	//{
+	//	EnhancedInputComponent->ClearActionBindings();
+	//}
 
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	// Add Input Mapping Context
 
+	UE_LOG(LogTemp, Warning, TEXT("%s's SetupPlayerInputComponent Called"), *this->GetActorNameOrLabel());
+
 	if (APlayerController* PlayerController = Cast<APlayerController>(GetController()))
 	{
+		UE_LOG(LogTemp, Warning, TEXT("%s Is Valid"), *PlayerController->GetActorNameOrLabel());
+
 		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
@@ -240,6 +244,8 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
+
+		UE_LOG(LogTemp, Warning, TEXT("%s Is Valid"), *MyPlayerController->GetActorNameOrLabel());
 
 		// Jumping
 		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
