@@ -11,6 +11,7 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <Net/UnrealNetwork.h>
+#include "VICTIMSCharacter.h"
 #include <Kismet/GameplayStatics.h>
 
 // Sets default values
@@ -67,6 +68,13 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	if (stateComp->GetStatePoint(HP) <= 0)
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s is Dead By %s"), *this->GetActorNameOrLabel(), *DamageCauser->GetActorNameOrLabel()), true, true, FLinearColor::Red, 10.0f);
+
+		AVICTIMSCharacter* Attacker=Cast<AVICTIMSCharacter>(DamageCauser);
+		if (Attacker!=nullptr)
+		{
+		//여기서 추가 작업
+		}
+
 	}
 
 	if (HitSound)
