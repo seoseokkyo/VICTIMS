@@ -19,6 +19,9 @@ public:
 	float HP;
 	UPROPERTY()
 	uint8 Gold;
+
+	UPROPERTY()
+    int32 HouseNumber;
 };
 
 UCLASS()
@@ -45,10 +48,14 @@ public:
 
 	UPROPERTY()
 	uint8 SavedItemSlot;
-
+	
 	UPROPERTY()
-	TArray<uint8> SavedItemSlots;
+	TArray<FString> SavedItemIDs;
 
 	UPROPERTY()
 	TArray<uint8> SavedItemAmounts;
+
+	UPROPERTY(VisibleAnywhere)
+	int32 HouseNumber;
+
 };

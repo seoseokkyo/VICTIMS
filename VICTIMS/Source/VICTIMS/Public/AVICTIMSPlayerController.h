@@ -155,6 +155,8 @@ private:
 
 public:
 
+	//UPROPERTY(BlueprintReadWrite, Category = "Player")
+	//int32 PlayerID;
 
 	UPROPERTY()
 	FString PlayerID;						
@@ -189,4 +191,7 @@ public:
 
 	UFUNCTION()
 	void CloseTestIDWidget();
+
+
+	class AVICTIMSGameMode* GameModeReference;
 };

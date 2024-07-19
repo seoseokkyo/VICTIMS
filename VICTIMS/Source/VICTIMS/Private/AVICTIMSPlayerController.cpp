@@ -21,6 +21,8 @@
 #include "Components/TextBlock.h"
 #include "IDInValidWidget.h"
 #include "SavedWidget.h"
+#include "Shelter.h"
+#include "System/VICTIMSGameMode.h"
 
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
@@ -54,7 +56,7 @@ void AVICTIMSPlayerController::BeginPlay()
 
 	//	UE_LOG(LogTemp, Warning, TEXT("CharacterReference Was Null, Replace : %p"), CharacterReference);
 	//}
-	
+
 	if (IsLocalController())					// ID 입력 위젯  
 	{
 		if (TestIDWidget_bp)
@@ -62,7 +64,7 @@ void AVICTIMSPlayerController::BeginPlay()
 			TestIDWidget = Cast<UTestIDWidget>(CreateWidget(GetWorld(), TestIDWidget_bp));
 			if (TestIDWidget)
 			{
-				TestIDWidget->AddToViewport();	
+				TestIDWidget->AddToViewport();
 				SetInputMode(FInputModeUIOnly());
 				bShowMouseCursor = true;
 			}
@@ -136,7 +138,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			InventoryManagerComponent->Server_InitInventory();
 			InventoryManagerComponent->InitializePlayerAttributes();
 
-			CharacterReference->TestFunction(CharacterReference->InputComponent);
+			//CharacterReference->TestFunction(CharacterReference->InputComponent);
 
 			CharacterReference->EnableInput(this);
 		}
@@ -540,10 +542,10 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 				IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
 
 				FTimerHandle Time;
-				GetWorld()->GetTimerManager().SetTimer(Time,[&](){
-				
+				GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+
 					IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
-				}, 0.5f, false);
+					}, 0.5f, false);
 			}
 		}
 	}
@@ -583,13 +585,36 @@ void AVICTIMSPlayerController::SaveData(FString ID)
 			SavedData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
 			SavedData->SavedGold = CharacterReference->MyPlayerController->InventoryManagerComponent->Gold;	// Gold 초기값 저장
 			CharacterReference->SavePersonalID(ID);
+
+			SavedData->SavedItemIDs.Reset();
+			SavedData->SavedItemAmounts.Reset();
+
+			int startPoint = (int)EEquipmentSlot::Count;
+
+			uint8 NumberOfRowsInventory = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->NumberOfRowsInventory;
+			uint8 SlotsPerRowInventory = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->SlotsPerRowInventory;
+
+			int inventorySize = NumberOfRowsInventory * SlotsPerRowInventory;
+
+			for (int i = 0; i < startPoint + inventorySize; i++)
+			{
+
+				FString TempItemID = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID.ToString();
+				SavedData->SavedItemIDs.Add(TempItemID);
+
+				uint8 TempItemAmount = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).Amount;
+				SavedData->SavedItemAmounts.Add(TempItemAmount);
+			}
 			
+			// 집 번호 저장
+			SavedData->HouseNumber = CharacterReference->AssignedHouse ? CharacterReference->AssignedHouse->HouseNumber : -1;
+
 			UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
 			HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Visible);
 			FTimerHandle Timer;
 			GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
 				HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Hidden);
-			}, 0.5f, false);
+				}, 0.5f, false);
 		}
 	}
 }
@@ -609,6 +634,40 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 				SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
 				CharacterReference->stateComp->NetMulticastRPC_SetStatePoint(EStateType::HP, SavedData->SavedHP);	// 플레이어 HP 로드
 				InventoryManagerComponent->AddGold(SavedData->SavedGold);	// Gold 로드
+
+
+				int itemCount = SavedData->SavedItemIDs.Num()-1;
+				//int startPoint = (int)EEquipmentSlot::Count;
+
+				for (int i = 0; i < itemCount; i++)
+				{
+					// 아이템 ID FString -> FName 변환해서 Slot 에 넣기 			
+					if (SavedData->SavedItemIDs[i].Contains(TEXT("ID_Empty")))
+					{
+						continue;
+					}
+
+					FSlotStructure TempSlot = CharacterReference->MyPlayerController->InventoryManagerComponent->GetItemFromItemDB(FName(*SavedData->SavedItemIDs[i]));
+
+					if (TempSlot.ItemStructure.ItemType == EItemType::Undefined)
+					{
+						continue;
+					}
+
+					TempSlot.Amount = SavedData->SavedItemAmounts[i];
+	//				CharacterReference->MyPlayerController->InventoryManagerComponent->AddItem(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, i, TempSlot);
+					bool bOutSuccess = false;
+					CharacterReference->MyPlayerController->InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
+
+				}
+
+				// 집 번호 로드 및 할당
+				if (SavedData->HouseNumber >= 0 && SavedData->HouseNumber < GameModeReference->Houses.Num())
+				{
+					AShelter* AssignedHouse = GameModeReference->Houses[SavedData->HouseNumber];
+					CharacterReference->SetAssignedHouse(AssignedHouse);
+				}
+
 			}
 			else
 			{
