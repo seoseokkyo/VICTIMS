@@ -187,6 +187,37 @@ void UInventoryManagerComponent::Server_EquipFromInventory_Implementation(uint8 
 	EquipItem(PlayerInventory, FromInventorySlot, PlayerInventory, ToInventorySlot);
 }
 
+void UInventoryManagerComponent::Client_EquipFromInventory_Implementation(uint8 InventorySlot, FSlotStructure InventoryItem)
+{
+	if (InventorySlot < (uint8)EEquipmentSlot::Count)
+	{
+		uint8 Index = 0;
+
+		if (PlayerInventory->GetEmptyInventorySpace(Index))
+		{
+			UnEquipItem(PlayerInventory, InventorySlot, PlayerInventory, Index);
+			return;
+		}
+
+		UE_LOG(LogTemp, Warning, TEXT("NO FREE SPACE"))
+	}
+	else
+	{
+		EEquipmentSlot LocalEquipmentSlot = GetItemEquipmentSlot(InventoryItem);
+
+		uint8 OutInventorySlot = 0;
+		if (GetEmptyEquipmentSlotByType(LocalEquipmentSlot, OutInventorySlot))
+		{
+			Server_EquipFromInventory(InventorySlot, OutInventorySlot);
+		}
+		else
+		{
+			OutInventorySlot = GetEquipmentSlotByType(LocalEquipmentSlot);
+			Server_EquipFromInventory(InventorySlot, OutInventorySlot);
+		}
+	}
+}
+
 void UInventoryManagerComponent::Server_UnEquipToInventory_Implementation(uint8 FromInventorySlot, uint8 ToInventorySlot)
 {
 	UnEquipItem(PlayerInventory, FromInventorySlot, PlayerInventory, ToInventorySlot);
@@ -2344,3 +2375,4 @@ void UInventoryManagerComponent::DropMoney()
 		MainLayoutUI->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
+

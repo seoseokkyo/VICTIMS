@@ -84,6 +84,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_EquipFromInventory(uint8 FromInventorySlot, uint8 ToInventorySlot);
 
+	UFUNCTION(Client, Reliable)
+	void Client_EquipFromInventory(uint8 InventorySlot, FSlotStructure InventoryItem);
+
 	UFUNCTION(Server, Reliable)
 	void Server_UnEquipToInventory(uint8 FromInventorySlot, uint8 ToInventorySlot);
 

@@ -78,7 +78,7 @@ public:
 	USoundBase* DeathSound;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	USoundBase* HitSound;
+	TArray<USoundBase*> HitSounds;
 
 	virtual void ContinueAttack_Implementation() override;
 	virtual void ResetCombat_Implementation() override;

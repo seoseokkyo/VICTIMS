@@ -68,12 +68,20 @@ void AVICTIMSPlayerController::BeginPlay()
 			if (TestIDWidget)
 			{
 				bIsShowUI = true;
-				TestIDWidget->AddToViewport();
-				SetInputMode(FInputModeUIOnly());
-				EnableUIMode();
-				bShowMouseCursor = true;
+
+				if (auto gameInst = GetGameInstance<UVictimsGameInstance>())
+				{
+					if (false == gameInst->DedicateServerCheck())
+					{
+						TestIDWidget->AddToViewport();
+						SetInputMode(FInputModeUIOnly());
+						EnableUIMode();
+						bShowMouseCursor = true;
+					}
+				}
 			}
 		}
+
 		if (IDInvalidWidget_bp)
 		{
 			IDInValidWidget = Cast<UIDInValidWidget>(CreateWidget(GetWorld(), IDInvalidWidget_bp));
@@ -122,6 +130,20 @@ void AVICTIMSPlayerController::OnPossess(APawn* aPawn)
 {
 	Super::OnPossess(aPawn);
 
+	if (IsLocalController())
+	{
+		if (GetHUD() == nullptr)
+		{
+			UE_LOG(LogPlayerController, Verbose, TEXT("SpawnDefaultHUD"));
+			FActorSpawnParameters SpawnInfo;
+			SpawnInfo.Owner = this;
+			SpawnInfo.Instigator = GetInstigator();
+			SpawnInfo.ObjectFlags |= RF_Transient;	// We never want to save HUDs into a map
+			MyHUD = GetWorld()->SpawnActor<AMyHUD>(SpawnInfo);
+
+			SetupHUDReferences();
+		}
+	}
 }
 
 void AVICTIMSPlayerController::Tick(float DeltaTime)
@@ -134,6 +156,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 		if (CharacterReference == nullptr || CharacterReference != charCheck)
 		{
 			CharacterReference = charCheck;
+			CharacterReference->MyPlayerController = this;
 
 			UE_LOG(LogTemp, Warning, TEXT("Inventory,Controller Init(%s)"), *GetPawn()->GetActorNameOrLabel());
 
@@ -190,7 +213,6 @@ void AVICTIMSPlayerController::SetupHUDReferences()
 	}
 }
 
-
 void AVICTIMSPlayerController::CollectFromPanel(const FName& Name)
 {
 	for (AActor*& Actor : CharacterReference->UsableActorsInsideRange)
@@ -212,12 +234,10 @@ void AVICTIMSPlayerController::CollectFromPanel(const FName& Name)
 	}
 }
 
-
 bool AVICTIMSPlayerController::IsContainerOpen()
 {
 	return HUD_Reference->HUDReference->MainLayout->Container->IsVisible();
 }
-
 
 void AVICTIMSPlayerController::ToggleInventory()
 {
@@ -230,7 +250,6 @@ void AVICTIMSPlayerController::ToggleInventory()
 	}
 }
 
-
 void AVICTIMSPlayerController::ToggleProfile()
 {
 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
@@ -241,7 +260,6 @@ void AVICTIMSPlayerController::ToggleProfile()
 		SetInputDependingFromVisibleWidgets();
 	}
 }
-
 
 void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 {
@@ -254,20 +272,19 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 			{
 				SetInputMode(FInputModeGameAndUI());
 				bShowMouseCursor = true;
-				
+
 				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
 			}
 			else
 			{
 				SetInputMode(FInputModeGameOnly());
 				bShowMouseCursor = false;
-				
+
 				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 			}
 		}
 	}
 }
-
 
 void AVICTIMSPlayerController::ToggleContainer()
 {
@@ -279,7 +296,6 @@ void AVICTIMSPlayerController::ToggleContainer()
 		SetInputDependingFromVisibleWidgets();
 	}
 }
-
 
 bool AVICTIMSPlayerController::IsShopOpen()
 {
@@ -316,7 +332,6 @@ void AVICTIMSPlayerController::Server_OnActorUsed_Implementation(AActor* Actor)
 	OnActorUsed(Actor);
 }
 
-
 UUserWidget* AVICTIMSPlayerController::GenerateInteractWidget(FText Text)
 {
 	if (HUD_Reference == nullptr)
@@ -330,7 +345,6 @@ UUserWidget* AVICTIMSPlayerController::GenerateInteractWidget(FText Text)
 		return HUD_Reference->GenerateInteractWidget(Text);
 	}
 }
-
 
 UUserWidget* AVICTIMSPlayerController::CreateInteractWidget(FName Name)
 {
@@ -346,7 +360,6 @@ UUserWidget* AVICTIMSPlayerController::CreateInteractWidget(FName Name)
 	}
 }
 
-
 void AVICTIMSPlayerController::SetMouseToCenterPosition()
 {
 	int32 SizeX;
@@ -355,7 +368,6 @@ void AVICTIMSPlayerController::SetMouseToCenterPosition()
 
 	SetMouseLocation(SizeX / 2, SizeY / 2);
 }
-
 
 void AVICTIMSPlayerController::EnableUIMode()
 {
@@ -372,7 +384,6 @@ void AVICTIMSPlayerController::EnableUIMode()
 		SetMouseToCenterPosition();
 	}
 }
-
 
 void AVICTIMSPlayerController::DisableUIMode()
 {
@@ -549,6 +560,25 @@ void AVICTIMSPlayerController::UI_DropInventoryItem_Implementation(const uint8& 
 //====================================================================================================================
 // Save
 
+void AVICTIMSPlayerController::SavePersonalID(FString ID)
+{
+	ServerRPC_SavePersonalID(ID);
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Chached Name : %s"), *PlayerID));
+}
+
+void AVICTIMSPlayerController::ServerRPC_SavePersonalID_Implementation(const FString& ID)
+{
+	PlayerID = ID;
+
+	NetMulticastRPC_SavePersonalID(PlayerID);
+}
+
+void AVICTIMSPlayerController::NetMulticastRPC_SavePersonalID_Implementation(const FString& ID)
+{
+	PlayerID = ID;
+}
+
 void AVICTIMSPlayerController::CreateSaveData(FString ID)
 {
 	if (UGameplayStatics::DoesSaveGameExist(ID, 0) || ID.IsEmpty())
@@ -572,9 +602,7 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 	}
 	else
 	{
-		SavedData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
-		UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
-		SaveData(ID);
+		SaveData();
 
 		if (TestIDWidget)
 		{
@@ -587,7 +615,7 @@ UTestSaveGame* AVICTIMSPlayerController::GetSaveDataFromID(FString ID)
 {
 	if (UGameplayStatics::DoesSaveGameExist(ID, 0))  // 해당 ID 이름의 저장된 데이터가 있으면 
 	{
-		return SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));	// 데이터 불러오기 
+		return Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));	// 데이터 불러오기 
 	}
 	else
 	{
@@ -595,125 +623,184 @@ UTestSaveGame* AVICTIMSPlayerController::GetSaveDataFromID(FString ID)
 	}
 }
 
-void AVICTIMSPlayerController::SaveData(FString ID)
+void AVICTIMSPlayerController::SaveData()
 {
-	if (HasAuthority())
+	ServerRPC_SaveData();
+}
+
+void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
+{
+	FString ID = PlayerID;
+
+	auto saveData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
+	UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
+
+	if (saveData)
 	{
+		//saveData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
+		saveData->SavedGold = InventoryManagerComponent->Gold;	// Gold 초기값 저장
+		CharacterReference->SavePersonalID(ID);
 
-		SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
-		if (SavedData)
+		saveData->SavedItemIDs.Reset();
+		saveData->SavedItemAmounts.Reset();
+
+		int startPoint = (int)EEquipmentSlot::Count;
+
+		uint8 NumberOfRowsInventory = InventoryManagerComponent->PlayerInventory->NumberOfRowsInventory;
+		uint8 SlotsPerRowInventory = InventoryManagerComponent->PlayerInventory->SlotsPerRowInventory;
+
+		int inventorySize = NumberOfRowsInventory * SlotsPerRowInventory;
+
+		for (int i = 0; i < startPoint + inventorySize; i++)
 		{
-			SavedData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
-			SavedData->SavedGold = CharacterReference->MyPlayerController->InventoryManagerComponent->Gold;	// Gold 초기값 저장
-			CharacterReference->SavePersonalID(ID);
+			FString TempItemID = InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID.ToString();
+			saveData->SavedItemIDs.Add(TempItemID);
 
-			SavedData->SavedItemIDs.Reset();
-			SavedData->SavedItemAmounts.Reset();
-
-			int startPoint = (int)EEquipmentSlot::Count;
-
-			uint8 NumberOfRowsInventory = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->NumberOfRowsInventory;
-			uint8 SlotsPerRowInventory = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->SlotsPerRowInventory;
-
-			int inventorySize = NumberOfRowsInventory * SlotsPerRowInventory;
-
-			for (int i = 0; i < startPoint + inventorySize; i++)
-			{
-
-				FString TempItemID = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID.ToString();
-				SavedData->SavedItemIDs.Add(TempItemID);
-
-				uint8 TempItemAmount = CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).Amount;
-				SavedData->SavedItemAmounts.Add(TempItemAmount);
-			}
-			
-			// 집 번호 저장
-			SavedData->HouseNumber = CharacterReference->AssignedHouse ? CharacterReference->AssignedHouse->HouseNumber : -1;
-
-			UGameplayStatics::SaveGameToSlot(SavedData, ID, 0);
-			HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Visible);
-			FTimerHandle Timer;
-			GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
-				HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Hidden);
-				}, 0.5f, false);
+			uint8 TempItemAmount = InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).Amount;
+			saveData->SavedItemAmounts.Add(TempItemAmount);
 		}
+
+		// 집 번호 저장
+		saveData->HouseNumber = CharacterReference->AssignedHouse ? CharacterReference->AssignedHouse->HouseNumber : -1;
+
+		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
+
+		NetMulticastRPC_SaveData();
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("LoadGameFromSlot:%s | Was Failed"), *ID);
+	}
+}
+
+void AVICTIMSPlayerController::NetMulticastRPC_SaveData_Implementation()
+{
+	if (IsLocalController())
+	{
+		HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Visible);
+		FTimerHandle Timer;
+		GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
+			HUD_Reference->HUDReference->MainLayout->Saved->SetVisibility(ESlateVisibility::Hidden);
+			}, 0.5f, false);
 	}
 }
 
 void AVICTIMSPlayerController::LoadData(FString ID)
 {
-	if (IsLocalController())
+	ServerRPC_LoadData(ID);
+}
+
+void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& ID)
+{
+	if (UGameplayStatics::DoesSaveGameExist(ID, 0))
 	{
-		if (UGameplayStatics::DoesSaveGameExist(ID, 0))
+		if (TestIDWidget)
 		{
-			if (TestIDWidget)
+			TestIDWidget->IsIDValid = true;
+		}
+
+		if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference))
+		{
+			auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+
+			CharacterReference->SavePersonalID(ID);
+
+			if (savedData->SavedHP != 0)
 			{
-				TestIDWidget->IsIDValid = true;
-			}
-
-			if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference))
-			{
-				SavedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
-				CharacterReference->SavePersonalID(ID);
-				CharacterReference->stateComp->NetMulticastRPC_SetStatePoint(EStateType::HP, SavedData->SavedHP);	// 플레이어 HP 로드
-				InventoryManagerComponent->AddGold(SavedData->SavedGold);	// Gold 로드
-
-
-				// 인벤토리 아이템 로드 
-				int itemCount = SavedData->SavedItemIDs.Num()-1;
-				int startPoint = (int)EEquipmentSlot::Count;
-
-				for (int i = 0; i < itemCount; i++)
-				{
-					if (SavedData->SavedItemIDs[i].Contains(TEXT("ID_Empty")))
-					{
-						continue;
-					}
-
-					FSlotStructure TempSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*SavedData->SavedItemIDs[i]));
-
-					if (TempSlot.ItemStructure.ItemType == EItemType::Undefined)
-					{
-						continue;
-					}
-
-					TempSlot.Amount = SavedData->SavedItemAmounts[i];
-
-					//======================================================================================================	
-					// 클라이언트 아이템로드 안되는 중	
-
-					bool bOutSuccess = false;
-
-					CharacterReference->MyPlayerController->InventoryManagerComponent->TryToAddItemToInventory(CharacterReference->MyPlayerController->InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
-
-					// 장비중인 아이템 로드 
-					for (int j = startPoint; j < startPoint + startPoint; j++)
-					{
-						if (TempSlot.ItemStructure.ID != FName("ID_Empty"))
-						{
-							CharacterReference->MyPlayerController->InventoryManagerComponent->UseInventoryItem(j);
-						}
-					}
-				}
-
-				// 집 번호 로드 및 할당
-				if (SavedData->HouseNumber >= 0 && SavedData->HouseNumber < GameModeReference->Houses.Num())
-				{
-					AShelter* AssignedHouse = GameModeReference->Houses[SavedData->HouseNumber];
-					CharacterReference->SetAssignedHouse(AssignedHouse);
-				}
-
+				CharacterReference->stateComp->NetMulticastRPC_SetStatePoint(EStateType::HP, savedData->SavedHP);	// 플레이어 HP 로드
 			}
 			else
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed333333333___Controller"));
+				UKismetSystemLibrary::PrintString(GetWorld(), TEXT("savedData->SavedHP Was Zero"));
 			}
+
+			InventoryManagerComponent->AddGold(savedData->SavedGold);	// Gold 로드
+
+			// 인벤토리 아이템 로드 
+			int itemCount = savedData->SavedItemIDs.Num() - 1;
+			int startPoint = (int)EEquipmentSlot::Count;
+
+			for (int i = 0; i < itemCount; i++)
+			{
+				if (savedData->SavedItemIDs[i].Contains(TEXT("ID_Empty")))
+				{
+					continue;
+				}
+
+				FSlotStructure TempSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedItemIDs[i]));
+
+				if (TempSlot.ItemStructure.ItemType == EItemType::Undefined)
+				{
+					continue;
+				}
+
+				TempSlot.Amount = savedData->SavedItemAmounts[i];
+
+				//======================================================================================================	
+				// 클라이언트 아이템로드 안되는 중	
+
+				bool bOutSuccess = false;
+
+				//InventoryManagerComponent->AddItem(InventoryManagerComponent->PlayerInventory, i, TempSlot);
+
+				InventoryManagerComponent->TryToAddItemToInventory(InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
+
+				// 장비중인 아이템 로드 
+				if (TempSlot.ItemStructure.ItemType == EItemType::Equipment)
+				{
+					if(startPoint < i && i < startPoint*2)
+					{
+						CharacterReference->MyPlayerController->InventoryManagerComponent->UseInventoryItem(i);
+					}
+				}
+			}
+
+			GameModeReference = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
+			// 집 번호 로드 및 할당
+			if (savedData->HouseNumber >= 0 && savedData->HouseNumber < GameModeReference->Houses.Num())
+			{
+				AShelter* AssignedHouse = GameModeReference->Houses[savedData->HouseNumber];
+				CharacterReference->SetAssignedHouse(AssignedHouse);
+			}
+
 		}
 		else
 		{
-			if (TestIDWidget)
-			{
+			UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed333333333___Controller"));
+		}
 
+		NetMulticastRPC_LoadData(true);
+	}
+	else
+	{
+		NetMulticastRPC_LoadData(false);
+	}
+}
+
+void AVICTIMSPlayerController::NetMulticastRPC_LoadData_Implementation(bool bSuccess)
+{
+	if (IsLocalController())
+	{
+		if (TestIDWidget)
+		{
+			if (bSuccess)
+			{
+				TestIDWidget->IsIDValid = true;
+				if (IDInValidWidget)
+				{
+					IDInValidWidget->AddToViewport();
+					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
+					IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
+
+					FTimerHandle Time;
+					GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+
+						IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+						}, 0.5f, false);
+				}
+			}
+			else
+			{
 				TestIDWidget->IsIDValid = false;
 				if (IDInValidWidget)
 				{
@@ -753,6 +840,7 @@ void AVICTIMSPlayerController::CloseTestIDWidget()	// TestIDWidget 지우기
 		bIsShowUI = false;
 		TestIDWidget->RemoveFromParent();
 		IDInValidWidget->RemoveFromParent();
+		DisableUIMode();
 		SetInputMode(FInputModeGameOnly());
 		bShowMouseCursor = false;
 	}
@@ -777,21 +865,21 @@ void AVICTIMSPlayerController::CloseLayouts()
 	{
 		HUDLayoutReference->MainLayout->Shop->SetVisibility(ESlateVisibility::Collapsed);
 		return;
-	}	
+	}
 	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Profile->GetVisibility())
 	{
 		HUDLayoutReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Collapsed);
 		return;
-	}	
+	}
 	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Container->GetVisibility())
 	{
 		HUDLayoutReference->MainLayout->Container->SetVisibility(ESlateVisibility::Collapsed);
 		return;
-	}	
+	}
 	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->DropMoneyLayout->GetVisibility())
 	{
 		HUDLayoutReference->MainLayout->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
 		return;
-	}	
-// 	return;
+	}
+	// 	return;
 }

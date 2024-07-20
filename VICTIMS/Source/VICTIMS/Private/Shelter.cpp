@@ -20,3 +20,8 @@ void AShelter::Tick(float DeltaTime)
 {   
     Super::Tick(DeltaTime);
 }
+
+void AShelter::ServerRPC_SetOriginPos_Implementation(FVector houseLocation)
+{
+    OriginPos = houseLocation;
+}

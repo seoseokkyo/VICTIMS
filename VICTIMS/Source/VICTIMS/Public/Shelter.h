@@ -29,4 +29,10 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Shelter")
 	int32 HouseNumber;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shelter")
+	FVector OriginPos;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetOriginPos(FVector houseLocation);
 };

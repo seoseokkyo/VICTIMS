@@ -4,6 +4,7 @@
 #include "Components/EditableText.h"
 #include "Components/Button.h"
 #include "AVICTIMSPlayerController.h"
+#include "VICTIMSCharacter.h"
 
 void UTestIDWidget::NativeConstruct()
 {
@@ -20,7 +21,11 @@ void UTestIDWidget::OnClickedSignInButton()
 		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 		if (PC)
 		{
-			PC->CreateSaveData(ID->GetText().ToString());
+			FString strID = ID->GetText().ToString();
+
+			PC->CharacterReference->SavePersonalID(strID);
+			PC->SavePersonalID(strID);
+			PC->CreateSaveData(strID);
 			if (IsIDValid)
 			{
 				PC->CloseTestIDWidget();
@@ -39,9 +44,15 @@ void UTestIDWidget::OnClickedContinueButton()
 	if (ID != nullptr)
 	{
 		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+
+		SetOwningPlayer(PC);
 		if (PC)
 		{
-			PC->LoadData(ID->GetText().ToString());
+			FString strID = ID->GetText().ToString();
+
+			PC->CharacterReference->SavePersonalID(strID);
+			PC->SavePersonalID(strID);
+			PC->LoadData(strID);
 			if (IsIDValid)
 			{
 				PC->CloseTestIDWidget();

@@ -78,4 +78,23 @@ public:
 
 	UPROPERTY()
 	class UTestSaveGame* SaveData;
+
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_DedicateServerCheck();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_DedicateServerCheck(bool bCheck);
+
+	UFUNCTION(BlueprintCallable)
+	bool DedicateServerCheck();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
+
+private:
+
+	UPROPERTY()
+	bool bIsDedicateServer;
+
+
 };

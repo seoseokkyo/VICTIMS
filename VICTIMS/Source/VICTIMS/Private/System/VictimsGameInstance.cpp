@@ -10,6 +10,7 @@
 #include "VICTIMSCharacter.h"
 #include "TestSaveGame.h"
 #include "AVICTIMSPlayerController.h"
+#include "Net/UnrealNetwork.h"
 
 FCharacterStat UVictimsGameInstance::GetCharacterDataTable(const FString& rowName)
 {
@@ -224,7 +225,7 @@ void UVictimsGameInstance::ShutDown()
 	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetFirstLocalPlayerController());
 	if (PC)
 	{
-		PC->SaveData(PC->PlayerID);
+		PC->SaveData();
 	}
 
 	
@@ -234,4 +235,28 @@ void UVictimsGameInstance::ShutDown()
 	
 	Super::Shutdown();
 	},0.5f, false);
+}
+
+bool UVictimsGameInstance::DedicateServerCheck()
+{
+	ServerRPC_DedicateServerCheck();
+
+	return bIsDedicateServer;
+}
+
+void UVictimsGameInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UVictimsGameInstance, bIsDedicateServer);
+}
+
+void UVictimsGameInstance::ServerRPC_DedicateServerCheck_Implementation()
+{	
+	NetMulticastRPC_DedicateServerCheck_Implementation(IsRunningDedicatedServer());
+}
+
+void UVictimsGameInstance::NetMulticastRPC_DedicateServerCheck_Implementation(bool bCheck)
+{
+	bIsDedicateServer = bCheck;
 }
