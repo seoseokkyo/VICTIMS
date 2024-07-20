@@ -287,7 +287,8 @@ public:
 	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
 	void MultiCast_GoToHouse(AShelter* NewHouse);
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+    UPrimitiveComponent* CurrentDoorComponent;
 
 //=====================================================================================================
 // Save

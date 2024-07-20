@@ -27,6 +27,8 @@
 #include "UI/InventoryLayout.h"
 #include "UI/ProfileLayout.h"
 #include "DropMoneyLayout.h"
+#include "HousingNotification.h"
+#include "HousingComponent.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -450,8 +452,23 @@ void AVICTIMSPlayerController::Interact()
 			return;
 		}
 	}
+	else if(CharacterReference->CurrentDoorComponent)
+	{
+		if (CharacterReference->HousingComponent->IsBuildModeOn)
+		{
+			ShowHousingNotification();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ByeDoor"));
+			// ¸Ê º¯°æ(³ª°¡±â)ÀÌ ¾Æ´Ï¶ó À§Á¬ ¶ç¿öÁÖ±â
+			CharacterReference->SetActorLocation(FVector(1850, 821, 169));
+			
+		}
+		//return;
+	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"))
+		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"));
 	}
 }
 
@@ -764,6 +781,38 @@ void AVICTIMSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AVICTIMSPlayerController, bUseUIMode);
+}
+
+void AVICTIMSPlayerController::ShowHousingNotification()
+{
+	if (!HousingNotificationWidget)
+	{
+		if (HousingNotificationWidgetClass)
+		{
+			HousingNotificationWidget = CreateWidget<UHousingNotification>(this, HousingNotificationWidgetClass);
+			if (HousingNotificationWidget)
+			{
+				HousingNotificationWidget->AddToViewport();
+			}
+		}
+	}
+
+	if (HousingNotificationWidget)
+	{
+		HousingNotificationWidget->SetVisibility(ESlateVisibility::Visible);
+
+		GetWorld()->GetTimerManager().SetTimer(HousingNotificationTimerHandle, this, &AVICTIMSPlayerController::HideHousingNotification, 1.0f, false);
+	}
+}
+
+void AVICTIMSPlayerController::HideHousingNotification()
+{
+	if (HousingNotificationWidget)
+	{
+		HousingNotificationWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	GetWorld()->GetTimerManager().ClearTimer(HousingNotificationTimerHandle);
 }
 
 void AVICTIMSPlayerController::CloseLayouts()

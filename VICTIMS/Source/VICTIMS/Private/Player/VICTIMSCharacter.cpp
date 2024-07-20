@@ -652,6 +652,10 @@ void AVICTIMSCharacter::OnBeginOverlap(class UPrimitiveComponent* OverlappedComp
 					}
 				}
 			}
+			else if (OtherComp->ComponentHasTag(TEXT("Door")))
+			{
+				CurrentDoorComponent = OtherComp;
+			}
 		}
 	}
 }
@@ -695,6 +699,10 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 						return;
 					}
 				}
+			}
+			if (OtherComp == CurrentDoorComponent)
+			{
+				CurrentDoorComponent = nullptr;
 			}
 		}
 	}

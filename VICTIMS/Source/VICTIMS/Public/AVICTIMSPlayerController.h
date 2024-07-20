@@ -210,6 +210,16 @@ public:
 	
 	bool bIsShowUI = false;
 
+	FTimerHandle HousingNotificationTimerHandle;
+	void ShowHousingNotification();
+	void HideHousingNotification();
+
+	UPROPERTY()
+	class UHousingNotification* HousingNotificationWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TSubclassOf<class UHousingNotification> HousingNotificationWidgetClass;
+
 //=========================================================================================================================
 
 	UFUNCTION()
