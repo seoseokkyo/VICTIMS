@@ -72,7 +72,7 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		AVICTIMSCharacter* Attacker=Cast<AVICTIMSCharacter>(DamageCauser);
 		if (Attacker!=nullptr)
 		{
-		//여기서 추가 작업
+			//여기서 추가 작업
 		}
 
 	}
