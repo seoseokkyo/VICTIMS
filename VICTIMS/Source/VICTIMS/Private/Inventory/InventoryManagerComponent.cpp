@@ -267,11 +267,19 @@ void UInventoryManagerComponent::Client_ClearContainerSlotItem_Implementation(ui
 void UInventoryManagerComponent::Client_OpenContainer_Implementation(FContainerInfo ContainerProperties, const TArray<FSlotStructure>& InContainerInventory, const TArray<FSlotStructure>& InPlayerInventory)
 {
 	LoadContainerSlots(ContainerProperties, InContainerInventory, InPlayerInventory);
+	if (OpenShopSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, playerReference->GetActorLocation());
+	}
 }
 
 void UInventoryManagerComponent::Client_CloseContainer_Implementation()
 {
 	MainLayoutUI->Container->SetVisibility(ESlateVisibility::Hidden);
+	if (OpenShopSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, playerReference->GetActorLocation());
+	}
 }
 
 void UInventoryManagerComponent::Client_MoveHotbarSlotItem_Implementation(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar)
@@ -2014,12 +2022,20 @@ void UInventoryManagerComponent::Client_ClearShopSlotItem_Implementation(uint8 S
 void UInventoryManagerComponent::Client_OpenShop_Implementation(FShopInfo ShopProperties, const TArray<FSlotStructure>& InShopInventory, const TArray<FSlotStructure>& InPlayerInventory)
 {
 	LoadShopSlots(ShopProperties, InShopInventory, InPlayerInventory);
+	if (OpenShopSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, playerReference->GetActorLocation());
+	}
 }
 
 void UInventoryManagerComponent::Client_CloseShop_Implementation()
 {
 	MainLayoutUI->Shop->SetVisibility(ESlateVisibility::Hidden);
 	MainLayoutUI->Inventory->SellButton->SetVisibility(ESlateVisibility::Hidden);
+	if (OpenShopSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, playerReference->GetActorLocation());
+	}
 }
 
 void UInventoryManagerComponent::Client_UpdateShopTooltips_Implementation(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory)

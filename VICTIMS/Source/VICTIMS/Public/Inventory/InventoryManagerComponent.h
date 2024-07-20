@@ -388,6 +388,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "UI Sound")
 	class USoundBase* MoveItemSound;
 
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* OpenShopSound;
 
 protected:
 

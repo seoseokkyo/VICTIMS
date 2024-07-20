@@ -9,6 +9,8 @@
 #include "AVICTIMSPlayerController.h"
 #include "Components/Button.h"
 #include "VictimsGameInstance.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Sound/SoundBase.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 void UInventoryLayout::NativeConstruct()
 {
@@ -43,11 +45,19 @@ void UInventoryLayout::OnClickSellButton()
 	{
 		pc->InventoryManagerComponent->IsSelling = false;
 		SellButton->SetBackgroundColor(FLinearColor::White);
+		if (click)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), click);
+		}
 	}
 	else
 	{
 		pc->InventoryManagerComponent->IsSelling = true;
 		SellButton->SetBackgroundColor(FLinearColor::Yellow);
+		if (click)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), click);
+		}
 	}
 }
 
@@ -57,5 +67,9 @@ void UInventoryLayout::OnClickDropMoneyButton()
 	if (pc)
 	{
 		pc->InventoryManagerComponent->Client_ShowDropMoneyLayout();
+		if (click)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), click);
+		}
 	}
 }
