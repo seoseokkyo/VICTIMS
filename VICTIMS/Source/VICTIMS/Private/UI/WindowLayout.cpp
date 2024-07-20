@@ -9,6 +9,8 @@
 #include "DragWidget.h"
 #include "MyHUD.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include "Sound/SoundBase.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 void UWindowLayout::NativeConstruct()
 {
@@ -86,10 +88,13 @@ void UWindowLayout::ToggleWindow()
 	GetName(strName);
 
 	bool bvisibleCheck = (GetVisibility() == ESlateVisibility::Hidden);
-
+	if (ToggleSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ToggleSound);
+	}
 	if (false == strName.IsEmpty())
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Toggle%s Called : %s"), *strName, bvisibleCheck ? TEXT("On") : TEXT("Off")));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Toggle%s Called : %s"), *strName, bvisibleCheck ? TEXT("On") : TEXT("Off")));
 	}	
 
 	if (GetVisibility() == ESlateVisibility::Hidden)
@@ -107,6 +112,10 @@ void UWindowLayout::OnButtonQuitClicked()
 	{
 		PlayerController->HUD_Reference->ToggleWindow(WindowLayout);
 		PlayerController->SetInputDependingFromVisibleWidgets();
+		if (ClickSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+		}
 	}
 }
 
@@ -124,6 +133,10 @@ FEventReply UWindowLayout::RedirectMouseDownToWidget(const FGeometry& InGeometry
 
 FReply UWindowLayout::CustomDetectDrag(const FPointerEvent& InMouseEvent, UWidget* WidgetDetectingDrag, FKey DragKey)
 {
+	if (ClickSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+	}
 	if ((InMouseEvent.GetEffectingButton() == DragKey && TopBorder->IsHovered()) || InMouseEvent.IsTouchEvent())
 	{
 		FEventReply Reply;

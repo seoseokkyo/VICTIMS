@@ -36,6 +36,8 @@
 #include "Inventory/InventoryComponent.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/Button.h>
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/Border.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Sound/SoundBase.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 UInventoryManagerComponent::UInventoryManagerComponent()
 {
@@ -60,7 +62,7 @@ void UInventoryManagerComponent::BeginPlay()
 			if (ownerCharacter)
 			{
 				playerReference = Cast<AVICTIMSCharacter>(ownerCharacter);
-				UE_LOG(LogTemp, Warning, TEXT("111111111111111111111111111111111111111111111111111"));
+// 				UE_LOG(LogTemp, Warning, TEXT("111111111111111111111111111111111111111111111111111"));
 			}
 		}
 	}
@@ -100,7 +102,7 @@ void UInventoryManagerComponent::InitializeItemDB()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UDataTable not Loaded"))
+// 		UE_LOG(LogTemp, Warning, TEXT("UDataTable not Loaded"))
 	}
 }
 
@@ -161,7 +163,7 @@ void UInventoryManagerComponent::TryToAddItemToInventory(UInventoryComponent* In
 	}
 	else
 	{
-		UE_LOG(LogTemp, Verbose, TEXT("Inventory Full"))
+// 		UE_LOG(LogTemp, Verbose, TEXT("Inventory Full"))
 			bOutSuccess = false;
 		return;
 	}
@@ -237,11 +239,19 @@ void UInventoryManagerComponent::Server_UnEquipToContainer_Implementation(uint8 
 void UInventoryManagerComponent::Client_SetInventorySlotItem_Implementation(const FSlotStructure& ContentToAdd, const uint8& InventorySlot)
 {
 	SetInventorySlotItem(ContentToAdd, InventorySlot);
+	if (MoveItemSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), MoveItemSound, playerReference->GetActorLocation());
+	}
 }
 
 void UInventoryManagerComponent::Client_SetContainerSlotItem_Implementation(const FSlotStructure& ContentToAdd, const uint8& InventorySlot)
 {
 	SetContainerSlotItem(ContentToAdd, InventorySlot);
+	if (MoveItemSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), MoveItemSound, playerReference->GetActorLocation());
+	}
 }
 
 void UInventoryManagerComponent::Client_ClearInventorySlotItem_Implementation(uint8 InventorySlot)
@@ -1095,6 +1105,10 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 		{
 			WActor->StaticMesh->SetSimulatePhysics(true);
 			WActor->Amount = LocalSlot.Amount;
+			if (DropSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DropSound, WActor->GetActorLocation());
+			}
 		}
 
 		RemoveItem(Inventory, InventorySlot);
@@ -1211,6 +1225,10 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 			if (LocalTuple.Success)
 			{
 				UnEquipItem(PlayerInventory, InventorySlot, ToInventory, Index);
+				if (UseSound_Equipment)
+				{
+					UGameplayStatics::PlaySoundAtLocation(GetWorld(), UseSound_Equipment, playerReference->GetActorLocation());
+				}
 				return;
 			}
 		}
@@ -1219,6 +1237,10 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 			if (ToInventory->GetEmptyInventorySpace(Index))
 			{
 				UnEquipItem(PlayerInventory, InventorySlot, ToInventory, Index);
+				if (UseSound_Equipment)
+				{
+					UGameplayStatics::PlaySoundAtLocation(GetWorld(), UseSound_Equipment, playerReference->GetActorLocation());
+				}
 				return;
 			}
 		}
@@ -1244,10 +1266,10 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 
 void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStructure InventoryItem)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Consuming this Item..."))
+// 	UE_LOG(LogTemp, Warning, TEXT("Consuming this Item..."))
 
 	// HEAL ! 
-	UE_LOG(LogTemp, Warning, TEXT("Call ClientRPC_UseConsumableItem Value : %d"), InventoryItem.ItemStructure.Health);
+// 	UE_LOG(LogTemp, Warning, TEXT("Call ClientRPC_UseConsumableItem Value : %d"), InventoryItem.ItemStructure.Health);
 	ClientRPC_UseConsumableItem(InventoryItem.ItemStructure.Health);
 
 	uint8 AmountToRemove = 1;
@@ -1271,7 +1293,11 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 void UInventoryManagerComponent::ClientRPC_UseConsumableItem_Implementation(const int32 Health)
 {
 	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, Health);
-	UE_LOG(LogTemp, Warning, TEXT("Called ClientRPC_UseConsumableItem Value : %d"), Health);
+// 	UE_LOG(LogTemp, Warning, TEXT("Called ClientRPC_UseConsumableItem Value : %d"), Health);
+	if (UseSound_Consumable)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(),UseSound_Consumable, playerReference->GetActorLocation());
+	}
 }
 
 void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem)
@@ -1323,7 +1349,7 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 		// UE_LOG(LogTemp, Warning, TEXT("Cannot use furniture item here. GO HOME."));
 		if (GEngine)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cannot use furniture item here. GO HOME."));
+// 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cannot use furniture item here. GO HOME."));
 		}
 	}
 
@@ -1409,6 +1435,10 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 		{
 			GetPlayerRef()->HousingComponent->IsBuildModeOn = false;
 			GetPlayerRef()->HousingComponent->LaunchBuildMode(ItemID);
+			if (UseSound_Furniture)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), UseSound_Furniture, playerReference->GetActorLocation());
+			}
 
 		}
 		else

@@ -64,6 +64,12 @@ public:
 	UFUNCTION()
 	void UseItem();
 
+//=========================================================================================================================
+// UI Sound
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* DragSound;
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UImage* Icon;

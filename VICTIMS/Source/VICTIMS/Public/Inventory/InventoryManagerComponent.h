@@ -369,6 +369,26 @@ public:
 	void Client_CloseShop();
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateShopTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
+
+//======================================================================================================================================
+// UI Sound
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* DropSound;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* UseSound_Equipment;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* UseSound_Consumable;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* UseSound_Furniture;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* MoveItemSound;
+
+
 protected:
 
 private:

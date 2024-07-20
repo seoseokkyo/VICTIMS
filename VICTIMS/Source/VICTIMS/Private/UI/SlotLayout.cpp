@@ -17,6 +17,8 @@
 #include "Components/MenuAnchor.h"
 #include "HUDLayout.h"
 #include "InventoryManagerComponent.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Sound/SoundBase.h>
 
 USlotLayout::USlotLayout(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
 {
@@ -92,6 +94,10 @@ void USlotLayout::NativeOnDragDetected(const FGeometry& InGeometry, const FPoint
 
 	if (HasItem())
 	{
+		if (DragSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), DragSound);
+		}
 		HideTooltip();
 
 		UItemDragVisual* DragVisual = CreateWidget<UItemDragVisual>(this, ItemDragVisualClass);

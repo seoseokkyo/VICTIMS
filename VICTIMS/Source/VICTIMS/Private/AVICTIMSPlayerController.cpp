@@ -149,20 +149,20 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 		}
 	}
 
-	int viewModeCheck = GetCurrentViewMode(this);
-
-	if (viewModeCheck == 0)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
-	}
-	else if (viewModeCheck == 1)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
-	}
-	else if (viewModeCheck == 2)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
-	}
+// 	int viewModeCheck = GetCurrentViewMode(this);
+// 
+// 	if (viewModeCheck == 0)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
+// 	}
+// 	else if (viewModeCheck == 1)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
+// 	}
+// 	else if (viewModeCheck == 2)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
+// 	}
 }
 
 uint8 AVICTIMSPlayerController::UIGetPlayerGold()
@@ -221,7 +221,7 @@ bool AVICTIMSPlayerController::IsContainerOpen()
 
 void AVICTIMSPlayerController::ToggleInventory()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -233,7 +233,7 @@ void AVICTIMSPlayerController::ToggleInventory()
 
 void AVICTIMSPlayerController::ToggleProfile()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -271,7 +271,7 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 
 void AVICTIMSPlayerController::ToggleContainer()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -287,7 +287,7 @@ bool AVICTIMSPlayerController::IsShopOpen()
 }
 void AVICTIMSPlayerController::ToggleShop()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -321,7 +321,7 @@ UUserWidget* AVICTIMSPlayerController::GenerateInteractWidget(FText Text)
 {
 	if (HUD_Reference == nullptr)
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
 
 		return nullptr;
 	}
@@ -336,7 +336,7 @@ UUserWidget* AVICTIMSPlayerController::CreateInteractWidget(FName Name)
 {
 	if (HUD_Reference == nullptr)
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
 
 		return nullptr;
 	}
@@ -423,7 +423,7 @@ void AVICTIMSPlayerController::UseHotbarSlot5()
 
 void AVICTIMSPlayerController::Interact()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Interact Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Interact Pressed"));
 
 	if (CharacterReference == nullptr)
 	{
@@ -440,7 +440,10 @@ void AVICTIMSPlayerController::Interact()
 		if (AWorldActor* WorldActor = Cast<AWorldActor>(Actor))
 		{
 			CollectFromPanel(WorldActor->ID);
-
+			if (PickUpSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(),PickUpSound, CharacterReference->GetActorLocation());
+			}
 			return;
 		}
 		if (AUsableActor* UsableActor = Cast<AUsableActor>(Actor))
@@ -451,7 +454,7 @@ void AVICTIMSPlayerController::Interact()
 		}
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"))
+// 		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"))
 	}
 }
 
@@ -696,12 +699,12 @@ void AVICTIMSPlayerController::LoadData(FString ID)
 					}
 				}
 
-				// 집 번호 로드 및 할당
-				if (SavedData->HouseNumber >= 0 && SavedData->HouseNumber < GameModeReference->Houses.Num())
-				{
-					AShelter* AssignedHouse = GameModeReference->Houses[SavedData->HouseNumber];
-					CharacterReference->SetAssignedHouse(AssignedHouse);
-				}
+// 				// 집 번호 로드 및 할당
+// 				if (SavedData->HouseNumber >= 0 && SavedData->HouseNumber < GameModeReference->Houses.Num())
+// 				{
+// 					AShelter* AssignedHouse = GameModeReference->Houses[SavedData->HouseNumber];
+// 					CharacterReference->SetAssignedHouse(AssignedHouse);
+// 				}
 
 			}
 			else
