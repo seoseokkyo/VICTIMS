@@ -35,6 +35,10 @@
 #include "UI/HUDLayout.h"
 #include "DropMoneyLayout.h"
 #include "CollisionComponent.h"
+#include "KillWidget.h"
+#include "UI/MainLayout.h"
+#include <../../../../../../../Source/Runtime/UMG/Public/Animation/WidgetAnimation.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Sound/SoundWave.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -114,6 +118,10 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 
 	//che
 	collisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
+	// Init Audio Resource
+	static ConstructorHelpers::FObjectFinder<USoundWave> myAudioResource(TEXT("<Reference_Path>"));
+	MatchReadyAudioWave = matchReadyAudioResource.Object;
+	KillSound = myAudioResource.Object;
 }
 
 void AVICTIMSCharacter::BeginPlay()
@@ -824,6 +832,20 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
+		}
+	}
+}
+
+void AVICTIMSCharacter::KillWidgetOn(ACharacterBase* DiedChar)
+{
+	if (IsLocallyControlled())
+	{
+		if (MyPlayerController)
+		{
+			MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->PlayAnimation(MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->KillAnimation);
+
+			
+
 		}
 	}
 }

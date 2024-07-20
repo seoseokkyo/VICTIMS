@@ -318,5 +318,12 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void AddDamage(ACharacterBase* DamagedChar);
+
+	UFUNCTION()
+	void KillWidgetOn(ACharacterBase* DiedChar);
+
+	UPROPERTY()
+		class USoundWave* KillSound;
+
 };
 

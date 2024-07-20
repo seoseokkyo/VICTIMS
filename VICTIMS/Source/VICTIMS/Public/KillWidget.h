@@ -13,5 +13,11 @@ UCLASS()
 class VICTIMS_API UKillWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "UI Animation", meta = (BindWidgetAnim))
+	class UWidgetAnimation* KillAnimation;
+
 	
 };
