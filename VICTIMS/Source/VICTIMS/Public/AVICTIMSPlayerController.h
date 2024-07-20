@@ -245,4 +245,8 @@ public:
 
 	UFUNCTION()
 	void CloseLayouts();
+
+    UPROPERTY(EditAnywhere, Category = "Interact Sound")
+	class USoundBase* PickUpSound;
+
 };

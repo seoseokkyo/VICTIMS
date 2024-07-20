@@ -38,6 +38,9 @@ public:
 	UPROPERTY(meta=(BindWidget))
 	UButton* DropMoneyButton;
 
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* click;
+
 
 	void UpdateGoldAmount();
 

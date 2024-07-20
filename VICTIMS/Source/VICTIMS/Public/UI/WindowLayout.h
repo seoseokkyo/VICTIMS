@@ -53,7 +53,16 @@ public:
 	virtual void NativeOnDragEnter(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override;
 	
 	FReply CustomDetectDrag(const FPointerEvent& InMouseEvent, UWidget* WidgetDetectingDrag, FKey DragKey);
-		
+	
+//======================================================================================================================
+// UI Sound
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* ToggleSound;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* ClickSound;
+
 private:
 	UPROPERTY()
 	class UDragWidget* DragWidget;
