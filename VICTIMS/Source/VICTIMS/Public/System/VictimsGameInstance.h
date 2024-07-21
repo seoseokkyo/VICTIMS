@@ -49,7 +49,7 @@ public:
 	UPROPERTY()
 	FString serverPort;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	FString mainAddress;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
@@ -93,7 +93,7 @@ public:
 
 private:
 
-	UPROPERTY()
+	UPROPERTY(Replicated)
 	bool bIsDedicateServer;
 
 

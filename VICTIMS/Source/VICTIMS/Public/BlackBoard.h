@@ -33,11 +33,8 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UCameraComponent* ViewCamera;	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	AVICTIMSPlayerController* useingPlayer;
-
-	UPROPERTY(Replicated, BlueprintReadWrite)
-	bool bUsingNow = false;
 
 	virtual bool OnActorUsed_Implementation(APlayerController* Controller) override;
 

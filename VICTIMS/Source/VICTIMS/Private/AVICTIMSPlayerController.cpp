@@ -637,8 +637,8 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 
 	if (saveData)
 	{
-		//saveData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
-		saveData->SavedGold = InventoryManagerComponent->Gold;	// Gold 초기값 저장
+		saveData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
+		saveData->SavedGold = InventoryManagerComponent->Gold;						// Gold 초기값 저장
 		CharacterReference->SavePersonalID(ID);
 
 		saveData->SavedItemIDs.Reset();
@@ -748,9 +748,11 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 				// 장비중인 아이템 로드 
 				if (TempSlot.ItemStructure.ItemType == EItemType::Equipment)
 				{
-					if(startPoint < i && i < startPoint*2)
+					//if(startPoint < i && i < startPoint*2)
+					if((int)EEquipmentSlot::Undefined < i &&  i < (int)EEquipmentSlot::Count)
 					{
-						CharacterReference->MyPlayerController->InventoryManagerComponent->UseInventoryItem(i);
+						//InventoryManagerComponent->UseInventoryItem(i);
+						InventoryManagerComponent->EquipItemAtLoad(InventoryManagerComponent->PlayerInventory, 6, InventoryManagerComponent->PlayerInventory, i);
 					}
 				}
 			}

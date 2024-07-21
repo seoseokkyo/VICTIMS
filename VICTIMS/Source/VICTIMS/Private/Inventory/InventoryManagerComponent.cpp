@@ -189,35 +189,10 @@ void UInventoryManagerComponent::Server_EquipFromInventory_Implementation(uint8 
 	EquipItem(PlayerInventory, FromInventorySlot, PlayerInventory, ToInventorySlot);
 }
 
-void UInventoryManagerComponent::Client_EquipFromInventory_Implementation(uint8 InventorySlot, FSlotStructure InventoryItem)
+void UInventoryManagerComponent::NetMulticast_EquipFromInventory_Implementation(uint8 FromInventorySlot, uint8 ToInventorySlot)
 {
-	if (InventorySlot < (uint8)EEquipmentSlot::Count)
-	{
-		uint8 Index = 0;
-
-		if (PlayerInventory->GetEmptyInventorySpace(Index))
-		{
-			UnEquipItem(PlayerInventory, InventorySlot, PlayerInventory, Index);
-			return;
-		}
-
-		UE_LOG(LogTemp, Warning, TEXT("NO FREE SPACE"))
-	}
-	else
-	{
-		EEquipmentSlot LocalEquipmentSlot = GetItemEquipmentSlot(InventoryItem);
-
-		uint8 OutInventorySlot = 0;
-		if (GetEmptyEquipmentSlotByType(LocalEquipmentSlot, OutInventorySlot))
-		{
-			Server_EquipFromInventory(InventorySlot, OutInventorySlot);
-		}
-		else
-		{
-			OutInventorySlot = GetEquipmentSlotByType(LocalEquipmentSlot);
-			Server_EquipFromInventory(InventorySlot, OutInventorySlot);
-		}
-	}
+	//Server_EquipFromInventory(FromInventorySlot, ToInventorySlot);
+	EquipItemAtLoad(PlayerInventory, FromInventorySlot, PlayerInventory, ToInventorySlot);
 }
 
 void UInventoryManagerComponent::Server_UnEquipToInventory_Implementation(uint8 FromInventorySlot, uint8 ToInventorySlot)
@@ -2422,3 +2397,29 @@ void UInventoryManagerComponent::DropMoney()
 	}
 }
 
+void UInventoryManagerComponent::EquipItemAtLoad(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot)
+{
+	if (GetItemTypeBySlot(FromInventorySlot) == EItemType::Equipment)
+	{
+		FSlotStructure LocalInventoryItem = FromInventory->GetInventorySlot(FromInventorySlot);
+		EEquipmentSlot LocalEquipmentSlotType = GetItemEquipmentSlot(LocalInventoryItem);
+
+		if (GetEquipmentTypeBySlot(ToInventorySlot) == LocalEquipmentSlotType)
+		{
+			AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
+			RemoveItem(FromInventory, FromInventorySlot);
+
+			UpdateEquippedStats();
+			Server_UpdateTooltips();
+			return;
+
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
+	}
+}

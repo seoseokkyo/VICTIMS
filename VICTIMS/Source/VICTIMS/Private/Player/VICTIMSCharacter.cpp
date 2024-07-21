@@ -35,6 +35,7 @@
 #include "UI/HUDLayout.h"
 #include "DropMoneyLayout.h"
 #include "CollisionComponent.h"
+#include "VICTIMSGameMode.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -575,7 +576,7 @@ void AVICTIMSCharacter::PrintInfo()
 
 	//FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, /**netMode,*/ *hasController, *strHP, *strSP);
 
-	FString strTemp = UEnum::GetValueAsString((ETemp)GEngine->GetNetMode(GetWorld()));
+	FString strTemp = UEnum::GetValueAsString((EVictimsNetMode)GEngine->GetNetMode(GetWorld()));
 
 	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nhasController : %s\n HP : %s\n SP : %s\n NetMode : %s"), *localRole, *remoteRole, *owner, *netConn, *hasController, *strHP, *strSP, *strTemp);
 
@@ -924,7 +925,10 @@ void AVICTIMSCharacter::NetMulticastRPC_SetAssignedHouse_Implementation(AShelter
 
 void AVICTIMSCharacter::Server_GoToHouse_Implementation()
 {
-	ClientRPC_GoToHouse(AssignedHouse->OriginPos);
+	if (AssignedHouse)
+	{
+		ClientRPC_GoToHouse(AssignedHouse->OriginPos);
+	}
 }
 
 void AVICTIMSCharacter::ClientRPC_GoToHouse_Implementation(FVector houseLocation)

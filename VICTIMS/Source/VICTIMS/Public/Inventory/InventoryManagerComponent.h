@@ -84,8 +84,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_EquipFromInventory(uint8 FromInventorySlot, uint8 ToInventorySlot);
 
-	UFUNCTION(Client, Reliable)
-	void Client_EquipFromInventory(uint8 InventorySlot, FSlotStructure InventoryItem);
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_EquipFromInventory(uint8 FromInventorySlot, uint8 ToInventorySlot);
 
 	UFUNCTION(Server, Reliable)
 	void Server_UnEquipToInventory(uint8 FromInventorySlot, uint8 ToInventorySlot);
@@ -445,6 +445,8 @@ public:
 
 	UFUNCTION(Category = "UserInterface|Public|DropMoney")
 	void DropMoney();
+
+	void EquipItemAtLoad(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot);
 
 	UPROPERTY()
 	uint8 DropMoneyAmount;

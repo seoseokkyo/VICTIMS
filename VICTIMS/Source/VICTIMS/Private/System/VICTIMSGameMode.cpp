@@ -163,6 +163,11 @@ void AVICTIMSGameMode::AssignHouseToPlayer(AVICTIMSPlayerController* NewPlayer)
 	}
 }
 
+EVictimsNetMode AVICTIMSGameMode::GetGameNetMode()
+{
+	return EVictimsNetMode(GetNetMode());
+}
+
 
 void AVICTIMSGameMode::Logout(AController* Exiting)
 {

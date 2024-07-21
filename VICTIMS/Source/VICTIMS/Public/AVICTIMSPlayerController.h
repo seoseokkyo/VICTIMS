@@ -14,16 +14,6 @@ class UInventoryManagerComponent;
 class UInteractiveText_Entry;
 class UTestIDWidget;
 
-UENUM(BlueprintType)
-enum class ETemp : uint8
-{
-	NM_Standalone,
-	NM_DedicatedServer,
-	NM_ListenServer,
-	NM_Client,
-	NM_MAX,
-};
-
 UCLASS()
 class VICTIMS_API AVICTIMSPlayerController : public APlayerController, public IInventoryHUDInterface
 {
