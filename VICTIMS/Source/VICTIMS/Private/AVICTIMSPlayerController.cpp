@@ -148,20 +148,22 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			CharacterReference->EnableInput(this);
 		}
 	}
+	if (bIsShowUI)
+	{
+		int viewModeCheck = GetCurrentViewMode(this);
 
-	int viewModeCheck = GetCurrentViewMode(this);
-
-	if (viewModeCheck == 0)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
-	}
-	else if (viewModeCheck == 1)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
-	}
-	else if (viewModeCheck == 2)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
+		if (viewModeCheck == 0)
+		{
+			GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
+		}
+		else if (viewModeCheck == 1)
+		{
+			GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
+		}
+		else if (viewModeCheck == 2)
+		{
+			GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
+		}
 	}
 }
 

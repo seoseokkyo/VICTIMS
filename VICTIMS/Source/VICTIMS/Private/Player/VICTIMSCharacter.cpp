@@ -38,7 +38,6 @@
 #include "KillWidget.h"
 #include "UI/MainLayout.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Animation/WidgetAnimation.h>
-#include <../../../../../../../Source/Runtime/Engine/Classes/Sound/SoundWave.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -119,9 +118,11 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	//che
 	collisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
 	// Init Audio Resource
-	static ConstructorHelpers::FObjectFinder<USoundWave> myAudioResource(TEXT("<Reference_Path>"));
-	MatchReadyAudioWave = matchReadyAudioResource.Object;
-	KillSound = myAudioResource.Object;
+	//static ConstructorHelpers::FObjectFinder<USoundWave> myAudioResource(TEXT("<Reference_Path>"));
+	//MatchReadyAudioWave = matchReadyAudioResource.Object;
+	//KillSound = myAudioResource.Object;
+	//UGameplayStatics::PlaySound2D(UObject * GetWorld(), class USoundBase* Sound, float VolumeMultiplier, float PitchMultiplier, float StartTime)
+	
 }
 
 void AVICTIMSCharacter::BeginPlay()
@@ -836,7 +837,18 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 	}
 }
 
+	
 void AVICTIMSCharacter::KillWidgetOn(ACharacterBase* DiedChar)
+{
+	ServerRPC_KillWidget_Implementation(DiedChar);
+}
+
+void AVICTIMSCharacter::ServerRPC_KillWidget_Implementation(ACharacterBase* DiedChar)
+{
+	NetMulticastRPC_KillWidget_Implementation(DiedChar);
+}
+
+void AVICTIMSCharacter::NetMulticastRPC_KillWidget_Implementation(ACharacterBase* DiedChar)
 {
 	if (IsLocallyControlled())
 	{
@@ -844,10 +856,12 @@ void AVICTIMSCharacter::KillWidgetOn(ACharacterBase* DiedChar)
 		{
 			MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->PlayAnimation(MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->KillAnimation);
 
+			UGameplayStatics::PlaySound2D(GetWorld(), KillSound, 1, 1, 0);
 			
 
 		}
 	}
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed")), true,true,FColor(1,1,1),30.0f);
 }
 
 void AVICTIMSCharacter::SetAssignedHouse(AShelter* NewHouse)

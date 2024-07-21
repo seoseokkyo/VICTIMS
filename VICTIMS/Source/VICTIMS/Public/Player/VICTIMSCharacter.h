@@ -319,11 +319,18 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void AddDamage(ACharacterBase* DamagedChar);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void KillWidgetOn(ACharacterBase* DiedChar);
 
-	UPROPERTY()
-		class USoundWave* KillSound;
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_KillWidget(ACharacterBase* DiedChar);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_KillWidget(ACharacterBase* DiedChar);
+
+
+	UPROPERTY(EditAnywhere)
+	class USoundBase* KillSound;
 
 };
 
