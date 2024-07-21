@@ -294,8 +294,14 @@ public:
 // Save
 
 public:
-	UPROPERTY()			// 저장시 사용하는 개인 ID 
+	UPROPERTY(ReplicatedUsing = OnRep_PersonalID)			// 저장시 사용하는 개인 ID 
 	FString PersonalID; 
+
+	UFUNCTION()
+	void OnRep_PersonalID();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetPersonalID(const FString& ID);
 
 	UFUNCTION()
 	void SavePersonalID(FString ID);

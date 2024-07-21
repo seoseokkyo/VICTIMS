@@ -35,6 +35,7 @@
 #include "UI/HUDLayout.h"
 #include "DropMoneyLayout.h"
 #include "CollisionComponent.h"
+#include "GameFramework/PlayerState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -406,6 +407,7 @@ void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AVICTIMSCharacter, HandsMesh);
 	DOREPLIFETIME(AVICTIMSCharacter, LegsMesh);
 	DOREPLIFETIME(AVICTIMSCharacter, HeadMesh);
+	DOREPLIFETIME(AVICTIMSCharacter, PersonalID);
 }
 
 
@@ -778,13 +780,61 @@ void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
 	}
 }
 
+void AVICTIMSCharacter::OnRep_PersonalID()
+{
+	UE_LOG(LogTemp, Warning, TEXT("MOVE: OnRep_PersonalID: %s"), *PersonalID);
+
+	// PlayerState에 PersonalID를 설정
+	if (APlayerState* PS = GetPlayerState())
+	{
+		PS->SetPlayerName(PersonalID);
+	}
+}
+
+void AVICTIMSCharacter::Server_SetPersonalID_Implementation(const FString& ID)
+{
+	PersonalID = ID;
+	OnRep_PersonalID();
+	UE_LOG(LogTemp, Warning, TEXT("MOVE : Server_SetPersonalID called: %s"), *ID);
+}
+
 //=======================================================================================================
 // Save
 void AVICTIMSCharacter::SavePersonalID(FString ID)
 {
-	if (IsLocallyControlled())
+	//if (HasAuthority())
+	//{
+	//	PersonalID = ID;
+	//	OnRep_PersonalID();
+	//}
+	//else
+	//{
+	//	Server_SetPersonalID(ID);
+	//}
+	//if (IsLocallyControlled())
+	//{
+	//	PersonalID = ID;
+	//	OnRep_PersonalID();
+	//	if (!HasAuthority())
+	//	{
+	//		Server_SetPersonalID(ID);
+	//	}
+	//}
+	//else if (HasAuthority())
+	//{
+	//	PersonalID = ID;
+	//	OnRep_PersonalID();
+	//}
+	if (HasAuthority())
 	{
 		PersonalID = ID;
+		OnRep_PersonalID();
+		UE_LOG(LogTemp, Warning, TEXT("MOVE : SavePersonalID called on server: %s"), *ID);
+	}
+	else if (IsLocallyControlled())
+	{
+		Server_SetPersonalID(ID);
+		UE_LOG(LogTemp, Warning, TEXT("MOVE : SavePersonalID called on client, requesting server to set ID: %s"), *ID);
 	}
 }
 

@@ -220,6 +220,30 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Test")
 	TSubclassOf<class UHousingNotification> HousingNotificationWidgetClass;
 
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	void ShowMovingInfo();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Test")
+	TSubclassOf<class UMovingInfoWidget> MovingInfoWidgetClass;
+
+	UPROPERTY()
+	UMovingInfoWidget* MovingInfoWidget;
+
+	void PopulatePlayerList();
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestPlayerList();
+
+	UFUNCTION(Client, Reliable)
+	void Client_ReceivePlayerList(const TArray<FString>& PlayerNames);
+
+	TArray<FString> AddedPlayerNames;
+
+	virtual void OnRep_PlayerState() override;
+	void UpdateAllClientsPlayerList();
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestPlayerListUpdate();
 //=========================================================================================================================
 
 	UFUNCTION()
