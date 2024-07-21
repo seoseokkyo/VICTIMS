@@ -97,7 +97,7 @@ void ANormalZombie::Tick(float DeltaTime)
 void ANormalZombie::DieFunction()
 {
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.2);
-
+	
 	Super::DieFunction();
 
 	//if (HasAuthority())

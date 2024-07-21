@@ -86,6 +86,9 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bIsDead=false;
+
 	void PrintInfo();
 
 	UFUNCTION(Server, Reliable)
@@ -123,5 +126,6 @@ public:
 	UFUNCTION()
 	virtual void DieFunction();
 
-
+	UFUNCTION(BlueprintImplementableEvent)
+	void AfterDieFunction();
 };

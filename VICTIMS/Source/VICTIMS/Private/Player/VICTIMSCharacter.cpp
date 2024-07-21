@@ -47,7 +47,7 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 AVICTIMSCharacter::AVICTIMSCharacter()
 {
 	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(42.f, 80.0f);
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -861,7 +861,7 @@ void AVICTIMSCharacter::NetMulticastRPC_KillWidget_Implementation(ACharacterBase
 
 		}
 	}
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed")), true,true,FColor(1,1,1),30.0f);
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed")), true, true, FColor(1, 1, 1), 30.0f);
 }
 
 void AVICTIMSCharacter::SetAssignedHouse(AShelter* NewHouse)
