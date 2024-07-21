@@ -687,7 +687,10 @@ void AVICTIMSPlayerController::NetMulticastRPC_SaveData_Implementation()
 
 void AVICTIMSPlayerController::LoadData(FString ID)
 {
-	ServerRPC_LoadData(ID);
+	if (InventoryManagerComponent->Gold == 0)
+	{
+		ServerRPC_LoadData(ID);
+	}
 }
 
 void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& ID)
@@ -749,7 +752,7 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 				if (TempSlot.ItemStructure.ItemType == EItemType::Equipment)
 				{
 					//if(startPoint < i && i < startPoint*2)
-					if((int)EEquipmentSlot::Undefined < i &&  i < (int)EEquipmentSlot::Count)
+					if ((int)EEquipmentSlot::Undefined < i && i < (int)EEquipmentSlot::Count)
 					{
 						//InventoryManagerComponent->UseInventoryItem(i);
 						InventoryManagerComponent->EquipItemAtLoad(InventoryManagerComponent->PlayerInventory, 6, InventoryManagerComponent->PlayerInventory, i);
@@ -764,7 +767,6 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 				AShelter* AssignedHouse = GameModeReference->Houses[savedData->HouseNumber];
 				CharacterReference->SetAssignedHouse(AssignedHouse);
 			}
-
 		}
 		else
 		{
