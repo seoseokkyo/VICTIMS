@@ -5,6 +5,8 @@
 #include "InventoryManagerComponent.h"
 #include "FShopList.h"
 #include "VictimsGameInstance.h"
+#include "Components/SkeletalMeshComponent.h"
+#include <Net/UnrealNetwork.h>
 
 AShopActor::AShopActor()
 {
@@ -15,7 +17,26 @@ AShopActor::AShopActor()
 	InventoryComponent->SlotsPerRowInventory = 1;
 	S_Name = "Shop";
 	S_CanShopItems = true;
+
+	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
+	Body->SetupAttachment(GetRootComponent());
+
+	Chest = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Chest"));
+	Chest->SetupAttachment(Body);
+
+	Hands = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
+	Hands->SetupAttachment(Body);
+
+	Feet = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Feet"));
+	Feet->SetupAttachment(Body);
+
+	Legs = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
+	Legs->SetupAttachment(Body);
+
+	Head = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Head"));
+	Head->SetupAttachment(Body);
 }
+
 
 void AShopActor::BeginPlay()
 {
@@ -225,4 +246,16 @@ void AShopActor::SetItemAmount(FSlotStructure& Item, uint8 NewAmount)
 uint8 AShopActor::GetItemMaxStackSize(const FSlotStructure Item)
 {
 	return Item.ItemStructure.MaxStackSize;
+}
+
+void AShopActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(AShopActor, Body);
+	DOREPLIFETIME(AShopActor, Chest);
+	DOREPLIFETIME(AShopActor, Feet);
+	DOREPLIFETIME(AShopActor, Hands);
+	DOREPLIFETIME(AShopActor, Legs);
+	DOREPLIFETIME(AShopActor, Head);
 }

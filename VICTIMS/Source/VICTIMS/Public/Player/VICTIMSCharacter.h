@@ -15,6 +15,7 @@ class UInputMappingContext;
 class UInputAction;
 class UHPWidget;
 class UCollisionComponent;
+class UPlayerDiedWidget;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -104,7 +105,7 @@ public:
 	TSubclassOf<UHPWidget> hpWidget_bp;
 
 	UPROPERTY()
-	class UPlayerDiedWidget* DiedWidget;
+	UPlayerDiedWidget* DiedWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UPlayerDiedWidget> DiedWidget_bp;
