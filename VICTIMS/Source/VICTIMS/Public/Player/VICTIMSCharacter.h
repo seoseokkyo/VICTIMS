@@ -277,6 +277,12 @@ public:
 	void SetAssignedHouse(AShelter* NewHouse);
 
 	UFUNCTION(Server, Reliable)
+	void Server_GoToOtherHouse(const FString& otherPlayerName);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ClientRPC_GoToOtherHouse(FVector houseLocation);
+
+	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetAssignedHouse(AShelter* NewHouse);
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -309,9 +315,6 @@ public:
 	
 	UFUNCTION()
 	void OnRep_PersonalID();
-
-	UFUNCTION(Server, Reliable)
-	void Server_SetPersonalID(const FString& ID);
 	
 	UPROPERTY()
 	class UTestSaveGame* SavedData;

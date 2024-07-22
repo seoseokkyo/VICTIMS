@@ -24,13 +24,22 @@ public:
 	class UScrollBox* MovingInfo;
 	//class UListView* PlayerListView;
 
-	void CreatePlayerButton(const FString& PlayerName);
+	void CreatePlayerButton();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_FindPlayers();
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_CreateButtons(const FString& playerNames);
 
 	UFUNCTION()
 	void MoveTo();
 
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Button_GoPub;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<class UGoOtherPlayerButton> bp_button;
 
 	UFUNCTION()
 	void OnClickedPubButton();

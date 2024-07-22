@@ -257,7 +257,7 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_ReceivePlayerList(const TArray<FString>& PlayerNames);
-
+	
 	TArray<FString> AddedPlayerNames;
 
 	virtual void OnRep_PlayerState() override;

@@ -621,9 +621,7 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 		}
 	}
 	else
-	{
-		SavedData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
-		SavedData->PlayerDataStructure.PlayerID = ID;
+	{		
 		SaveData();
 
 		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());

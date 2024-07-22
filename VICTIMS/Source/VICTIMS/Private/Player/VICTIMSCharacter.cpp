@@ -854,18 +854,7 @@ void AVICTIMSCharacter::OnRep_PersonalID()
 
 void AVICTIMSCharacter::SavePersonalID(FString ID)
 {
-	if (HasAuthority())
-	{
-		PersonalID = ID;
-		OnRep_PersonalID();
-		UE_LOG(LogTemp, Warning, TEXT("MOVE : SavePersonalID called on server: %s"), *ID);
-	}
-	else if (IsLocallyControlled())
-	{
-		Server_SetPersonalID(ID);
-		UE_LOG(LogTemp, Warning, TEXT("MOVE : SavePersonalID called on client, requesting server to set ID: %s"), *ID);
-	}
-
+	ServerRPC_SavePersonalID(ID);
 }
 
 void AVICTIMSCharacter::ServerRPC_SavePersonalID_Implementation(const FString& ID)
@@ -964,6 +953,29 @@ void AVICTIMSCharacter::Server_GoToHouse_Implementation()
 }
 
 void AVICTIMSCharacter::ClientRPC_GoToHouse_Implementation(FVector houseLocation)
+{
+	if (houseLocation != FVector::ZeroVector)
+	{
+		SetActorLocation(houseLocation);
+	}
+}
+
+
+void AVICTIMSCharacter::Server_GoToOtherHouse_Implementation(const FString& otherPlayerName)
+{
+	auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
+
+	for (auto house : gm->Houses)
+	{
+		if (house->OwnerPlayerID == otherPlayerName)
+		{			
+			ClientRPC_GoToHouse(house->OriginPos);
+			break;
+		}
+	}	
+}
+
+void AVICTIMSCharacter::ClientRPC_GoToOtherHouse_Implementation(FVector houseLocation)
 {
 	if (houseLocation != FVector::ZeroVector)
 	{
