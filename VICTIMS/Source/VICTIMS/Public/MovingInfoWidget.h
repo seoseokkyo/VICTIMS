@@ -29,6 +29,17 @@ public:
 	UFUNCTION()
 	void MoveTo();
 
-//	UFUNCTION(BlueprintCallable)
-//	void ClearPlayerList();
+	UPROPERTY(meta = (BindWidget))
+	class UButton* Button_GoPub;
+
+	UFUNCTION()
+	void OnClickedPubButton();
+
+	FTimerHandle HideWidgetTimerHandle;
+
+	UFUNCTION()
+	void HideWidget();
+
+	UFUNCTION(BlueprintCallable)
+	void ClearPlayerList();
 };

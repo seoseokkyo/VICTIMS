@@ -88,6 +88,7 @@ void AVICTIMSPlayerController::BeginPlay()
 			}
 		}
 	}
+
 	if (HasAuthority())
 	{
 		UpdateAllClientsPlayerList();
@@ -157,21 +158,21 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			CharacterReference->EnableInput(this);
 		}
 	}
-
-	int viewModeCheck = GetCurrentViewMode(this);
-
-	if (viewModeCheck == 0)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
-	}
-	else if (viewModeCheck == 1)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
-	}
-	else if (viewModeCheck == 2)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
-	}
+// 
+// 	int viewModeCheck = GetCurrentViewMode(this);
+// 
+// 	if (viewModeCheck == 0)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
+// 	}
+// 	else if (viewModeCheck == 1)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
+// 	}
+// 	else if (viewModeCheck == 2)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
+// 	}
 }
 
 uint8 AVICTIMSPlayerController::UIGetPlayerGold()
@@ -866,28 +867,44 @@ void AVICTIMSPlayerController::ShowMovingInfo()
 {
 	if (IsLocalController())
 	{
-		if (!MovingInfoWidget && MovingInfoWidgetClass)
+		PopulatePlayerList();
+		if (HUDLayoutReference->MainLayout->MovingInfo->GetVisibility() == ESlateVisibility::Hidden)
 		{
-			MovingInfoWidget = CreateWidget<UMovingInfoWidget>(this, MovingInfoWidgetClass);
-			if (MovingInfoWidget)
-			{
-				MovingInfoWidget->AddToViewport();
-				PopulatePlayerList();
-			}
+			HUDLayoutReference->MainLayout->MovingInfo->SetVisibility(ESlateVisibility::Visible);
+			bIsShowUI = true;
+			EnableUIMode();
 		}
-		else if (MovingInfoWidget)
+		else if (HUDLayoutReference->MainLayout->MovingInfo->GetVisibility() == ESlateVisibility::Visible)
 		{
-			if (MovingInfoWidget->GetVisibility() == ESlateVisibility::Visible)
-			{
-				MovingInfoWidget->SetVisibility(ESlateVisibility::Hidden);
-			}
-			else
-			{
-				MovingInfoWidget->SetVisibility(ESlateVisibility::Visible);
-				PopulatePlayerList();
-				//MovingInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
-			}
+			HUDLayoutReference->MainLayout->MovingInfo->SetVisibility(ESlateVisibility::Hidden);
+			bIsShowUI = false;
+			DisableUIMode();
 		}
+// 		if (!MovingInfoWidget && MovingInfoWidgetClass)
+// 		{
+// 			MovingInfoWidget = CreateWidget<UMovingInfoWidget>(this, MovingInfoWidgetClass);
+// 			if (MovingInfoWidget)
+// 			{
+// 				MovingInfoWidget->AddToViewport();
+// 				PopulatePlayerList();
+// 			}
+// 		}
+// 		else if (MovingInfoWidget)
+// 		{
+// 			if (MovingInfoWidget->GetVisibility() == ESlateVisibility::Visible)
+// 			{
+// 				MovingInfoWidget->SetVisibility(ESlateVisibility::Hidden);
+// 				bShowMouseCursor = false;
+// 				SetInputMode(FInputModeGameOnly());
+// 			}
+//  			else
+//  			{
+//  				MovingInfoWidget->SetVisibility(ESlateVisibility::Visible);
+// 				
+// 				//PopulatePlayerList();
+// 				//MovingInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+// 			}
+// 		}
 	}
 }
 
@@ -960,10 +977,10 @@ void AVICTIMSPlayerController::Server_RequestPlayerList_Implementation()
 	Client_ReceivePlayerList(PlayerNames);
 }
 
-void AVICTIMSPlayerController::Client_Receive PlayerList_Implementation(const TArray<FString>& PlayerNames)
+void AVICTIMSPlayerController::Client_ReceivePlayerList_Implementation(const TArray<FString>& PlayerNames)
 {
 	if (MovingInfoWidget)
-	{
+	{	
 		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
 		if (CharacterReference)
 		{

@@ -12,6 +12,7 @@
 #include "InventoryManagerComponent.h"
 #include "AVICTIMSPlayerController.h"
 #include "ShopLayout.h"
+#include "MovingInfoWidget.h"
 
 AMyHUD::AMyHUD()
 {
@@ -70,6 +71,8 @@ bool AMyHUD::IsAnyWidgetVisible()
 		HUDReference->MainLayout->Container->IsVisible()
 		||
 		HUDReference->MainLayout->Shop->IsVisible()
+		||	
+		HUDReference->MainLayout->MovingInfo->IsVisible()
 		)
 	{
 		return true;
@@ -108,6 +111,7 @@ void AMyHUD::ToggleWindow(const ELayout Layout)
 		}
 	}
 }
+
 
 FWidgetsLayoutBP* AMyHUD::GetWidgetBPClass(FName Name)
 {
