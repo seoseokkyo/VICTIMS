@@ -45,11 +45,6 @@ void ABlackBoard::Tick(float DeltaTime)
 
 bool ABlackBoard::OnActorUsed_Implementation(APlayerController* Controller)
 {
-	if (bUsingNow)
-	{
-		return true;
-	}
-
 	useingPlayer = Cast<AVICTIMSPlayerController>(Controller);
 
 	if (nullptr != useingPlayer)
@@ -113,9 +108,7 @@ void ABlackBoard::ClientRPC_TravelRequest_Implementation(AVICTIMSPlayerControlle
 		return;
 	}
 
-	//playerCharacter->DisableInput(Controller);
 	playerCharacter->SetActorLocation(loc, false, nullptr, ETeleportType::TeleportPhysics);
-	//playerCharacter->TeleportTo(playerCharacter->GetActorLocation(), playerCharacter->GetActorRotation());;
 
 	playerCharacter->DisableInput(Controller);
 
@@ -153,5 +146,5 @@ void ABlackBoard::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifet
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ABlackBoard, bUsingNow);
+	DOREPLIFETIME(ABlackBoard, useingPlayer);
 }

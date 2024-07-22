@@ -27,6 +27,10 @@
 #include "UI/InventoryLayout.h"
 #include "UI/ProfileLayout.h"
 #include "DropMoneyLayout.h"
+#include "HousingNotification.h"
+#include "HousingComponent.h"
+#include "MovingInfoWidget.h"
+#include "GameFramework/PlayerState.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -47,6 +51,8 @@ AVICTIMSPlayerController::AVICTIMSPlayerController()
 	CharacterReference = nullptr;
 
 	bReplicates = true;
+
+	AddedPlayerNames.Empty();
 }
 
 void AVICTIMSPlayerController::BeginPlay()
@@ -68,17 +74,10 @@ void AVICTIMSPlayerController::BeginPlay()
 			if (TestIDWidget)
 			{
 				bIsShowUI = true;
-
-				if (auto gameInst = GetGameInstance<UVictimsGameInstance>())
-				{
-					if (false == gameInst->DedicateServerCheck())
-					{
-						TestIDWidget->AddToViewport();
-						SetInputMode(FInputModeUIOnly());
-						EnableUIMode();
-						bShowMouseCursor = true;
-					}
-				}
+				TestIDWidget->AddToViewport();
+				SetInputMode(FInputModeUIOnly());
+				EnableUIMode();
+				bShowMouseCursor = true;
 			}
 		}
 
@@ -90,6 +89,11 @@ void AVICTIMSPlayerController::BeginPlay()
 				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
+	}
+
+	if (HasAuthority())
+	{
+		UpdateAllClientsPlayerList();
 	}
 }
 
@@ -461,8 +465,24 @@ void AVICTIMSPlayerController::Interact()
 			return;
 		}
 	}
+	else if(CharacterReference->CurrentDoorComponent)
+	{
+		if (CharacterReference->HousingComponent->IsBuildModeOn)
+		{
+			ShowHousingNotification();
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ByeDoor"));
+			// 맵 변경(나가기)이 아니라 위젯 띄워주기
+			// CharacterReference->SetActorLocation(FVector(1850, 821, 169));
+			ShowMovingInfo();
+			
+		}
+		//return;
+	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"))
+		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"));
 	}
 }
 
@@ -601,13 +621,27 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 		}
 	}
 	else
-	{
+	{		
 		SaveData();
+
+		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
+		if (CharacterReference)
+		{
+			CharacterReference->SavePersonalID(ID);
+			UE_LOG(LogTemp, Warning, TEXT("Move :: CreateSaveData: PersonalID set to %s"), *ID);
+		}
+		if (PlayerState)
+		{
+			PlayerState->SetPlayerName(ID);
+		}
 
 		if (TestIDWidget)
 		{
 			TestIDWidget->IsIDValid = true;
 		}
+
+		// 서버에 플레이어 리스트 업데이트 요청
+		Server_RequestPlayerListUpdate();
 	}
 }
 
@@ -637,8 +671,8 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 
 	if (saveData)
 	{
-		//saveData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
-		saveData->SavedGold = InventoryManagerComponent->Gold;	// Gold 초기값 저장
+		saveData->SavedHP = CharacterReference->stateComp->runningStat.currentHP;	// HP 초기값 저장 
+		saveData->SavedGold = InventoryManagerComponent->Gold;						// Gold 초기값 저장
 		CharacterReference->SavePersonalID(ID);
 
 		saveData->SavedItemIDs.Reset();
@@ -687,7 +721,10 @@ void AVICTIMSPlayerController::NetMulticastRPC_SaveData_Implementation()
 
 void AVICTIMSPlayerController::LoadData(FString ID)
 {
-	ServerRPC_LoadData(ID);
+	if (InventoryManagerComponent->Gold == 0)
+	{
+		ServerRPC_LoadData(ID);
+	}
 }
 
 void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& ID)
@@ -715,6 +752,11 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			}
 
 			InventoryManagerComponent->AddGold(savedData->SavedGold);	// Gold 로드
+			
+			if (PlayerState)
+			{
+				PlayerState->SetPlayerName(/*SaveGame->PlayerDataStructure.PlayerID*/ID);
+			}
 
 			// 인벤토리 아이템 로드 
 			int itemCount = savedData->SavedItemIDs.Num() - 1;
@@ -748,9 +790,11 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 				// 장비중인 아이템 로드 
 				if (TempSlot.ItemStructure.ItemType == EItemType::Equipment)
 				{
-					if(startPoint < i && i < startPoint*2)
+					//if(startPoint < i && i < startPoint*2)
+					if ((int)EEquipmentSlot::Undefined < i && i < (int)EEquipmentSlot::Count)
 					{
-						CharacterReference->MyPlayerController->InventoryManagerComponent->UseInventoryItem(i);
+						//InventoryManagerComponent->UseInventoryItem(i);
+						InventoryManagerComponent->EquipItemAtLoad(InventoryManagerComponent->PlayerInventory, 6, InventoryManagerComponent->PlayerInventory, i);
 					}
 				}
 			}
@@ -762,7 +806,6 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 				AShelter* AssignedHouse = GameModeReference->Houses[savedData->HouseNumber];
 				CharacterReference->SetAssignedHouse(AssignedHouse);
 			}
-
 		}
 		else
 		{
@@ -882,4 +925,212 @@ void AVICTIMSPlayerController::CloseLayouts()
 		return;
 	}
 	// 	return;
+}
+
+void AVICTIMSPlayerController::ShowHousingNotification()
+{
+	if (!HousingNotificationWidget)
+	{
+		if (HousingNotificationWidgetClass)
+		{
+			HousingNotificationWidget = CreateWidget<UHousingNotification>(this, HousingNotificationWidgetClass);
+			if (HousingNotificationWidget)
+			{
+				HousingNotificationWidget->AddToViewport();
+			}
+		}
+	}
+
+	if (HousingNotificationWidget)
+	{
+		HousingNotificationWidget->SetVisibility(ESlateVisibility::Visible);
+
+		GetWorld()->GetTimerManager().SetTimer(HousingNotificationTimerHandle, this, &AVICTIMSPlayerController::HideHousingNotification, 1.0f, false);
+	}
+}
+
+void AVICTIMSPlayerController::HideHousingNotification()
+{
+	if (HousingNotificationWidget)
+	{
+		HousingNotificationWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	GetWorld()->GetTimerManager().ClearTimer(HousingNotificationTimerHandle);
+}
+
+void AVICTIMSPlayerController::ShowMovingInfo()
+{
+	if (IsLocalController())
+	{
+		PopulatePlayerList();
+		if (HUDLayoutReference->MainLayout->MovingInfo->GetVisibility() == ESlateVisibility::Hidden)
+		{
+			HUDLayoutReference->MainLayout->MovingInfo->SetVisibility(ESlateVisibility::Visible);
+			bIsShowUI = true;
+			EnableUIMode();
+		}
+		else if (HUDLayoutReference->MainLayout->MovingInfo->GetVisibility() == ESlateVisibility::Visible)
+		{
+			HUDLayoutReference->MainLayout->MovingInfo->SetVisibility(ESlateVisibility::Hidden);
+			bIsShowUI = false;
+			DisableUIMode();
+		}
+// 		if (!MovingInfoWidget && MovingInfoWidgetClass)
+// 		{
+// 			MovingInfoWidget = CreateWidget<UMovingInfoWidget>(this, MovingInfoWidgetClass);
+// 			if (MovingInfoWidget)
+// 			{
+// 				MovingInfoWidget->AddToViewport();
+// 				PopulatePlayerList();
+// 			}
+// 		}
+// 		else if (MovingInfoWidget)
+// 		{
+// 			if (MovingInfoWidget->GetVisibility() == ESlateVisibility::Visible)
+// 			{
+// 				MovingInfoWidget->SetVisibility(ESlateVisibility::Hidden);
+// 				bShowMouseCursor = false;
+// 				SetInputMode(FInputModeGameOnly());
+// 			}
+//  			else
+//  			{
+//  				MovingInfoWidget->SetVisibility(ESlateVisibility::Visible);
+// 				
+// 				//PopulatePlayerList();
+// 				//MovingInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
+// 			}
+// 		}
+	}
+}
+
+void AVICTIMSPlayerController::PopulatePlayerList()
+{
+	if (IsLocalController())
+	{
+		if (MovingInfoWidget)
+		{	
+			CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
+			if (CharacterReference)
+			{
+				FString MyPlayerName = CharacterReference->PersonalID;
+				UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList :: MyPlayerName: %s"), *MyPlayerName);
+
+				//for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+				//{
+				//	APlayerController* pc = It->Get();
+				//	//if (pc && pc->PlayerState)
+				//	//{
+				//	//	FString OtherPlayerName = pc->PlayerState->GetPlayerName();
+				//	//	UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList: OtherPlayerName: %s"), *OtherPlayerName);
+				//	//	if (OtherPlayerName != MyPlayerName)
+				//	//	{
+				//	//		//MovingInfoWidget->AddPlayerName(pc->PlayerState->GetPlayerName());
+				//	//		MovingInfoWidget->AddPlayerName(OtherPlayerName);
+
+				//	//	}
+				//	//}
+				//	if (pc)
+				//	{
+				//		FString ControllerName = pc->GetName();
+				//		FString PlayerStateName = pc->PlayerState ? pc->PlayerState->GetPlayerName() : TEXT("Move : No PlayerState");
+
+				//		// 모든 컨트롤러의 이름을 로그로 출력
+				//		UE_LOG(LogTemp, Warning, TEXT("Move :: Controller: %s, PlayerStateName: %s"), *ControllerName, *PlayerStateName);
+
+				//		if (PlayerStateName != MyPlayerName) // 자신의 이름은 제외
+				//		{
+				//			MovingInfoWidget->AddPlayerName(PlayerStateName);
+				//		}
+				//		else
+				//		{
+				//			UE_LOG(LogTemp, Warning, TEXT("Skipping MyPlayerName: %s"), *PlayerStateName);
+				//		}
+				//	}
+				//}
+				Server_RequestPlayerList();
+			}
+		}
+	}
+}
+
+void AVICTIMSPlayerController::Server_RequestPlayerList_Implementation()
+{
+	TArray<FString> PlayerNames;
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* pc = It->Get();
+		if (pc && pc->PlayerState)
+		{
+			FString PlayerStateName = pc->PlayerState->GetPlayerName();
+			if (!PlayerStateName.IsEmpty()) // 빈 이름은 제외
+			{
+				PlayerNames.Add(PlayerStateName);
+			}
+		}
+	}
+	Client_ReceivePlayerList(PlayerNames);
+}
+
+void AVICTIMSPlayerController::Client_ReceivePlayerList_Implementation(const TArray<FString>& PlayerNames)
+{
+	if (MovingInfoWidget)
+	{	
+		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
+		if (CharacterReference)
+		{
+			FString MyPlayerName = CharacterReference->PersonalID;
+			UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList :: MyPlayerName: %s"), *MyPlayerName);
+
+			for (const FString& PlayerName : PlayerNames)
+			{
+				if (!PlayerName.IsEmpty() && PlayerName != MyPlayerName && !AddedPlayerNames.Contains(PlayerName)) // 자신의 이름은 제외
+				{
+					MovingInfoWidget->AddPlayerName(PlayerName);
+					AddedPlayerNames.Add(PlayerName);
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("Skipping MyPlayerName: %s"), *PlayerName);
+				}
+			}
+		}
+	}
+}
+
+void AVICTIMSPlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	UpdateAllClientsPlayerList();
+}
+
+void AVICTIMSPlayerController::UpdateAllClientsPlayerList()
+{
+	TArray<FString> PlayerNames;
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* pc = It->Get();
+		if (pc && pc->PlayerState)
+		{
+			FString PlayerStateName = pc->PlayerState->GetPlayerName();
+			PlayerNames.Add(PlayerStateName);
+		}
+	}
+
+	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
+	{
+		APlayerController* pc = It->Get();
+		if (AVICTIMSPlayerController* VPC = Cast<AVICTIMSPlayerController>(pc))
+		{
+			VPC->Client_ReceivePlayerList(PlayerNames);
+		}
+	}
+}
+
+void AVICTIMSPlayerController::Server_RequestPlayerListUpdate_Implementation()
+{
+	UpdateAllClientsPlayerList();
 }

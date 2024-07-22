@@ -61,7 +61,7 @@ void UEquipmentComponent::NetMulticastRPC_UpdateEquippedMeshes_Implementation(ui
 {
 	if (IsValid(EquipmentCharacterReference))
 	{
-		switch (Slot.ItemStructure.EquipmentSlot)
+		switch ((EEquipmentSlot)InventorySlot)
 		{
 		case EEquipmentSlot::Weapon:
 			break;

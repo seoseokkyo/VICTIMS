@@ -43,24 +43,28 @@ void UTestIDWidget::OnClickedContinueButton()
 {
 	if (ID != nullptr)
 	{
-		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());		
 
-		SetOwningPlayer(PC);
 		if (PC)
 		{
-			FString strID = ID->GetText().ToString();
+			SetOwningPlayer(PC);
 
-			PC->CharacterReference->SavePersonalID(strID);
-			PC->SavePersonalID(strID);
-			PC->LoadData(strID);
-			if (IsIDValid)
+			if (PC->IsLocalController())
 			{
-				PC->CloseTestIDWidget();
-			}
-			else
-			{
-// 				UE_LOG(LogTemp, Warning, TEXT("Continue Failed"));
-				return;
+				FString strID = ID->GetText().ToString();
+
+				PC->CharacterReference->SavePersonalID(strID);
+				PC->SavePersonalID(strID);
+				PC->LoadData(strID);
+				if (IsIDValid)
+				{
+					PC->CloseTestIDWidget();
+				}
+				else
+				{
+					// 				UE_LOG(LogTemp, Warning, TEXT("Continue Failed"));
+					return;
+				}
 			}
 		}
 	}

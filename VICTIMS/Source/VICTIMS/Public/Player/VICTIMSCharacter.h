@@ -15,6 +15,7 @@ class UInputMappingContext;
 class UInputAction;
 class UHPWidget;
 class UCollisionComponent;
+class UPlayerDiedWidget;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -104,7 +105,7 @@ public:
 	TSubclassOf<UHPWidget> hpWidget_bp;
 
 	UPROPERTY()
-	class UPlayerDiedWidget* DiedWidget;
+	UPlayerDiedWidget* DiedWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UPlayerDiedWidget> DiedWidget_bp;
@@ -276,6 +277,12 @@ public:
 	void SetAssignedHouse(AShelter* NewHouse);
 
 	UFUNCTION(Server, Reliable)
+	void Server_GoToOtherHouse(const FString& otherPlayerName);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ClientRPC_GoToOtherHouse(FVector houseLocation);
+
+	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetAssignedHouse(AShelter* NewHouse);
 
 	UFUNCTION(NetMulticast, Reliable)
@@ -287,13 +294,14 @@ public:
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void ClientRPC_GoToHouse(FVector houseLocation);
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+    UPrimitiveComponent* CurrentDoorComponent;
 
 //=====================================================================================================
 // Save
 
 public:
-	UPROPERTY()			// 저장시 사용하는 개인 ID 
+	UPROPERTY(ReplicatedUsing = OnRep_PersonalID)			// 저장시 사용하는 개인 ID 
 	FString PersonalID; 
 
 	UFUNCTION()
@@ -304,6 +312,9 @@ public:
 
 	UFUNCTION(Netmulticast, Reliable)
 	void NetMulticastRPC_SavePersonalID(const FString& ID);
+	
+	UFUNCTION()
+	void OnRep_PersonalID();
 	
 	UPROPERTY()
 	class UTestSaveGame* SavedData;

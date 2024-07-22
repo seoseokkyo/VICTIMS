@@ -12,6 +12,7 @@
 #include "InventoryManagerComponent.h"
 #include "AVICTIMSPlayerController.h"
 #include "ShopLayout.h"
+#include "MovingInfoWidget.h"
 
 AMyHUD::AMyHUD()
 {
@@ -69,6 +70,8 @@ bool AMyHUD::IsAnyWidgetVisible()
 		HUDReference->MainLayout->Container->IsVisible()
 		||
 		HUDReference->MainLayout->Shop->IsVisible()
+		||	
+		HUDReference->MainLayout->MovingInfo->IsVisible()
 		)
 	{
 		return true;

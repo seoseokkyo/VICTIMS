@@ -6,6 +6,18 @@
 #include "GameFramework/GameModeBase.h"
 #include "VICTIMSGameMode.generated.h"
 
+
+UENUM(BlueprintType)
+enum class EVictimsNetMode : uint8
+{
+	NM_Standalone,
+	NM_DedicatedServer,
+	NM_ListenServer,
+	NM_Client,
+	NM_MAX,
+};
+
+
 UCLASS(minimalapi)
 class AVICTIMSGameMode : public AGameModeBase
 {
@@ -23,6 +35,8 @@ public:
 	int32 TotalHouses;
 	int32 NextHouseIndex;
 
+	UFUNCTION(BlueprintCallable)
+	EVictimsNetMode GetGameNetMode();
 };
 
 

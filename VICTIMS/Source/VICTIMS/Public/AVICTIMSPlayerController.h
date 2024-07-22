@@ -14,16 +14,6 @@ class UInventoryManagerComponent;
 class UInteractiveText_Entry;
 class UTestIDWidget;
 
-UENUM(BlueprintType)
-enum class ETemp : uint8
-{
-	NM_Standalone,
-	NM_DedicatedServer,
-	NM_ListenServer,
-	NM_Client,
-	NM_MAX,
-};
-
 UCLASS()
 class VICTIMS_API AVICTIMSPlayerController : public APlayerController, public IInventoryHUDInterface
 {
@@ -241,6 +231,40 @@ public:
 	
 	bool bIsShowUI = false;
 
+	FTimerHandle HousingNotificationTimerHandle;
+	void ShowHousingNotification();
+	void HideHousingNotification();
+
+	UPROPERTY()
+	class UHousingNotification* HousingNotificationWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Test")
+	TSubclassOf<class UHousingNotification> HousingNotificationWidgetClass;
+
+	UFUNCTION(BlueprintCallable, Category = "Interaction")
+	void ShowMovingInfo();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Test")
+	TSubclassOf<class UMovingInfoWidget> MovingInfoWidgetClass;
+
+	UPROPERTY()
+	UMovingInfoWidget* MovingInfoWidget;
+
+	void PopulatePlayerList();
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestPlayerList();
+
+	UFUNCTION(Client, Reliable)
+	void Client_ReceivePlayerList(const TArray<FString>& PlayerNames);
+	
+	TArray<FString> AddedPlayerNames;
+
+	virtual void OnRep_PlayerState() override;
+	void UpdateAllClientsPlayerList();
+
+	UFUNCTION(Server, Reliable)
+	void Server_RequestPlayerListUpdate();
 //=========================================================================================================================
 
 	UFUNCTION()

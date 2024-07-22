@@ -35,6 +35,8 @@
 #include "UI/HUDLayout.h"
 #include "DropMoneyLayout.h"
 #include "CollisionComponent.h"
+#include "VICTIMSGameMode.h"
+#include "GameFramework/PlayerState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -445,6 +447,8 @@ void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AVICTIMSCharacter, Feet);
 	DOREPLIFETIME(AVICTIMSCharacter, Legs);
 	DOREPLIFETIME(AVICTIMSCharacter, Head);
+	
+	DOREPLIFETIME(AVICTIMSCharacter, PersonalID);
 }
 
 
@@ -575,7 +579,7 @@ void AVICTIMSCharacter::PrintInfo()
 
 	//FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, /**netMode,*/ *hasController, *strHP, *strSP);
 
-	FString strTemp = UEnum::GetValueAsString((ETemp)GEngine->GetNetMode(GetWorld()));
+	FString strTemp = UEnum::GetValueAsString((EVictimsNetMode)GEngine->GetNetMode(GetWorld()));
 
 	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nhasController : %s\n HP : %s\n SP : %s\n NetMode : %s"), *localRole, *remoteRole, *owner, *netConn, *hasController, *strHP, *strSP, *strTemp);
 
@@ -708,6 +712,10 @@ void AVICTIMSCharacter::OnBeginOverlap(class UPrimitiveComponent* OverlappedComp
 					}
 				}
 			}
+			else if (OtherComp->ComponentHasTag(TEXT("Door")))
+			{
+				CurrentDoorComponent = OtherComp;
+			}
 		}
 	}
 }
@@ -751,6 +759,10 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 						return;
 					}
 				}
+			}
+			if (OtherComp == CurrentDoorComponent)
+			{
+				CurrentDoorComponent = nullptr;
 			}
 		}
 	}
@@ -828,11 +840,21 @@ void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
 
 //=======================================================================================================
 // Save
+
+void AVICTIMSCharacter::OnRep_PersonalID()
+{
+	UE_LOG(LogTemp, Warning, TEXT("MOVE: OnRep_PersonalID: %s"), *PersonalID);
+
+	// PlayerState에 PersonalID를 설정
+	if (APlayerState* PS = GetPlayerState())
+	{
+		PS->SetPlayerName(PersonalID);
+	}
+}
+
 void AVICTIMSCharacter::SavePersonalID(FString ID)
 {
 	ServerRPC_SavePersonalID(ID);
-
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Chached Name : %s"), *PersonalID));
 }
 
 void AVICTIMSCharacter::ServerRPC_SavePersonalID_Implementation(const FString& ID)
@@ -924,10 +946,36 @@ void AVICTIMSCharacter::NetMulticastRPC_SetAssignedHouse_Implementation(AShelter
 
 void AVICTIMSCharacter::Server_GoToHouse_Implementation()
 {
-	ClientRPC_GoToHouse(AssignedHouse->OriginPos);
+	if (AssignedHouse)
+	{
+		ClientRPC_GoToHouse(AssignedHouse->OriginPos);
+	}
 }
 
 void AVICTIMSCharacter::ClientRPC_GoToHouse_Implementation(FVector houseLocation)
+{
+	if (houseLocation != FVector::ZeroVector)
+	{
+		SetActorLocation(houseLocation);
+	}
+}
+
+
+void AVICTIMSCharacter::Server_GoToOtherHouse_Implementation(const FString& otherPlayerName)
+{
+	auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
+
+	for (auto house : gm->Houses)
+	{
+		if (house->OwnerPlayerID == otherPlayerName)
+		{			
+			ClientRPC_GoToHouse(house->OriginPos);
+			break;
+		}
+	}	
+}
+
+void AVICTIMSCharacter::ClientRPC_GoToOtherHouse_Implementation(FVector houseLocation)
 {
 	if (houseLocation != FVector::ZeroVector)
 	{

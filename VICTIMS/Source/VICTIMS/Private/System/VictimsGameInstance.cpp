@@ -249,6 +249,7 @@ void UVictimsGameInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UVictimsGameInstance, bIsDedicateServer);
+	DOREPLIFETIME(UVictimsGameInstance, mainAddress);	
 }
 
 void UVictimsGameInstance::ServerRPC_DedicateServerCheck_Implementation()
