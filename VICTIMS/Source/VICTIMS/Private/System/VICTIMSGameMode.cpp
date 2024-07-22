@@ -7,6 +7,7 @@
 #include "VICTIMSCharacter.h"
 #include "BaseWeapon.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include "GameFramework/PlayerState.h"
 #include "Shelter.h"
 #include "TestSaveGame.h"
@@ -36,6 +37,15 @@ void AVICTIMSGameMode::BeginPlay()
 		{
 			Houses.Add(*it);
 			(*it)->HouseNumber = HouseIndex++;
+
+			auto OriginPos = (*it)->GetComponentsByTag(USceneComponent::StaticClass(), FName(TEXT("OriginPos")));
+
+			for (auto temp : OriginPos)
+			{
+				(*it)->ServerRPC_SetOriginPos(Cast<USceneComponent>(temp)->GetComponentLocation());
+
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("House OriginPos X : %f, Y : %f, Z : %f"), (*it)->OriginPos.X, (*it)->OriginPos.Y, (*it)->OriginPos.Z));
+			}
 		}
 	}
 
@@ -68,6 +78,7 @@ void AVICTIMSGameMode::PostLogin(APlayerController* pc)
 				AVICTIMSCharacter* PlayerCharacter = Cast<AVICTIMSCharacter>(NewPlayer->GetPawn());
 				if (PlayerCharacter)
 				{
+					PlayerCharacter->MyPlayerController = NewPlayer;
 					PlayerCharacter->SetAssignedHouse(AssignedHouse);
 				}
 			}
@@ -126,10 +137,10 @@ void AVICTIMSGameMode::AssignHouseToPlayer(AVICTIMSPlayerController* NewPlayer)
 				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Player %d assigned to House %d"), PlayerIDInt, NextHouseIndex));
 			}
 
-			if (NewPlayer->SavedData != nullptr)
+			if (auto savedData = NewPlayer->GetSaveDataFromID(PlayerID))
 			{
-				NewPlayer->SavedData->HouseNumber = NextHouseIndex;
-				NewPlayer->SaveData(PlayerID);
+				savedData->HouseNumber = NextHouseIndex;
+				NewPlayer->SaveData();
 			}
 			else
 			{
@@ -150,6 +161,11 @@ void AVICTIMSGameMode::AssignHouseToPlayer(AVICTIMSPlayerController* NewPlayer)
 		// 	{
 		//	}
 	}
+}
+
+EVictimsNetMode AVICTIMSGameMode::GetGameNetMode()
+{
+	return EVictimsNetMode(GetNetMode());
 }
 
 

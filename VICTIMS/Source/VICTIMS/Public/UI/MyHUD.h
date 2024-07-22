@@ -29,6 +29,7 @@ public:
 	UHUDLayout* HUDReference;
 	
 	UUserWidget* CustomCreateWidget(FName Name);
+
 protected:
 	AMyHUD();
 	

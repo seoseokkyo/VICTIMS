@@ -15,6 +15,7 @@ class UInputMappingContext;
 class UInputAction;
 class UHPWidget;
 class UCollisionComponent;
+class UPlayerDiedWidget;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -104,7 +105,7 @@ public:
 	TSubclassOf<UHPWidget> hpWidget_bp;
 
 	UPROPERTY()
-	class UPlayerDiedWidget* DiedWidget;
+	UPlayerDiedWidget* DiedWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
 	TSubclassOf<UPlayerDiedWidget> DiedWidget_bp;
@@ -114,22 +115,22 @@ public:
 	UPROPERTY()
 	class AVICTIMSPlayerController* MyPlayerController;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* MainWeapon;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Chest;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Feet;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Hands;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Legs;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Head;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category="Interaction")
@@ -207,6 +208,9 @@ protected:
 
 	void PrintInfo();
 
+	
+	virtual void PossessedBy(AController* NewController) override;
+
 
 protected:
 	// APawn interface
@@ -278,14 +282,11 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastRPC_SetAssignedHouse(AShelter* NewHouse);
 
-	// 	UFUNCTION(BlueprintCallable)
-	// 	void GoToHouse();
-
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_GoToHouse();
 
-	UFUNCTION(NetMulticast, Reliable, BlueprintCallable)
-	void MultiCast_GoToHouse(AShelter* NewHouse);
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void ClientRPC_GoToHouse(FVector houseLocation);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
     UPrimitiveComponent* CurrentDoorComponent;
@@ -298,13 +299,19 @@ public:
 	FString PersonalID; 
 
 	UFUNCTION()
+	void SavePersonalID(FString ID);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SavePersonalID(const FString& ID);
+
+	UFUNCTION(Netmulticast, Reliable)
+	void NetMulticastRPC_SavePersonalID(const FString& ID);
+	
+	UFUNCTION()
 	void OnRep_PersonalID();
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetPersonalID(const FString& ID);
-
-	UFUNCTION()
-	void SavePersonalID(FString ID);
 	
 	UPROPERTY()
 	class UTestSaveGame* SavedData;
@@ -317,6 +324,15 @@ public:
 	
 	UFUNCTION()			// 플레이어 정보 데이터 로드
 	void LoadPlayerData(UTestSaveGame* Data);
+
+	UFUNCTION()
+	void SaveHousingData(FName playerName);
+
+	UFUNCTION()
+	void AddHousingData(FName playerName);
+
+	UFUNCTION()
+	void LoadHousingData(FName playerName);
 
 	//che
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")

@@ -32,7 +32,7 @@ void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("characterName : %s"), *characterName));
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("characterName : %s"), *characterName));
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
@@ -69,17 +69,18 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s is Dead By %s"), *this->GetActorNameOrLabel(), *DamageCauser->GetActorNameOrLabel()), true, true, FLinearColor::Red, 10.0f);
 
-		AVICTIMSCharacter* Attacker=Cast<AVICTIMSCharacter>(DamageCauser);
-		if (Attacker!=nullptr)
+		AVICTIMSCharacter* Attacker = Cast<AVICTIMSCharacter>(DamageCauser);
+		if (Attacker != nullptr)
 		{
 			//여기서 추가 작업
 		}
-
 	}
 
-	if (HitSound)
-	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
+	if (HitSounds.Num() > 0)
+	{		
+		int selected = FMath::RandRange(0, HitSounds.Num()-1);
+
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSounds[selected], GetActorLocation());
 	}
 
 	if (hitReaction)

@@ -84,6 +84,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_EquipFromInventory(uint8 FromInventorySlot, uint8 ToInventorySlot);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticast_EquipFromInventory(uint8 FromInventorySlot, uint8 ToInventorySlot);
+
 	UFUNCTION(Server, Reliable)
 	void Server_UnEquipToInventory(uint8 FromInventorySlot, uint8 ToInventorySlot);
 
@@ -369,6 +372,28 @@ public:
 	void Client_CloseShop();
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateShopTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
+
+//======================================================================================================================================
+// UI Sound
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* DropSound;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* UseSound_Equipment;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* UseSound_Consumable;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* UseSound_Furniture;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* MoveItemSound;
+
+	UPROPERTY(EditAnywhere, Category = "UI Sound")
+	class USoundBase* OpenShopSound;
+
 protected:
 
 private:
@@ -420,6 +445,8 @@ public:
 
 	UFUNCTION(Category = "UserInterface|Public|DropMoney")
 	void DropMoney();
+
+	void EquipItemAtLoad(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot);
 
 	UPROPERTY()
 	uint8 DropMoneyAmount;

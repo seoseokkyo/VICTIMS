@@ -151,6 +151,15 @@ public:
 	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
 	bool bUseUIMode = false;
 
+	UFUNCTION()
+	void SavePersonalID(FString ID);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SavePersonalID(const FString& ID);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_SavePersonalID(const FString& ID);
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -167,8 +176,8 @@ public:
 	UPROPERTY()
 	FString PlayerID;						
 
-	UPROPERTY()
-	class UTestSaveGame* SavedData;
+	//UPROPERTY()
+	//class UTestSaveGame* SavedData;
 
 	UFUNCTION()
 	void CreateSaveData(FString ID);		// 새로 저장파일 만들기
@@ -177,10 +186,22 @@ public:
 	UTestSaveGame* GetSaveDataFromID(FString ID);		// TestIDWidget 에서 입력받은 문자열 ID 와 맞는 TesTSaveGame 데이터 가져오기
 
 	UFUNCTION()
-	void SaveData(FString ID);						// 데이터 저장 
+	void SaveData();						// 데이터 저장 
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SaveData();		// 데이터 저장 
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_SaveData();		// 데이터 저장 
 
 	UFUNCTION()
 	void LoadData(FString ID);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_LoadData(const FString& ID);		// 데이터 저장 
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_LoadData(bool bSuccess);		// 데이터 저장 
 
 	UPROPERTY()
 	UTestIDWidget* TestIDWidget;
@@ -248,4 +269,8 @@ public:
 
 	UFUNCTION()
 	void CloseLayouts();
+
+    UPROPERTY(EditAnywhere, Category = "Interact Sound")
+	class USoundBase* PickUpSound;
+
 };

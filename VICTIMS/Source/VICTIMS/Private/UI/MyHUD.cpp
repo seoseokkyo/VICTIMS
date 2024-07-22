@@ -27,7 +27,9 @@ void AMyHUD::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (auto ownerCon = Cast<AVICTIMSPlayerController>(GetOwner()))
+	auto ownerCon = Cast<AVICTIMSPlayerController>(GetOwner());
+
+	if (ownerCon)
 	{
 		if (false == ownerCon->IsLocalController())
 		{
@@ -55,10 +57,7 @@ void AMyHUD::BeginPlay()
 		}
 	}
 
-	if (AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(GetOwner()))
-	{
-		PlayerController->SetupHUDReferences();
-	}
+	ownerCon->SetupHUDReferences();
 }
 
 bool AMyHUD::IsAnyWidgetVisible()
@@ -111,7 +110,6 @@ void AMyHUD::ToggleWindow(const ELayout Layout)
 		}
 	}
 }
-
 
 FWidgetsLayoutBP* AMyHUD::GetWidgetBPClass(FName Name)
 {

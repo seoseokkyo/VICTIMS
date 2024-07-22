@@ -8,7 +8,6 @@
 #include "FShopList.h"
 #include "ShopActor.generated.h"
 
-
 UCLASS()
 class VICTIMS_API AShopActor : public AUsableActor, public IInventoryInterface
 {
@@ -68,6 +67,27 @@ public:
 	UDataTable* DB_ItemList;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* BP_ShopDB;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* Body;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* Chest;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* Feet;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* Hands;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* Legs;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+	class USkeletalMeshComponent* Head;
+
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	TArray<FSlotStructure> InventoryItems;

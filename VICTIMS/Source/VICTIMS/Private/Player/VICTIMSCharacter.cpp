@@ -35,6 +35,7 @@
 #include "UI/HUDLayout.h"
 #include "DropMoneyLayout.h"
 #include "CollisionComponent.h"
+#include "VICTIMSGameMode.h"
 #include "GameFramework/PlayerState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -90,21 +91,27 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 
 	MainWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	MainWeapon->SetupAttachment(GetMesh());
+	MainWeapon->SetIsReplicated(true);
 
 	Chest = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Chest"));
 	Chest->SetupAttachment(GetMesh());
+	Chest->SetIsReplicated(true);
 
 	Hands = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
 	Hands->SetupAttachment(GetMesh());
+	Hands->SetIsReplicated(true);
 
 	Feet = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Feet"));
 	Feet->SetupAttachment(GetMesh());
+	Feet->SetIsReplicated(true);
 
 	Legs = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
 	Legs->SetupAttachment(GetMesh());
+	Legs->SetIsReplicated(true);
 
 	Head = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Head"));
 	Head->SetupAttachment(GetMesh());
+	Head->SetIsReplicated(true);
 
 	MainWeaponMesh = nullptr;
 	ChestMesh = nullptr;
@@ -143,7 +150,18 @@ void AVICTIMSCharacter::BeginPlay()
 		HousingComponent->Camera = FollowCamera; // 초기화 시 카메라 컴포넌트를 할당
 	}
 
-	MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
+	if (GetController())
+	{
+		if (GetController()->IsLocalController())
+		{
+			if (auto conCheck = Cast<AVICTIMSPlayerController>(GetController()))
+			{
+				MyPlayerController = conCheck;
+				SetOwner(MyPlayerController);
+			}
+		}
+	}
+
 	InteractionField->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlap);
 	InteractionField->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlap);
 	InteractionField->ComponentTags.Add(TEXT("InteractionField"));
@@ -167,6 +185,12 @@ void AVICTIMSCharacter::BeginPlay()
 void AVICTIMSCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+
+	if (0)
+	{
+		PrintInfo();
+	}
+
 	if (UsableActorsInsideRange.Num() == 0)
 	{
 		if (IsValid(MyPlayerController))
@@ -224,7 +248,6 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 			}
 		}
 	}
-
 }
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -250,7 +273,17 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
-		MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
+		if (GetController())
+		{
+			if (GetController()->IsLocalController())
+			{
+				if (auto conCheck = Cast<AVICTIMSPlayerController>(GetController()))
+				{
+					MyPlayerController = conCheck;
+					SetOwner(MyPlayerController);
+				}
+			}
+		}
 
 		// Jumping
 		//EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::CharacterJump);
@@ -357,7 +390,7 @@ void AVICTIMSCharacter::DieFunction()
 		{
 			PC->InventoryManagerComponent->DropItem(PC->InventoryManagerComponent->PlayerInventory, i);
 		}
-		for(int i = 0; i < PC->InventoryManagerComponent->Gold; i++)
+		for (int i = 0; i < PC->InventoryManagerComponent->Gold; i++)
 		{
 			FSlotStructure LocalSlot = PC->InventoryManagerComponent->PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
 			UClass* LocalClass = nullptr;
@@ -407,6 +440,14 @@ void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AVICTIMSCharacter, HandsMesh);
 	DOREPLIFETIME(AVICTIMSCharacter, LegsMesh);
 	DOREPLIFETIME(AVICTIMSCharacter, HeadMesh);
+
+	DOREPLIFETIME(AVICTIMSCharacter, MainWeapon);
+	DOREPLIFETIME(AVICTIMSCharacter, Chest);
+	DOREPLIFETIME(AVICTIMSCharacter, Hands);
+	DOREPLIFETIME(AVICTIMSCharacter, Feet);
+	DOREPLIFETIME(AVICTIMSCharacter, Legs);
+	DOREPLIFETIME(AVICTIMSCharacter, Head);
+	
 	DOREPLIFETIME(AVICTIMSCharacter, PersonalID);
 }
 
@@ -531,8 +572,6 @@ void AVICTIMSCharacter::PrintInfo()
 	// netConn
 	FString netConn = GetNetConnection() ? "Valid" : "Invalid";
 
-	//FString netMode = UEnum::GetValueAsString(GetNetMode());
-
 	FString hasController = Controller ? TEXT("HasController") : TEXT("NoController");
 
 	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
@@ -540,10 +579,29 @@ void AVICTIMSCharacter::PrintInfo()
 
 	//FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, /**netMode,*/ *hasController, *strHP, *strSP);
 
-	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, *hasController, *strHP, *strSP);
+	FString strTemp = UEnum::GetValueAsString((EVictimsNetMode)GEngine->GetNetMode(GetWorld()));
+
+	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nhasController : %s\n HP : %s\n SP : %s\n NetMode : %s"), *localRole, *remoteRole, *owner, *netConn, *hasController, *strHP, *strSP, *strTemp);
 
 	FVector loc = GetActorLocation() + FVector(0, 0, 50);
+
 	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
+}
+
+void AVICTIMSCharacter::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	if (NewController)
+	{
+		if (NewController->IsLocalController())
+		{
+			if (auto conCheck = Cast<AVICTIMSPlayerController>(NewController))
+			{
+				MyPlayerController = conCheck;
+				SetOwner(MyPlayerController);
+			}
+		}
+	}
 }
 
 void AVICTIMSCharacter::OnRep_MainWeaponMesh()
@@ -780,6 +838,9 @@ void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
 	}
 }
 
+//=======================================================================================================
+// Save
+
 void AVICTIMSCharacter::OnRep_PersonalID()
 {
 	UE_LOG(LogTemp, Warning, TEXT("MOVE: OnRep_PersonalID: %s"), *PersonalID);
@@ -791,40 +852,8 @@ void AVICTIMSCharacter::OnRep_PersonalID()
 	}
 }
 
-void AVICTIMSCharacter::Server_SetPersonalID_Implementation(const FString& ID)
-{
-	PersonalID = ID;
-	OnRep_PersonalID();
-	UE_LOG(LogTemp, Warning, TEXT("MOVE : Server_SetPersonalID called: %s"), *ID);
-}
-
-//=======================================================================================================
-// Save
 void AVICTIMSCharacter::SavePersonalID(FString ID)
 {
-	//if (HasAuthority())
-	//{
-	//	PersonalID = ID;
-	//	OnRep_PersonalID();
-	//}
-	//else
-	//{
-	//	Server_SetPersonalID(ID);
-	//}
-	//if (IsLocallyControlled())
-	//{
-	//	PersonalID = ID;
-	//	OnRep_PersonalID();
-	//	if (!HasAuthority())
-	//	{
-	//		Server_SetPersonalID(ID);
-	//	}
-	//}
-	//else if (HasAuthority())
-	//{
-	//	PersonalID = ID;
-	//	OnRep_PersonalID();
-	//}
 	if (HasAuthority())
 	{
 		PersonalID = ID;
@@ -836,15 +865,26 @@ void AVICTIMSCharacter::SavePersonalID(FString ID)
 		Server_SetPersonalID(ID);
 		UE_LOG(LogTemp, Warning, TEXT("MOVE : SavePersonalID called on client, requesting server to set ID: %s"), *ID);
 	}
+
+}
+
+void AVICTIMSCharacter::ServerRPC_SavePersonalID_Implementation(const FString& ID)
+{
+	PersonalID = ID;
+
+	NetMulticastRPC_SavePersonalID(PersonalID);
+}
+
+void AVICTIMSCharacter::NetMulticastRPC_SavePersonalID_Implementation(const FString& ID)
+{
+	PersonalID = ID;
 }
 
 void AVICTIMSCharacter::SaveDataNow()
 {
 	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, "Saved");
-	if (HasAuthority())
-	{
-		MyPlayerController->SaveData(PersonalID);
-	}
+
+	MyPlayerController->SaveData();
 }
 
 void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
@@ -886,6 +926,18 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 	}
 }
 
+void AVICTIMSCharacter::SaveHousingData(FName playerName)
+{
+}
+
+void AVICTIMSCharacter::AddHousingData(FName playerName)
+{
+}
+
+void AVICTIMSCharacter::LoadHousingData(FName playerName)
+{
+}
+
 void AVICTIMSCharacter::SetAssignedHouse(AShelter* NewHouse)
 {
 	ServerRPC_SetAssignedHouse(NewHouse);
@@ -903,23 +955,18 @@ void AVICTIMSCharacter::NetMulticastRPC_SetAssignedHouse_Implementation(AShelter
 	AssignedHouse = NewHouse;
 }
 
-// void AVICTIMSCharacter::GoToHouse()
-// {
-// 	if (AssignedHouse)
-// 	{
-// 		SetActorLocation(AssignedHouse->GetActorLocation());
-// 	}
-// }
-
 void AVICTIMSCharacter::Server_GoToHouse_Implementation()
 {
-	MultiCast_GoToHouse(AssignedHouse);
+	if (AssignedHouse)
+	{
+		ClientRPC_GoToHouse(AssignedHouse->OriginPos);
+	}
 }
 
-void AVICTIMSCharacter::MultiCast_GoToHouse_Implementation(AShelter* NewHouse)
+void AVICTIMSCharacter::ClientRPC_GoToHouse_Implementation(FVector houseLocation)
 {
-	if (NewHouse)
+	if (houseLocation != FVector::ZeroVector)
 	{
-		SetActorLocation(NewHouse->GetActorLocation() + FVector(0, 0, 1) * 3000.f);
+		SetActorLocation(houseLocation);
 	}
 }

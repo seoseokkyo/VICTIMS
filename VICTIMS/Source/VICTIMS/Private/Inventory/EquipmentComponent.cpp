@@ -45,54 +45,48 @@ void UEquipmentComponent::UpdateEquippedMeshes(uint8 InventorySlot)
 {																		// 장비아이템 매시 업데이트 
 	if (IsValid(EquipmentCharacterReference))
 	{
-		if (InventorySlot < (uint8)EEquipmentSlot::Count)
+		ServerRPC_UpdateEquippedMeshes(InventorySlot);
+	}
+}
+
+void UEquipmentComponent::ServerRPC_UpdateEquippedMeshes_Implementation(uint8 InventorySlot)
+{
+	FSlotStructure Slot = GetInventoryItem(InventorySlot);
+	USkeletalMesh* NewMesh = Slot.ItemStructure.SkeletalMesh;
+
+	NetMulticastRPC_UpdateEquippedMeshes(InventorySlot, Slot, NewMesh);
+}
+
+void UEquipmentComponent::NetMulticastRPC_UpdateEquippedMeshes_Implementation(uint8 InventorySlot, FSlotStructure Slot, USkeletalMesh* NewMesh)
+{
+	if (IsValid(EquipmentCharacterReference))
+	{
+		switch ((EEquipmentSlot)InventorySlot)
 		{
-			FSlotStructure Slot = GetInventoryItem(InventorySlot);
-			USkeletalMesh* NewMesh = Slot.ItemStructure.SkeletalMesh;
-
-			switch (InventorySlot)
-			{
-			case (uint8)EEquipmentSlot::Weapon:
-	
-// 				EquipmentCharacterReference->MainWeaponMesh = NewMesh;
-// 				EquipmentCharacterReference->OnRep_MainWeaponMesh();
-
-				break;
-			case (uint8)EEquipmentSlot::Chest:
-				ChestMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Chest"));
-				ChestMesh->SetSkeletalMesh(NewMesh);
-
-// 				EquipmentCharacterReference->ChestMesh = NewMesh;
-// 				EquipmentCharacterReference->OnRep_MainChestMesh();
-				break;
-			case (uint8)EEquipmentSlot::Feet:
-				FeetMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Feet"));
-				FeetMesh->SetSkeletalMesh(NewMesh);
-
-// 				EquipmentCharacterReference->FeetMesh = NewMesh;
-// 				EquipmentCharacterReference->OnRep_MainFeetMesh();
-				break;
-			case (uint8)EEquipmentSlot::Hands:
-				EquipmentCharacterReference->HandsMesh = NewMesh;
-				EquipmentCharacterReference->OnRep_MainHandsMesh();
-				break;
-			case (uint8)EEquipmentSlot::Legs:
-				BottomMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Bottom"));
-				BottomMesh->SetSkeletalMesh(NewMesh);
-// 
-// 				EquipmentCharacterReference->LegsMesh = NewMesh;
-// 				EquipmentCharacterReference->OnRep_MainLegsMesh();
-				break;
-			case (uint8)EEquipmentSlot::Head:
-				HeadMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Head"));
-				HeadMesh->SetSkeletalMesh(NewMesh);
-
-// 				EquipmentCharacterReference->HeadMesh = NewMesh;
-//  				EquipmentCharacterReference->OnRep_MainHeadMesh();
-				break;
-			default:
-				break;
-			}
-		}
+		case EEquipmentSlot::Weapon:
+			break;
+		case EEquipmentSlot::Chest:
+			ChestMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Chest"));
+			ChestMesh->SetSkeletalMesh(NewMesh);
+			break;
+		case EEquipmentSlot::Feet:
+			FeetMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Feet"));
+			FeetMesh->SetSkeletalMesh(NewMesh);
+			break;
+		case EEquipmentSlot::Hands:
+			EquipmentCharacterReference->HandsMesh = NewMesh;
+			EquipmentCharacterReference->OnRep_MainHandsMesh();
+			break;
+		case EEquipmentSlot::Legs:
+			BottomMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Bottom"));
+			BottomMesh->SetSkeletalMesh(NewMesh);
+			break;
+		case EEquipmentSlot::Head:
+			HeadMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Head"));
+			HeadMesh->SetSkeletalMesh(NewMesh);
+			break;
+		default:
+			break;
+		}		
 	}
 }

@@ -25,6 +25,12 @@ public:
 
 	UFUNCTION()
 	virtual void UpdateEquippedMeshes(uint8 InventorySlot);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_UpdateEquippedMeshes(uint8 InventorySlot);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_UpdateEquippedMeshes(uint8 InventorySlot, FSlotStructure Slot, USkeletalMesh* NewMesh);
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(DisplayName="Equipment Character Reference", Category="Default", OverrideNativeName="EquipmentCharacterReference"))
 	AVICTIMSCharacter* EquipmentCharacterReference;
