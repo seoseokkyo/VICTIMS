@@ -184,11 +184,11 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (1)
+	if (0)
 	{
 		PrintInfo();
 	}
-
+	 
 	if (UsableActorsInsideRange.Num() == 0)
 	{
 		if (IsValid(MyPlayerController))
