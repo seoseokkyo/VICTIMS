@@ -76,7 +76,7 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 			AVICTIMSCharacter* Attacker = Cast<AVICTIMSCharacter>(DamageCauser);
 			if (Attacker != nullptr)
 			{
-				Attacker->KillWidgetOn(this);
+				Attacker->NetMulticastRPC_KillWidget(this);
 				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("WidgetOn")), true, true, FLinearColor::Red, 10.0f);
 			}
 			

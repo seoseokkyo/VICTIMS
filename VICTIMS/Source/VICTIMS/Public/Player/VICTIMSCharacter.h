@@ -325,7 +325,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_KillWidget(ACharacterBase* DiedChar);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Client, Reliable)
 	void NetMulticastRPC_KillWidget(ACharacterBase* DiedChar);
 
 

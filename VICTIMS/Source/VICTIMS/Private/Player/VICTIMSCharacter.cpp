@@ -850,18 +850,19 @@ void AVICTIMSCharacter::ServerRPC_KillWidget_Implementation(ACharacterBase* Died
 
 void AVICTIMSCharacter::NetMulticastRPC_KillWidget_Implementation(ACharacterBase* DiedChar)
 {
-	if (IsLocallyControlled())
-	{
+	MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
 		if (MyPlayerController)
 		{
 			MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->PlayAnimation(MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->KillAnimation);
 
 			UGameplayStatics::PlaySound2D(GetWorld(), KillSound, 1, 1, 0);
-			
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI MyPlayerController")), true, true, FColor(1, 1, 1), 30.0f);
 
 		}
-	}
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed")), true, true, FColor(1, 1, 1), 30.0f);
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI IsLocallyControlled")), true, true, FColor(1, 1, 1), 30.0f);
+	
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI NetMulticastRPC_KillWidget_Implementation")), true, true, FColor(1, 1, 1), 30.0f);
+	
 }
 
 void AVICTIMSCharacter::SetAssignedHouse(AShelter* NewHouse)
