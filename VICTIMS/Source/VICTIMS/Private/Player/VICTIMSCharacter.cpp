@@ -807,12 +807,12 @@ void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
 			Data = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(PersonalID, 0));
 			Data->SavedHP = stateComp->runningStat.currentHP;					  // 현재 플레이어 HP 저장
 			Data->SavedGold = MyPlayerController->InventoryManagerComponent->Gold; // 현재 인벤토리 Gold 저장
-			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
+			//UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
 
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
+			//UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
 		}
 	}
 }
@@ -827,12 +827,12 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 			stateComp->ServerRPC_SetStatePoint(EStateType::HP, Data->SavedHP);	// 플레이어 HP 로드
 			MyPlayerController->InventoryManagerComponent->AddGold(Data->SavedGold);	// Gold 로드
 
-			UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), Data->SavedHP);
-			UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), Data->SavedGold);
+			//UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), Data->SavedHP);
+			//UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), Data->SavedGold);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
+			//UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
 		}
 	}
 }
@@ -856,12 +856,12 @@ void AVICTIMSCharacter::NetMulticastRPC_KillWidget_Implementation(ACharacterBase
 			MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->PlayAnimation(MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->KillAnimation);
 
 			UGameplayStatics::PlaySound2D(GetWorld(), KillSound, 1, 1, 0);
-			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI MyPlayerController")), true, true, FColor(1, 1, 1), 30.0f);
+			//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI MyPlayerController")), true, true, FColor(1, 1, 1), 30.0f);
 
 		}
 		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI IsLocallyControlled")), true, true, FColor(1, 1, 1), 30.0f);
 	
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI NetMulticastRPC_KillWidget_Implementation")), true, true, FColor(1, 1, 1), 30.0f);
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI NetMulticastRPC_KillWidget_Implementation")), true, true, FColor(1, 1, 1), 30.0f);
 	
 }
 
