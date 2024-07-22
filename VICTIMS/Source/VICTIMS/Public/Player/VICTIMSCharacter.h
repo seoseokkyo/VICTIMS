@@ -288,13 +288,14 @@ public:
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void ClientRPC_GoToHouse(FVector houseLocation);
 
-
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Interaction")
+    UPrimitiveComponent* CurrentDoorComponent;
 
 //=====================================================================================================
 // Save
 
 public:
-	UPROPERTY()			// 저장시 사용하는 개인 ID 
+	UPROPERTY(ReplicatedUsing = OnRep_PersonalID)			// 저장시 사용하는 개인 ID 
 	FString PersonalID; 
 
 	UFUNCTION()
@@ -305,6 +306,12 @@ public:
 
 	UFUNCTION(Netmulticast, Reliable)
 	void NetMulticastRPC_SavePersonalID(const FString& ID);
+	
+	UFUNCTION()
+	void OnRep_PersonalID();
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetPersonalID(const FString& ID);
 	
 	UPROPERTY()
 	class UTestSaveGame* SavedData;

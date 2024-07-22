@@ -37,6 +37,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UDropMoneyLayout* DropMoneyLayout;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UMovingInfoWidget* MovingInfo;
+
 protected:
 	UFUNCTION()
 	virtual void NativeConstruct() override;

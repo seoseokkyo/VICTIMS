@@ -36,6 +36,7 @@
 #include "DropMoneyLayout.h"
 #include "CollisionComponent.h"
 #include "VICTIMSGameMode.h"
+#include "GameFramework/PlayerState.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -185,7 +186,7 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	if (1)
+	if (0)
 	{
 		PrintInfo();
 	}
@@ -446,6 +447,8 @@ void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AVICTIMSCharacter, Feet);
 	DOREPLIFETIME(AVICTIMSCharacter, Legs);
 	DOREPLIFETIME(AVICTIMSCharacter, Head);
+	
+	DOREPLIFETIME(AVICTIMSCharacter, PersonalID);
 }
 
 
@@ -709,6 +712,10 @@ void AVICTIMSCharacter::OnBeginOverlap(class UPrimitiveComponent* OverlappedComp
 					}
 				}
 			}
+			else if (OtherComp->ComponentHasTag(TEXT("Door")))
+			{
+				CurrentDoorComponent = OtherComp;
+			}
 		}
 	}
 }
@@ -752,6 +759,10 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 						return;
 					}
 				}
+			}
+			if (OtherComp == CurrentDoorComponent)
+			{
+				CurrentDoorComponent = nullptr;
 			}
 		}
 	}
@@ -829,11 +840,32 @@ void AVICTIMSCharacter::DestroyComponent(UActorComponent* TargetComponent)
 
 //=======================================================================================================
 // Save
+
+void AVICTIMSCharacter::OnRep_PersonalID()
+{
+	UE_LOG(LogTemp, Warning, TEXT("MOVE: OnRep_PersonalID: %s"), *PersonalID);
+
+	// PlayerState에 PersonalID를 설정
+	if (APlayerState* PS = GetPlayerState())
+	{
+		PS->SetPlayerName(PersonalID);
+	}
+}
+
 void AVICTIMSCharacter::SavePersonalID(FString ID)
 {
-	ServerRPC_SavePersonalID(ID);
+	if (HasAuthority())
+	{
+		PersonalID = ID;
+		OnRep_PersonalID();
+		UE_LOG(LogTemp, Warning, TEXT("MOVE : SavePersonalID called on server: %s"), *ID);
+	}
+	else if (IsLocallyControlled())
+	{
+		Server_SetPersonalID(ID);
+		UE_LOG(LogTemp, Warning, TEXT("MOVE : SavePersonalID called on client, requesting server to set ID: %s"), *ID);
+	}
 
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Chached Name : %s"), *PersonalID));
 }
 
 void AVICTIMSCharacter::ServerRPC_SavePersonalID_Implementation(const FString& ID)
