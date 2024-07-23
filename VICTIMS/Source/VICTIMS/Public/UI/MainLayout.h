@@ -43,6 +43,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UCompassWedget* CompassWidget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UMiniMapWidget* MiniMapWidget;
+
 protected:
 	UFUNCTION()
 	virtual void NativeConstruct() override;
