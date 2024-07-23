@@ -19,22 +19,22 @@ class VICTIMS_API UCompassWedget : public UUserWidget
 {
 	GENERATED_BODY()
 public:
-	UPROPERTY(EditAnywhere, Category = "MySettings")
+	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* CanvasPanel;
 
-	UPROPERTY(EditAnywhere, Category = "MySettings")
+	UPROPERTY(meta = (BindWidget))
 	UCanvasPanel* Compass;
 
-	UPROPERTY(EditAnywhere, Category="MySettings")
+	UPROPERTY(meta = (BindWidget))
 	UImage* Points;
 
-	UPROPERTY(EditAnywhere, Category="MySettings")
+	UPROPERTY(meta = (BindWidget))
 	UImage* BackGround;
 
-	UPROPERTY(EditAnywhere, Category="MySettings")
+	UPROPERTY(meta = (BindWidget))
 	UImage* Arrow;
 
-	UPROPERTY(EditAnywhere, Category="MySettings")
+	UPROPERTY(meta = (BindWidget))
 	UImage* Marker;
 
 	UPROPERTY(EditAnywhere, Category="MySettings")
@@ -48,12 +48,6 @@ public:
 	UFUNCTION()
 	void SetTimer();
 
-	UFUNCTION()
-	void CheckNavPoint();
-
-	UFUNCTION()
-	void CheckIfBehind();
-
 	protected:
 	UFUNCTION()
 	virtual void NativeConstruct() override;
@@ -62,4 +56,5 @@ public:
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
 	private:
+	
 };

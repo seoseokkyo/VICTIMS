@@ -38,6 +38,7 @@
 #include "KillWidget.h"
 #include "UI/MainLayout.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Animation/WidgetAnimation.h>
+#include "CompassWedget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -169,6 +170,11 @@ void AVICTIMSCharacter::BeginPlay()
 	}
 
 	stateComp->UpdateStat();
+
+	if (IsLocallyControlled())
+	{
+		MyPlayerController->HUDLayoutReference->MainLayout->CompassWidget->AddToViewport();
+	}
 }
 
 

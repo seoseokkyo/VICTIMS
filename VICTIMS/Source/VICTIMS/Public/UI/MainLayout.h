@@ -40,6 +40,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UKillWidget* KillWidget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UCompassWedget* CompassWidget;
+
 protected:
 	UFUNCTION()
 	virtual void NativeConstruct() override;
