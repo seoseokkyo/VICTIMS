@@ -62,7 +62,6 @@ void UInventoryManagerComponent::BeginPlay()
 			if (ownerCharacter)
 			{
 				playerReference = Cast<AVICTIMSCharacter>(ownerCharacter);
-// 				UE_LOG(LogTemp, Warning, TEXT("111111111111111111111111111111111111111111111111111"));
 			}
 		}
 	}
@@ -917,7 +916,6 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 			{
 				if (!CanContainerStoreItems(FromInventory))
 				{
-					UE_LOG(LogTemp, Warning, TEXT("CONTAINER CANNOT STORE ITEMS"))
 						return;
 				}
 
@@ -978,12 +976,12 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 
 		}
 		else {
-			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
+// 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
+// 		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
 	}
 }
 
@@ -1002,19 +1000,19 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 	{
 		if (!CanContainerStoreItems(ToInventory))
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CONTAINER CANNOT STORE ITEMS"))
+// 			UE_LOG(LogTemp, Warning, TEXT("CONTAINER CANNOT STORE ITEMS"))
 				return;
 		}
 
 		if (GetItemTypeBySlot(FromInventorySlot) != EItemType::Equipment)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
+// 			UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
 				return;
 		}
 
 		if (GetEquipmentTypeBySlot(ToInventorySlot) != LocalEquipmentSlot)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
+// 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
 				return;
 		}
 
@@ -1029,7 +1027,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			{
 				if (GetEquipmentTypeBySlot(ToInventorySlot) != LocalEquipmentSlot)
 				{
-					UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
+// 					UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
 						return;
 				}
 			}
@@ -1109,8 +1107,6 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 
 	if (LocalSlot.ItemStructure.IsDroppable)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("DROPPED ITEM"))
-
 		UClass* LocalClass = nullptr;
 		FTransform OutTransform;
 		RandomizeDropLocation(LocalSlot, LocalClass, OutTransform);
@@ -1134,10 +1130,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("You cannot drop this..."))
-			UE_LOG(LogTemp, Warning, TEXT("DESTROYED ITEM"))
-
-			RemoveItem(Inventory, InventorySlot);
+		RemoveItem(Inventory, InventorySlot);
 	}
 }
 
@@ -1195,7 +1188,6 @@ void UInventoryManagerComponent::MoveItem(UInventoryComponent* FromInventory, ui
 		else {
 			if (!CanContainerStoreItems(FromInventory))
 			{
-				UE_LOG(LogTemp, Warning, TEXT("CONTAINER CANNOT STORE ITEMS"))
 					return;
 			}
 			else {
@@ -1258,8 +1250,6 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 				return;
 			}
 		}
-
-		UE_LOG(LogTemp, Warning, TEXT("NO FREE SPACE"))
 	}
 	else
 	{
@@ -1280,10 +1270,7 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 
 void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStructure InventoryItem)
 {
-// 	UE_LOG(LogTemp, Warning, TEXT("Consuming this Item..."))
 
-	// HEAL ! 
-// 	UE_LOG(LogTemp, Warning, TEXT("Call ClientRPC_UseConsumableItem Value : %d"), InventoryItem.ItemStructure.Health);
 	ClientRPC_UseConsumableItem(InventoryItem.ItemStructure.Health);
 
 	uint8 AmountToRemove = 1;
@@ -1307,7 +1294,6 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 void UInventoryManagerComponent::ClientRPC_UseConsumableItem_Implementation(const int32 Health)
 {
 	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, Health);
-// 	UE_LOG(LogTemp, Warning, TEXT("Called ClientRPC_UseConsumableItem Value : %d"), Health);
 	if (UseSound_Consumable)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(),UseSound_Consumable, playerReference->GetActorLocation());
@@ -1457,7 +1443,7 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("No matching BuildID found in housing data table for Item ID: %s"), *ItemID.ToString());
+// 			UE_LOG(LogTemp, Warning, TEXT("No matching BuildID found in housing data table for Item ID: %s"), *ItemID.ToString());
 		}
 	}
 }
@@ -2067,7 +2053,6 @@ void UInventoryManagerComponent::Client_UpdateShopTooltips_Implementation(const 
 		if (!IsValid(Tooltip))
 		{
 			Tooltip = CreateWidget<UW_ItemTooltip>(GetWorld(), WidgetLayout->Widget);
-			UE_LOG(LogTemp, Verbose, TEXT("Creating Inventory Tooltip"))
 		}
 		if (Slot.ItemStructure.ItemType == EItemType::Equipment)
 		{
@@ -2415,11 +2400,11 @@ void UInventoryManagerComponent::EquipItemAtLoad(UInventoryComponent* FromInvent
 
 		}
 		else {
-			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
+// 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
 		}
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
+// 		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
 	}
 }

@@ -181,7 +181,6 @@ void AVICTIMSCharacter::BeginPlay()
 	stateComp->UpdateStat();
 }
 
-
 void AVICTIMSCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
@@ -871,7 +870,7 @@ void AVICTIMSCharacter::NetMulticastRPC_SavePersonalID_Implementation(const FStr
 
 void AVICTIMSCharacter::SaveDataNow()
 {
-	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, "Saved");
+// 	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, "Saved");
 
 	MyPlayerController->SaveData();
 }
@@ -885,12 +884,12 @@ void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
 			Data = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(PersonalID, 0));
 			Data->SavedHP = stateComp->runningStat.currentHP;					  // 현재 플레이어 HP 저장
 			Data->SavedGold = MyPlayerController->InventoryManagerComponent->Gold; // 현재 인벤토리 Gold 저장
-			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
+// 			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
 
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
+// 			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
 		}
 	}
 }
@@ -905,12 +904,12 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 			stateComp->ServerRPC_SetStatePoint(EStateType::HP, Data->SavedHP);	// 플레이어 HP 로드
 			MyPlayerController->InventoryManagerComponent->AddGold(Data->SavedGold);	// Gold 로드
 
-			UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), Data->SavedHP);
-			UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), Data->SavedGold);
+// 			UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), Data->SavedHP);
+// 			UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), Data->SavedGold);
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
+// 			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
 		}
 	}
 }
