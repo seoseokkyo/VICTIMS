@@ -1233,7 +1233,7 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 				UnEquipItem(PlayerInventory, InventorySlot, ToInventory, Index);
 				if (UseSound_Equipment)
 				{
-					AVICTIMSCharacter* player = Cast<AVICTIMSCharacter>(GetPlayerRef());
+					AVICTIMSCharacter* player = GetPlayerRef();
 					UGameplayStatics::PlaySoundAtLocation(GetWorld(), UseSound_Equipment, player->GetActorLocation());
 				}
 				return;
@@ -1246,7 +1246,7 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 				UnEquipItem(PlayerInventory, InventorySlot, ToInventory, Index);
 				if (UseSound_Equipment)
 				{
-					AVICTIMSCharacter* player = Cast<AVICTIMSCharacter>(GetPlayerRef());
+					AVICTIMSCharacter* player = GetPlayerRef();
 					UGameplayStatics::PlaySoundAtLocation(GetWorld(), UseSound_Equipment, player->GetActorLocation());
 				}
 				return;
@@ -1298,8 +1298,7 @@ void UInventoryManagerComponent::ClientRPC_UseConsumableItem_Implementation(cons
 	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, Health);
 	if (UseSound_Consumable)
 	{
-		AVICTIMSCharacter* player = Cast<AVICTIMSCharacter>(GetPlayerRef());
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(),UseSound_Consumable, player->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(),UseSound_Consumable, GetPlayerRef()->GetActorLocation());
 	}
 }
 
@@ -1440,8 +1439,7 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 			GetPlayerRef()->HousingComponent->LaunchBuildMode(ItemID);
 			if (UseSound_Furniture)
 			{
-				AVICTIMSCharacter* player = Cast<AVICTIMSCharacter>(GetPlayerRef());
-				UGameplayStatics::PlaySoundAtLocation(GetWorld(), UseSound_Furniture, player->GetActorLocation());
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), UseSound_Furniture, GetPlayerRef()->GetActorLocation());
 			}
 
 		}
@@ -2020,8 +2018,7 @@ void UInventoryManagerComponent::Client_OpenShop_Implementation(FShopInfo ShopPr
 	LoadShopSlots(ShopProperties, InShopInventory, InPlayerInventory);
 	if (OpenShopSound)
 	{
-		AVICTIMSCharacter* player = Cast<AVICTIMSCharacter>(GetPlayerRef());
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, player->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, GetPlayerRef()->GetActorLocation());
 	}
 }
 
@@ -2031,8 +2028,7 @@ void UInventoryManagerComponent::Client_CloseShop_Implementation()
 	MainLayoutUI->Inventory->SellButton->SetVisibility(ESlateVisibility::Hidden);
 	if (OpenShopSound)
 	{
-		AVICTIMSCharacter* player = Cast<AVICTIMSCharacter>(GetPlayerRef());
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, player->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, GetPlayerRef()->GetActorLocation());
 	}
 }
 

@@ -612,41 +612,64 @@ void AVICTIMSCharacter::PossessedBy(AController* NewController)
 	}
 }
 
-// void AVICTIMSCharacter::OnRep_MainWeaponMesh()
-// {
-// 	MainWeapon->SetSkeletalMesh(MainWeaponMesh);
-// 	MainWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "MainWeapon");
-// }
-
 void AVICTIMSCharacter::OnRep_MainChestMesh()
 {
-	Chest->SetSkeletalMesh(ChestMesh);
-	Chest->SetLeaderPoseComponent(GetMesh());
+	Chest->SetSkeletalMesh(ChestMesh, false);
 }
 
 void AVICTIMSCharacter::OnRep_MainFeetMesh()
 {
-	Feet->SetSkeletalMesh(FeetMesh);
-	Feet->SetLeaderPoseComponent(GetMesh());
+	Feet->SetSkeletalMesh(FeetMesh, false);
 }
-
-// 
-// void AVICTIMSCharacter::OnRep_MainHandsMesh()
-// {
-// 	Hands->SetSkeletalMesh(HandsMesh);
-// 	Hands->SetLeaderPoseComponent(GetMesh());
-// }
 
 void AVICTIMSCharacter::OnRep_MainLegsMesh()
 {
-	Legs->SetSkeletalMesh(LegsMesh);
-	Legs->SetLeaderPoseComponent(GetMesh());
+	Legs->SetSkeletalMesh(LegsMesh, false);
 }
 
 void AVICTIMSCharacter::OnRep_MainHeadMesh()
 {
-	Head->SetSkeletalMesh(HeadMesh);
-	Head->SetLeaderPoseComponent(GetMesh());
+	Head->SetSkeletalMesh(HeadMesh, false);
+}
+
+void AVICTIMSCharacter::SetChsetMesh(USkeletalMesh* NewChestMesh)
+{
+	ChestMesh = NewChestMesh;
+	if (NewChestMesh == nullptr)
+	{
+		ChestMesh = DefaultChestMesh;
+	}
+	OnRep_MainChestMesh();
+}
+
+void AVICTIMSCharacter::SetFeetMesh(USkeletalMesh* NewFeetMesh)
+{
+	FeetMesh = NewFeetMesh;
+	if (NewFeetMesh == nullptr)
+	{
+		FeetMesh = DefaultFeetMesh;
+	}
+	OnRep_MainFeetMesh();
+}
+
+void AVICTIMSCharacter::SetLegsMesh(USkeletalMesh* NewLegsMesh)
+{
+	LegsMesh = NewLegsMesh;
+	if (NewLegsMesh == nullptr)
+	{
+		NewLegsMesh = DefaultLegsMesh;
+	}
+	OnRep_MainLegsMesh();
+}
+
+void AVICTIMSCharacter::SetHeadMesh(USkeletalMesh* NewHeadMesh)
+{
+	HeadMesh = NewHeadMesh;
+	if (NewHeadMesh == nullptr)
+	{
+		HeadMesh = DefaultHeadMesh;
+	}
+	OnRep_MainHeadMesh();
 }
 
 void AVICTIMSCharacter::OnBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
