@@ -74,8 +74,8 @@ void UEquipmentComponent::NetMulticastRPC_UpdateEquippedMeshes_Implementation(ui
 			FeetMesh->SetSkeletalMesh(NewMesh);
 			break;
 		case EEquipmentSlot::Hands:
-			EquipmentCharacterReference->HandsMesh = NewMesh;
-			EquipmentCharacterReference->OnRep_MainHandsMesh();
+// 			EquipmentCharacterReference->HandsMesh = NewMesh;
+// 			EquipmentCharacterReference->OnRep_MainHandsMesh();
 			break;
 		case EEquipmentSlot::Legs:
 			BottomMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Bottom"));

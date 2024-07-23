@@ -89,36 +89,8 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	InteractionField->InitSphereRadius(150);
 	InteractionField->SetCollisionProfileName(TEXT("CollisionTrigger"));
 
-	MainWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
-	MainWeapon->SetupAttachment(GetMesh());
-	MainWeapon->SetIsReplicated(true);
 
-	Chest = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Chest"));
-	Chest->SetupAttachment(GetMesh());
-	Chest->SetIsReplicated(true);
 
-	Hands = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
-	Hands->SetupAttachment(GetMesh());
-	Hands->SetIsReplicated(true);
-
-	Feet = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Feet"));
-	Feet->SetupAttachment(GetMesh());
-	Feet->SetIsReplicated(true);
-
-	Legs = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Legs"));
-	Legs->SetupAttachment(GetMesh());
-	Legs->SetIsReplicated(true);
-
-	Head = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Head"));
-	Head->SetupAttachment(GetMesh());
-	Head->SetIsReplicated(true);
-
-	MainWeaponMesh = nullptr;
-	ChestMesh = nullptr;
-	FeetMesh = nullptr;
-	HandsMesh = nullptr;
-	LegsMesh = nullptr;
-	HeadMesh = nullptr;
 
 	//che
 	collisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
@@ -126,24 +98,14 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 
 void AVICTIMSCharacter::BeginPlay()
 {
-	// Call the base class  
 	Super::BeginPlay();
 
-	//DisableInput(Cast<APlayerController>(GetController()));
 
 	FActorSpawnParameters spawnParam;
 	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	spawnParam.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
 	spawnParam.Owner = this;
 	spawnParam.Instigator = this;
-
-	/*ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
-
-	if (equipment)
-	{
-		equipment->OnEquipped();
-	}
-	*/
 
 	if (HousingComponent)
 	{
@@ -179,6 +141,56 @@ void AVICTIMSCharacter::BeginPlay()
 	}
 
 	stateComp->UpdateStat();
+
+
+	//==========================================================================================================
+
+		// 	MainWeapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
+	// 	MainWeapon->SetupAttachment(GetMesh());
+	// 	MainWeapon->SetIsReplicated(true);
+	FTimerHandle Timer;
+	GetWorld()->GetTimerManager().ClearTimer(Timer);
+	GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
+		Chest = FindComponentByTag<USkeletalMeshComponent>(FName("Chest"));
+		// 	Chest->SetupAttachment(GetMesh());
+		if (Chest)
+		{
+			Chest->SetIsReplicated(true);
+		}
+
+		// 	Hands = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Hands"));
+		// 	Hands->SetupAttachment(GetMesh());
+		// 	Hands->SetIsReplicated(true);
+
+		Feet = FindComponentByTag<USkeletalMeshComponent>(FName("Feet"));
+		// 	Feet->SetupAttachment(GetMesh());
+		if (Feet)
+		{
+			Feet->SetIsReplicated(true);
+		}
+
+		Legs = FindComponentByTag<USkeletalMeshComponent>(FName("Bottom"));
+		// 	Legs->SetupAttachment(GetMesh());
+		if (Legs)
+		{
+			Legs->SetIsReplicated(true);
+		}
+
+		Head = FindComponentByTag<USkeletalMeshComponent>(FName("Head"));
+		// 	Head->SetupAttachment(GetMesh());
+
+		if (Head)
+		{
+			Head->SetIsReplicated(true);
+		}
+
+		// 	MainWeaponMesh = nullptr;
+	// 	ChestMesh = nullptr;
+	// 	FeetMesh = nullptr;
+	// 	// 	HandsMesh = nullptr;
+	// 	LegsMesh = nullptr;
+	// 	HeadMesh = nullptr;
+		}, 0.5f, false);
 }
 
 void AVICTIMSCharacter::Tick(float DeltaSeconds)
@@ -189,7 +201,7 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 	{
 		PrintInfo();
 	}
-	 
+
 	if (UsableActorsInsideRange.Num() == 0)
 	{
 		if (IsValid(MyPlayerController))
@@ -433,20 +445,20 @@ void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(AVICTIMSCharacter, UsableActorsInsideRange);
 
-	DOREPLIFETIME(AVICTIMSCharacter, MainWeaponMesh);
+	// 	DOREPLIFETIME(AVICTIMSCharacter, MainWeaponMesh);
 	DOREPLIFETIME(AVICTIMSCharacter, ChestMesh);
 	DOREPLIFETIME(AVICTIMSCharacter, FeetMesh);
-	DOREPLIFETIME(AVICTIMSCharacter, HandsMesh);
+	// 	DOREPLIFETIME(AVICTIMSCharacter, HandsMesh);
 	DOREPLIFETIME(AVICTIMSCharacter, LegsMesh);
 	DOREPLIFETIME(AVICTIMSCharacter, HeadMesh);
 
-	DOREPLIFETIME(AVICTIMSCharacter, MainWeapon);
+	// 	DOREPLIFETIME(AVICTIMSCharacter, MainWeapon);
 	DOREPLIFETIME(AVICTIMSCharacter, Chest);
-	DOREPLIFETIME(AVICTIMSCharacter, Hands);
+	// 	DOREPLIFETIME(AVICTIMSCharacter, Hands);
 	DOREPLIFETIME(AVICTIMSCharacter, Feet);
 	DOREPLIFETIME(AVICTIMSCharacter, Legs);
 	DOREPLIFETIME(AVICTIMSCharacter, Head);
-	
+
 	DOREPLIFETIME(AVICTIMSCharacter, PersonalID);
 }
 
@@ -603,12 +615,11 @@ void AVICTIMSCharacter::PossessedBy(AController* NewController)
 	}
 }
 
-void AVICTIMSCharacter::OnRep_MainWeaponMesh()
-{
-	MainWeapon->SetSkeletalMesh(MainWeaponMesh);
-	MainWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "MainWeapon");
-}
-
+// void AVICTIMSCharacter::OnRep_MainWeaponMesh()
+// {
+// 	MainWeapon->SetSkeletalMesh(MainWeaponMesh);
+// 	MainWeapon->AttachToComponent(GetMesh(), FAttachmentTransformRules::KeepRelativeTransform, "MainWeapon");
+// }
 
 void AVICTIMSCharacter::OnRep_MainChestMesh()
 {
@@ -616,20 +627,18 @@ void AVICTIMSCharacter::OnRep_MainChestMesh()
 	Chest->SetLeaderPoseComponent(GetMesh());
 }
 
-
 void AVICTIMSCharacter::OnRep_MainFeetMesh()
 {
 	Feet->SetSkeletalMesh(FeetMesh);
 	Feet->SetLeaderPoseComponent(GetMesh());
 }
 
-
-void AVICTIMSCharacter::OnRep_MainHandsMesh()
-{
-	Hands->SetSkeletalMesh(HandsMesh);
-	Hands->SetLeaderPoseComponent(GetMesh());
-}
-
+// 
+// void AVICTIMSCharacter::OnRep_MainHandsMesh()
+// {
+// 	Hands->SetSkeletalMesh(HandsMesh);
+// 	Hands->SetLeaderPoseComponent(GetMesh());
+// }
 
 void AVICTIMSCharacter::OnRep_MainLegsMesh()
 {
@@ -637,13 +646,11 @@ void AVICTIMSCharacter::OnRep_MainLegsMesh()
 	Legs->SetLeaderPoseComponent(GetMesh());
 }
 
-
 void AVICTIMSCharacter::OnRep_MainHeadMesh()
 {
 	Head->SetSkeletalMesh(HeadMesh);
 	Head->SetLeaderPoseComponent(GetMesh());
 }
-
 
 void AVICTIMSCharacter::OnBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
@@ -870,7 +877,7 @@ void AVICTIMSCharacter::NetMulticastRPC_SavePersonalID_Implementation(const FStr
 
 void AVICTIMSCharacter::SaveDataNow()
 {
-// 	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, "Saved");
+	// 	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, "Saved");
 
 	MyPlayerController->SaveData();
 }
@@ -884,12 +891,12 @@ void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
 			Data = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(PersonalID, 0));
 			Data->SavedHP = stateComp->runningStat.currentHP;					  // 현재 플레이어 HP 저장
 			Data->SavedGold = MyPlayerController->InventoryManagerComponent->Gold; // 현재 인벤토리 Gold 저장
-// 			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
+			// 			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
 
 		}
 		else
 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
+			// 			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Failed"));
 		}
 	}
 }
@@ -904,12 +911,12 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 			stateComp->ServerRPC_SetStatePoint(EStateType::HP, Data->SavedHP);	// 플레이어 HP 로드
 			MyPlayerController->InventoryManagerComponent->AddGold(Data->SavedGold);	// Gold 로드
 
-// 			UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), Data->SavedHP);
-// 			UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), Data->SavedGold);
+			// 			UE_LOG(LogTemp, Warning, TEXT("SetStatePoint HP : %f"), Data->SavedHP);
+			// 			UE_LOG(LogTemp, Warning, TEXT("AddGold : %d"), Data->SavedGold);
 		}
 		else
 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
+			// 			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
 		}
 	}
 }
@@ -967,11 +974,11 @@ void AVICTIMSCharacter::Server_GoToOtherHouse_Implementation(const FString& othe
 	for (auto house : gm->Houses)
 	{
 		if (house->OwnerPlayerID == otherPlayerName)
-		{			
+		{
 			ClientRPC_GoToHouse(house->OriginPos);
 			break;
 		}
-	}	
+	}
 }
 
 void AVICTIMSCharacter::ClientRPC_GoToOtherHouse_Implementation(FVector houseLocation)

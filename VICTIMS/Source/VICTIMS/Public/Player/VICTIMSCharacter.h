@@ -115,8 +115,8 @@ public:
 	UPROPERTY()
 	class AVICTIMSPlayerController* MyPlayerController;
 
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	USkeletalMeshComponent* MainWeapon;
+// 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+// 	USkeletalMeshComponent* MainWeapon;
 	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Chest;
@@ -124,8 +124,8 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Feet;
 	
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	USkeletalMeshComponent* Hands;
+// 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
+// 	USkeletalMeshComponent* Hands;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Legs;
@@ -138,8 +138,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")
 	TArray<AActor*> WorldActorsInsideRange;
 	
-	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainWeaponMesh", meta=(DisplayName="Weapon Mesh", Category="Inventory|Equipment"))
-	USkeletalMesh* MainWeaponMesh;
+// 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainWeaponMesh", meta=(DisplayName="Weapon Mesh", Category="Inventory|Equipment"))
+// 	USkeletalMesh* MainWeaponMesh;
 
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainChestMesh", meta=(DisplayName="Main Chest Mesh", Category="Inventory|Equipment"))
 	USkeletalMesh* ChestMesh;
@@ -147,8 +147,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainFeetMesh", meta=(DisplayName="Main Feet Mesh", Category="Inventory|Equipment"))
 	USkeletalMesh* FeetMesh;
 
-	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHandsMesh", meta=(DisplayName="Main Hands Mesh", Category="Inventory|Equipment"))
-	USkeletalMesh* HandsMesh;
+// 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHandsMesh", meta=(DisplayName="Main Hands Mesh", Category="Inventory|Equipment"))
+// 	USkeletalMesh* HandsMesh;
 	
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainLegsMesh", meta = (DisplayName = "Main Legs Mesh", Category = "Inventory|Equipment"))
 	USkeletalMesh* LegsMesh;
@@ -159,8 +159,8 @@ public:
 //=====================================================================================================
 //  FUNCTION
 
-	UFUNCTION(meta=(OverrideNativeName="OnRep_MainWeaponMesh"))
-	void OnRep_MainWeaponMesh();
+// 	UFUNCTION(meta=(OverrideNativeName="OnRep_MainWeaponMesh"))
+// 	void OnRep_MainWeaponMesh();
 
 	UFUNCTION(meta=(OverrideNativeName="OnRep_MainChestMesh"))
 	void OnRep_MainChestMesh();
@@ -168,8 +168,8 @@ public:
 	UFUNCTION(meta=(OverrideNativeName="OnRep_MainFeetMesh"))
 	void OnRep_MainFeetMesh();
 
-	UFUNCTION(meta=(OverrideNativeName="OnRep_MainHandsMesh"))
-	void OnRep_MainHandsMesh();
+// 	UFUNCTION(meta=(OverrideNativeName="OnRep_MainHandsMesh"))
+// 	void OnRep_MainHandsMesh();
 
 	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainLegsMesh"))
 	void OnRep_MainLegsMesh();
