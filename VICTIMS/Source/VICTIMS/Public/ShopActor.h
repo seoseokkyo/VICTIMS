@@ -89,6 +89,9 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
+	virtual bool BeginOutlineFocus_Implementation() override;
+	virtual bool EndOutlineFocus_Implementation() override;
+
 private:
 	TArray<FSlotStructure> InventoryItems;
 

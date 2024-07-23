@@ -259,3 +259,53 @@ void AShopActor::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 	DOREPLIFETIME(AShopActor, Legs);
 	DOREPLIFETIME(AShopActor, Head);
 }
+
+bool AShopActor::BeginOutlineFocus_Implementation()
+{
+	Super::BeginOutlineFocus_Implementation();
+
+	Body->SetRenderCustomDepth(true);
+	Body->SetCustomDepthStencilValue(2);
+
+	Chest->SetRenderCustomDepth(true);
+	Chest->SetCustomDepthStencilValue(2);
+
+	Feet->SetRenderCustomDepth(true);
+	Feet->SetCustomDepthStencilValue(2);
+
+	Hands->SetRenderCustomDepth(true);
+	Hands->SetCustomDepthStencilValue(2);
+
+	Legs->SetRenderCustomDepth(true);
+	Legs->SetCustomDepthStencilValue(2);
+
+	Head->SetRenderCustomDepth(true);
+	Head->SetCustomDepthStencilValue(2);
+
+	return true;
+}
+
+bool AShopActor::EndOutlineFocus_Implementation()
+{
+	Super::EndOutlineFocus_Implementation();
+
+	Body->SetRenderCustomDepth(false);
+	Body->SetCustomDepthStencilValue(0);
+
+	Chest->SetRenderCustomDepth(false);
+	Chest->SetCustomDepthStencilValue(0);
+
+	Feet->SetRenderCustomDepth(false);
+	Feet->SetCustomDepthStencilValue(0);
+
+	Hands->SetRenderCustomDepth(false);
+	Hands->SetCustomDepthStencilValue(0);
+
+	Legs->SetRenderCustomDepth(false);
+	Legs->SetCustomDepthStencilValue(0);
+
+	Head->SetRenderCustomDepth(false);
+	Head->SetCustomDepthStencilValue(0);
+
+	return true;
+}
