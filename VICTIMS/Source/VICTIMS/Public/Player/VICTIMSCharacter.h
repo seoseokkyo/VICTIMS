@@ -114,18 +114,12 @@ public:
 
 	UPROPERTY()
 	class AVICTIMSPlayerController* MyPlayerController;
-
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	USkeletalMeshComponent* MainWeapon;
 	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Chest;
 	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Feet;
-	
-	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
-	USkeletalMeshComponent* Hands;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	USkeletalMeshComponent* Legs;
@@ -137,30 +131,35 @@ public:
 	TArray<AActor*> UsableActorsInsideRange;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")
 	TArray<AActor*> WorldActorsInsideRange;
-	
-	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainWeaponMesh", meta=(DisplayName="Weapon Mesh", Category="Inventory|Equipment"))
-	USkeletalMesh* MainWeaponMesh;
 
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainChestMesh", meta=(DisplayName="Main Chest Mesh", Category="Inventory|Equipment"))
 	USkeletalMesh* ChestMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Replicated, Category="Inventory|Equipment")
+	USkeletalMesh* DefaultChestMesh;
+
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainFeetMesh", meta=(DisplayName="Main Feet Mesh", Category="Inventory|Equipment"))
 	USkeletalMesh* FeetMesh;
-
-	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHandsMesh", meta=(DisplayName="Main Hands Mesh", Category="Inventory|Equipment"))
-	USkeletalMesh* HandsMesh;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated,Category="Inventory|Equipment")
+	USkeletalMesh* DefaultFeetMesh;
 	
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainLegsMesh", meta = (DisplayName = "Main Legs Mesh", Category = "Inventory|Equipment"))
 	USkeletalMesh* LegsMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated,Category="Inventory|Equipment")
+	USkeletalMesh* DefaultLegsMesh;
+
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHeadMesh", meta = (DisplayName = "Main Head Mesh", Category = "Inventory|Equipment"))
 	USkeletalMesh* HeadMesh;	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Inventory|Equipment")
+	USkeletalMesh* DefaultHeadMesh;
 
 //=====================================================================================================
 //  FUNCTION
 
-	UFUNCTION(meta=(OverrideNativeName="OnRep_MainWeaponMesh"))
-	void OnRep_MainWeaponMesh();
+
 
 	UFUNCTION(meta=(OverrideNativeName="OnRep_MainChestMesh"))
 	void OnRep_MainChestMesh();
@@ -168,14 +167,20 @@ public:
 	UFUNCTION(meta=(OverrideNativeName="OnRep_MainFeetMesh"))
 	void OnRep_MainFeetMesh();
 
-	UFUNCTION(meta=(OverrideNativeName="OnRep_MainHandsMesh"))
-	void OnRep_MainHandsMesh();
-
 	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainLegsMesh"))
 	void OnRep_MainLegsMesh();
 
 	UFUNCTION(meta = (OverrideNativeName = "OnRep_MainHeadMesh"))
 	void OnRep_MainHeadMesh();
+
+	UFUNCTION()
+	void SetChsetMesh(USkeletalMesh* NewChestMesh);
+	UFUNCTION()
+	void SetFeetMesh(USkeletalMesh* NewFeetMesh);	
+	UFUNCTION()
+	void SetLegsMesh(USkeletalMesh* NewLegsMesh);	
+	UFUNCTION()
+	void SetHeadMesh(USkeletalMesh* NewHeadMesh);
 
 	UFUNCTION(BlueprintCallable)
 	void OnBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -254,10 +259,6 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_SpawnBuild(UHousingComponent* Comp, bool Moving, AActor* Movable, const FTransform& Transform, const TArray<FBuildablesStructs>& DB, int32 ID);
-
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
-	//TSubclassOf<class ABaseWeapon> defaultWeapon;
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_ToggleCombat();

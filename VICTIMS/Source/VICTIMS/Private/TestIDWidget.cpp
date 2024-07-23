@@ -13,6 +13,7 @@ void UTestIDWidget::NativeConstruct()
 
 	SignInButton->OnClicked.AddUniqueDynamic(this, &UTestIDWidget::OnClickedSignInButton);
 	ContinueButton->OnClicked.AddUniqueDynamic(this, &UTestIDWidget::OnClickedContinueButton);
+	QuitButton->OnClicked.AddUniqueDynamic(this, &UTestIDWidget::OnClickedQuitButton);
 }
 
 void UTestIDWidget::OnClickedSignInButton()
@@ -82,11 +83,8 @@ void UTestIDWidget::OnClickedContinueButton()
 		}
 	}
 }
-<<<<<<< Updated upstream
-=======
 
 void UTestIDWidget::OnClickedQuitButton()
 {
 
 }
->>>>>>> Stashed changes

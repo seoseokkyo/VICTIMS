@@ -59,13 +59,6 @@ void AVICTIMSPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//if (CharacterReference == nullptr)
-	//{
-	//	CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
-
-	//	UE_LOG(LogTemp, Warning, TEXT("CharacterReference Was Null, Replace : %p"), CharacterReference);
-	//}
-
 	if (IsLocalController())					// ID 입력 위젯  
 	{
 		if (TestIDWidget_bp)
@@ -138,7 +131,6 @@ void AVICTIMSPlayerController::OnPossess(APawn* aPawn)
 	{
 		if (GetHUD() == nullptr)
 		{
-			UE_LOG(LogPlayerController, Verbose, TEXT("SpawnDefaultHUD"));
 			FActorSpawnParameters SpawnInfo;
 			SpawnInfo.Owner = this;
 			SpawnInfo.Instigator = GetInstigator();
@@ -162,34 +154,30 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			CharacterReference = charCheck;
 			CharacterReference->MyPlayerController = this;
 
-			UE_LOG(LogTemp, Warning, TEXT("Inventory,Controller Init(%s)"), *GetPawn()->GetActorNameOrLabel());
-
 			PlayerInventoryComponent->EquipmentCharacterReference = CharacterReference;
 
 			InventoryManagerComponent->InitializeInventoryManager(PlayerInventoryComponent);
 			InventoryManagerComponent->Server_InitInventory();
 			InventoryManagerComponent->InitializePlayerAttributes();
 
-			//CharacterReference->TestFunction(CharacterReference->InputComponent);
-
 			CharacterReference->EnableInput(this);
 		}
 	}
-
-	int viewModeCheck = GetCurrentViewMode(this);
-
-	if (viewModeCheck == 0)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
-	}
-	else if (viewModeCheck == 1)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
-	}
-	else if (viewModeCheck == 2)
-	{
-		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
-	}
+// UI/Game 모드 확인용 디버그 메세지 출력 주석처리
+// 	int viewModeCheck = GetCurrentViewMode(this);
+// 
+// 	if (viewModeCheck == 0)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
+// 	}
+// 	else if (viewModeCheck == 1)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
+// 	}
+// 	else if (viewModeCheck == 2)
+// 	{
+// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
+// 	}
 }
 
 uint8 AVICTIMSPlayerController::UIGetPlayerGold()
@@ -245,7 +233,7 @@ bool AVICTIMSPlayerController::IsContainerOpen()
 
 void AVICTIMSPlayerController::ToggleInventory()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -256,7 +244,7 @@ void AVICTIMSPlayerController::ToggleInventory()
 
 void AVICTIMSPlayerController::ToggleProfile()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -292,7 +280,7 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 
 void AVICTIMSPlayerController::ToggleContainer()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -307,7 +295,7 @@ bool AVICTIMSPlayerController::IsShopOpen()
 }
 void AVICTIMSPlayerController::ToggleShop()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -340,7 +328,7 @@ UUserWidget* AVICTIMSPlayerController::GenerateInteractWidget(FText Text)
 {
 	if (HUD_Reference == nullptr)
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
 
 		return nullptr;
 	}
@@ -354,7 +342,7 @@ UUserWidget* AVICTIMSPlayerController::CreateInteractWidget(FName Name)
 {
 	if (HUD_Reference == nullptr)
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
 
 		return nullptr;
 	}
@@ -438,7 +426,7 @@ void AVICTIMSPlayerController::UseHotbarSlot5()
 
 void AVICTIMSPlayerController::Interact()
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Interact Pressed"));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Interact Pressed"));
 
 	if (CharacterReference == nullptr)
 	{
@@ -482,7 +470,7 @@ void AVICTIMSPlayerController::Interact()
 		//return;
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"));
+// 		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"));
 	}
 }
 
@@ -584,7 +572,7 @@ void AVICTIMSPlayerController::SavePersonalID(FString ID)
 {
 	ServerRPC_SavePersonalID(ID);
 
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Chached Name : %s"), *PlayerID));
+// 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Chached Name : %s"), *PlayerID));
 }
 
 void AVICTIMSPlayerController::ServerRPC_SavePersonalID_Implementation(const FString& ID)
@@ -628,7 +616,7 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 		if (CharacterReference)
 		{
 			CharacterReference->SavePersonalID(ID);
-			UE_LOG(LogTemp, Warning, TEXT("Move :: CreateSaveData: PersonalID set to %s"), *ID);
+// 			UE_LOG(LogTemp, Warning, TEXT("Move :: CreateSaveData: PersonalID set to %s"), *ID);
 		}
 		if (PlayerState)
 		{
@@ -703,7 +691,7 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("LoadGameFromSlot:%s | Was Failed"), *ID);
+// 		UE_LOG(LogTemp, Warning, TEXT("LoadGameFromSlot:%s | Was Failed"), *ID);
 	}
 }
 
@@ -748,7 +736,7 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			}
 			else
 			{
-				UKismetSystemLibrary::PrintString(GetWorld(), TEXT("savedData->SavedHP Was Zero"));
+// 				UKismetSystemLibrary::PrintString(GetWorld(), TEXT("savedData->SavedHP Was Zero"));
 			}
 
 			InventoryManagerComponent->AddGold(savedData->SavedGold);	// Gold 로드
@@ -809,7 +797,7 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 		}
 		else
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed333333333___Controller"));
+// 			UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed333333333___Controller"));
 		}
 
 		NetMulticastRPC_LoadData(true);
@@ -832,7 +820,7 @@ void AVICTIMSPlayerController::NetMulticastRPC_LoadData_Implementation(bool bSuc
 				if (IDInValidWidget)
 				{
 					IDInValidWidget->AddToViewport();
-					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
+// 					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
 					IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
 
 					FTimerHandle Time;
@@ -866,7 +854,7 @@ void AVICTIMSPlayerController::ServerRPC_SetUseUIState_Implementation(bool bUse)
 {
 	bUseUIMode = bUse;
 
-	UE_LOG(LogTemp, Warning, TEXT("bUseUIMode : %s"), bUseUIMode ? TEXT("TRUE") : TEXT("FALSE"));
+// 	UE_LOG(LogTemp, Warning, TEXT("bUseUIMode : %s"), bUseUIMode ? TEXT("TRUE") : TEXT("FALSE"));
 
 	ClientRPC_SetUseUIState(bUseUIMode);
 }
@@ -1015,7 +1003,7 @@ void AVICTIMSPlayerController::PopulatePlayerList()
 			if (CharacterReference)
 			{
 				FString MyPlayerName = CharacterReference->PersonalID;
-				UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList :: MyPlayerName: %s"), *MyPlayerName);
+// 				UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList :: MyPlayerName: %s"), *MyPlayerName);
 
 				//for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
 				//{
@@ -1082,7 +1070,7 @@ void AVICTIMSPlayerController::Client_ReceivePlayerList_Implementation(const TAr
 		if (CharacterReference)
 		{
 			FString MyPlayerName = CharacterReference->PersonalID;
-			UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList :: MyPlayerName: %s"), *MyPlayerName);
+// 			UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList :: MyPlayerName: %s"), *MyPlayerName);
 
 			for (const FString& PlayerName : PlayerNames)
 			{
@@ -1093,7 +1081,7 @@ void AVICTIMSPlayerController::Client_ReceivePlayerList_Implementation(const TAr
 				}
 				else
 				{
-					UE_LOG(LogTemp, Warning, TEXT("Skipping MyPlayerName: %s"), *PlayerName);
+// 					UE_LOG(LogTemp, Warning, TEXT("Skipping MyPlayerName: %s"), *PlayerName);
 				}
 			}
 		}
