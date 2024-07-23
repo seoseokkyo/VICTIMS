@@ -589,14 +589,14 @@ void AVICTIMSPlayerController::SavePersonalID(FString ID)
 
 void AVICTIMSPlayerController::ServerRPC_SavePersonalID_Implementation(const FString& ID)
 {
-	PlayerID = ID;
+	playerName = ID;
 
-	NetMulticastRPC_SavePersonalID(PlayerID);
+	NetMulticastRPC_SavePersonalID(playerName);
 }
 
 void AVICTIMSPlayerController::NetMulticastRPC_SavePersonalID_Implementation(const FString& ID)
 {
-	PlayerID = ID;
+	playerName = ID;
 }
 
 void AVICTIMSPlayerController::CreateSaveData(FString ID)
@@ -799,13 +799,13 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 				}
 			}
 
-			GameModeReference = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
-			// 집 번호 로드 및 할당
-			if (savedData->HouseNumber >= 0 && savedData->HouseNumber < GameModeReference->Houses.Num())
-			{
-				AShelter* AssignedHouse = GameModeReference->Houses[savedData->HouseNumber];
-				CharacterReference->SetAssignedHouse(AssignedHouse);
-			}
+			//GameModeReference = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
+			//// 집 번호 로드 및 할당
+			//if (savedData->HouseNumber >= 0 && savedData->HouseNumber < GameModeReference->Houses.Num())
+			//{
+			//	AShelter* AssignedHouse = GameModeReference->Houses[savedData->HouseNumber];
+			//	CharacterReference->SetAssignedHouse(AssignedHouse);
+			//}
 		}
 		else
 		{
@@ -963,9 +963,10 @@ void AVICTIMSPlayerController::ShowMovingInfo()
 {
 	if (IsLocalController())
 	{
-		PopulatePlayerList();
+		//PopulatePlayerList();
 		if (HUDLayoutReference->MainLayout->MovingInfo->GetVisibility() == ESlateVisibility::Hidden)
 		{
+			HUDLayoutReference->MainLayout->MovingInfo->AddPlayerName();
 			HUDLayoutReference->MainLayout->MovingInfo->SetVisibility(ESlateVisibility::Visible);
 			bIsShowUI = true;
 			EnableUIMode();
@@ -1008,7 +1009,7 @@ void AVICTIMSPlayerController::PopulatePlayerList()
 {
 	if (IsLocalController())
 	{
-		if (MovingInfoWidget)
+		if (HUDLayoutReference->MainLayout->MovingInfo)
 		{	
 			CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
 			if (CharacterReference)
@@ -1075,7 +1076,7 @@ void AVICTIMSPlayerController::Server_RequestPlayerList_Implementation()
 
 void AVICTIMSPlayerController::Client_ReceivePlayerList_Implementation(const TArray<FString>& PlayerNames)
 {
-	if (MovingInfoWidget)
+	if (HUDLayoutReference->MainLayout->MovingInfo)
 	{	
 		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
 		if (CharacterReference)
@@ -1087,7 +1088,7 @@ void AVICTIMSPlayerController::Client_ReceivePlayerList_Implementation(const TAr
 			{
 				if (!PlayerName.IsEmpty() && PlayerName != MyPlayerName && !AddedPlayerNames.Contains(PlayerName)) // 자신의 이름은 제외
 				{
-					MovingInfoWidget->AddPlayerName(PlayerName);
+					HUDLayoutReference->MainLayout->MovingInfo->AddPlayerName();
 					AddedPlayerNames.Add(PlayerName);
 				}
 				else

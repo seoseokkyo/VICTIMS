@@ -37,6 +37,7 @@
 #include "CollisionComponent.h"
 #include "VICTIMSGameMode.h"
 #include "GameFramework/PlayerState.h"
+#include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -936,10 +937,10 @@ void AVICTIMSCharacter::ServerRPC_SetAssignedHouse_Implementation(AShelter* NewH
 {
 	AssignedHouse = NewHouse;
 
-	NetMulticastRPC_SetAssignedHouse(AssignedHouse);
+	ClientRPC_SetAssignedHouse(AssignedHouse);
 }
 
-void AVICTIMSCharacter::NetMulticastRPC_SetAssignedHouse_Implementation(AShelter* NewHouse)
+void AVICTIMSCharacter::ClientRPC_SetAssignedHouse_Implementation(AShelter* NewHouse)
 {
 	AssignedHouse = NewHouse;
 }
@@ -963,16 +964,25 @@ void AVICTIMSCharacter::ClientRPC_GoToHouse_Implementation(FVector houseLocation
 
 void AVICTIMSCharacter::Server_GoToOtherHouse_Implementation(const FString& otherPlayerName)
 {
-	auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
+	//auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
 
-	for (auto house : gm->Houses)
+	//for (auto house : gm->Houses)
+	//{
+	//	if (house->OwnerPlayerName == otherPlayerName)
+	//	{			
+	//		ClientRPC_GoToHouse(house->OriginPos);
+	//		break;
+	//	}
+	//}	
+
+	for (TActorIterator<AShelter> it(GetWorld()); it; ++it)
 	{
-		if (house->OwnerPlayerID == otherPlayerName)
-		{			
-			ClientRPC_GoToHouse(house->OriginPos);
+		if ((*it)->OwnerPlayerName == otherPlayerName)
+		{
+			ClientRPC_GoToHouse((*it)->OriginPos);
 			break;
 		}
-	}	
+	}
 }
 
 void AVICTIMSCharacter::ClientRPC_GoToOtherHouse_Implementation(FVector houseLocation)

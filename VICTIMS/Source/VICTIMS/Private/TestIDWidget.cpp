@@ -5,6 +5,7 @@
 #include "Components/Button.h"
 #include "AVICTIMSPlayerController.h"
 #include "VICTIMSCharacter.h"
+#include "Shelter.h"
 
 void UTestIDWidget::NativeConstruct()
 {
@@ -26,13 +27,19 @@ void UTestIDWidget::OnClickedSignInButton()
 			PC->CharacterReference->SavePersonalID(strID);
 			PC->SavePersonalID(strID);
 			PC->CreateSaveData(strID);
+
+			if (PC->CharacterReference->AssignedHouse)
+			{
+				PC->CharacterReference->AssignedHouse->SetPlayerName(strID);
+			}
+
 			if (IsIDValid)
 			{
 				PC->CloseTestIDWidget();
 			}
 			else
 			{
-// 				UE_LOG(LogTemp, Warning, TEXT("Sing In Failed"));
+				// 				UE_LOG(LogTemp, Warning, TEXT("Sing In Failed"));
 				return;
 			}
 		}
@@ -43,7 +50,7 @@ void UTestIDWidget::OnClickedContinueButton()
 {
 	if (ID != nullptr)
 	{
-		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());		
+		AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 
 		if (PC)
 		{
@@ -56,6 +63,12 @@ void UTestIDWidget::OnClickedContinueButton()
 				PC->CharacterReference->SavePersonalID(strID);
 				PC->SavePersonalID(strID);
 				PC->LoadData(strID);
+
+				if (PC->CharacterReference->AssignedHouse)
+				{
+					PC->CharacterReference->AssignedHouse->SetPlayerName(strID);
+				}
+
 				if (IsIDValid)
 				{
 					PC->CloseTestIDWidget();
@@ -69,3 +82,11 @@ void UTestIDWidget::OnClickedContinueButton()
 		}
 	}
 }
+<<<<<<< Updated upstream
+=======
+
+void UTestIDWidget::OnClickedQuitButton()
+{
+
+}
+>>>>>>> Stashed changes

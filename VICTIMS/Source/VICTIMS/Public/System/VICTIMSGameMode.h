@@ -31,12 +31,17 @@ public:
 
 	void AssignHouseToPlayer(class AVICTIMSPlayerController* NewPlayer);
 
+	UPROPERTY(Replicated)
 	TArray<class AShelter*> Houses;
+
 	int32 TotalHouses;
+
 	int32 NextHouseIndex;
 
 	UFUNCTION(BlueprintCallable)
 	EVictimsNetMode GetGameNetMode();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
 
 
