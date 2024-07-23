@@ -144,8 +144,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainChestMesh", meta=(DisplayName="Main Chest Mesh", Category="Inventory|Equipment"))
 	USkeletalMesh* ChestMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite,Replicated, Category="Inventory|Equipment")
+	USkeletalMesh* DefaultChestMesh;
+
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainFeetMesh", meta=(DisplayName="Main Feet Mesh", Category="Inventory|Equipment"))
 	USkeletalMesh* FeetMesh;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated,Category="Inventory|Equipment")
+	USkeletalMesh* DefaultFeetMesh;
 
 // 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHandsMesh", meta=(DisplayName="Main Hands Mesh", Category="Inventory|Equipment"))
 // 	USkeletalMesh* HandsMesh;
@@ -153,8 +159,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainLegsMesh", meta = (DisplayName = "Main Legs Mesh", Category = "Inventory|Equipment"))
 	USkeletalMesh* LegsMesh;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated,Category="Inventory|Equipment")
+	USkeletalMesh* DefaultLegsMesh;
+
 	UPROPERTY(BlueprintReadWrite, ReplicatedUsing="OnRep_MainHeadMesh", meta = (DisplayName = "Main Head Mesh", Category = "Inventory|Equipment"))
 	USkeletalMesh* HeadMesh;	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Replicated, Category="Inventory|Equipment")
+	USkeletalMesh* DefaultHeadMesh;
 
 //=====================================================================================================
 //  FUNCTION

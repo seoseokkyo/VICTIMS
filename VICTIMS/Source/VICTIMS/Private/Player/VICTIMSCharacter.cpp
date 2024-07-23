@@ -89,8 +89,12 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	InteractionField->InitSphereRadius(150);
 	InteractionField->SetCollisionProfileName(TEXT("CollisionTrigger"));
 
-
-
+	// 	MainWeaponMesh = nullptr;
+	ChestMesh = nullptr;
+	FeetMesh = nullptr;
+	// 	// 	HandsMesh = nullptr;
+	LegsMesh = nullptr;
+	HeadMesh = nullptr;
 
 	//che
 	collisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
@@ -151,8 +155,7 @@ void AVICTIMSCharacter::BeginPlay()
 	FTimerHandle Timer;
 	GetWorld()->GetTimerManager().ClearTimer(Timer);
 	GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
-		Chest = FindComponentByTag<USkeletalMeshComponent>(FName("Chest"));
-		// 	Chest->SetupAttachment(GetMesh());
+		Chest = Cast<USkeletalMeshComponent>(FindComponentByTag<USkeletalMeshComponent>(FName("Chest")));
 		if (Chest)
 		{
 			Chest->SetIsReplicated(true);
@@ -162,34 +165,24 @@ void AVICTIMSCharacter::BeginPlay()
 		// 	Hands->SetupAttachment(GetMesh());
 		// 	Hands->SetIsReplicated(true);
 
-		Feet = FindComponentByTag<USkeletalMeshComponent>(FName("Feet"));
-		// 	Feet->SetupAttachment(GetMesh());
+		Feet = Cast<USkeletalMeshComponent>(FindComponentByTag<USkeletalMeshComponent>(FName("Feet")));
 		if (Feet)
 		{
 			Feet->SetIsReplicated(true);
 		}
 
-		Legs = FindComponentByTag<USkeletalMeshComponent>(FName("Bottom"));
-		// 	Legs->SetupAttachment(GetMesh());
+		Legs = Cast<USkeletalMeshComponent>(FindComponentByTag<USkeletalMeshComponent>(FName("Bottom")));
 		if (Legs)
 		{
 			Legs->SetIsReplicated(true);
 		}
 
-		Head = FindComponentByTag<USkeletalMeshComponent>(FName("Head"));
-		// 	Head->SetupAttachment(GetMesh());
-
+		Head = Cast<USkeletalMeshComponent>(FindComponentByTag<USkeletalMeshComponent>(FName("Head")));
 		if (Head)
 		{
 			Head->SetIsReplicated(true);
 		}
 
-		// 	MainWeaponMesh = nullptr;
-	// 	ChestMesh = nullptr;
-	// 	FeetMesh = nullptr;
-	// 	// 	HandsMesh = nullptr;
-	// 	LegsMesh = nullptr;
-	// 	HeadMesh = nullptr;
 		}, 0.5f, false);
 }
 
@@ -207,7 +200,6 @@ void AVICTIMSCharacter::Tick(float DeltaSeconds)
 		if (IsValid(MyPlayerController))
 		{
 			MyPlayerController->DisableUIMode();
-			//MyPlayerController->Tick(DeltaSeconds);
 		}
 		return;
 	}
@@ -458,6 +450,11 @@ void AVICTIMSCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 	DOREPLIFETIME(AVICTIMSCharacter, Feet);
 	DOREPLIFETIME(AVICTIMSCharacter, Legs);
 	DOREPLIFETIME(AVICTIMSCharacter, Head);
+
+	DOREPLIFETIME(AVICTIMSCharacter, DefaultChestMesh);
+	DOREPLIFETIME(AVICTIMSCharacter, DefaultFeetMesh);
+	DOREPLIFETIME(AVICTIMSCharacter, DefaultHeadMesh);
+	DOREPLIFETIME(AVICTIMSCharacter, DefaultLegsMesh);
 
 	DOREPLIFETIME(AVICTIMSCharacter, PersonalID);
 }

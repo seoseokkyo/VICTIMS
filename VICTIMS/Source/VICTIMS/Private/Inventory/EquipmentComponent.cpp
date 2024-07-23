@@ -66,24 +66,52 @@ void UEquipmentComponent::NetMulticastRPC_UpdateEquippedMeshes_Implementation(ui
 		case EEquipmentSlot::Weapon:
 			break;
 		case EEquipmentSlot::Chest:
-			ChestMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Chest"));
-			ChestMesh->SetSkeletalMesh(NewMesh);
+			ChestMesh = EquipmentCharacterReference->Chest;
+			if (NewMesh == nullptr)
+			{
+				ChestMesh->SetSkeletalMesh(EquipmentCharacterReference->DefaultChestMesh, false);
+			}
+			else
+			{
+				ChestMesh->SetSkeletalMesh(NewMesh, false);
+			}
 			break;
 		case EEquipmentSlot::Feet:
-			FeetMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Feet"));
-			FeetMesh->SetSkeletalMesh(NewMesh);
+			FeetMesh = EquipmentCharacterReference->Feet;
+			if (NewMesh == nullptr)
+			{
+				FeetMesh->SetSkeletalMesh(EquipmentCharacterReference->DefaultFeetMesh, false);
+			}
+			else
+			{
+				FeetMesh->SetSkeletalMesh(NewMesh, false);
+			}
 			break;
 		case EEquipmentSlot::Hands:
 // 			EquipmentCharacterReference->HandsMesh = NewMesh;
 // 			EquipmentCharacterReference->OnRep_MainHandsMesh();
 			break;
 		case EEquipmentSlot::Legs:
-			BottomMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Bottom"));
-			BottomMesh->SetSkeletalMesh(NewMesh);
+			BottomMesh = EquipmentCharacterReference->Legs;
+			if (NewMesh == nullptr)
+			{
+				BottomMesh->SetSkeletalMesh(EquipmentCharacterReference->DefaultLegsMesh, false);
+			}
+			else
+			{
+				BottomMesh->SetSkeletalMesh(NewMesh, false);
+			}
 			break;
 		case EEquipmentSlot::Head:
-			HeadMesh = EquipmentCharacterReference->FindComponentByTag<USkeletalMeshComponent>(FName("Head"));
-			HeadMesh->SetSkeletalMesh(NewMesh);
+			HeadMesh = EquipmentCharacterReference->Head;
+			if (NewMesh == nullptr)
+			{
+				HeadMesh->SetSkeletalMesh(EquipmentCharacterReference->DefaultHeadMesh, false);
+			}
+			else
+			{
+				HeadMesh->SetSkeletalMesh(NewMesh, false);
+			}
 			break;
 		default:
 			break;
