@@ -149,7 +149,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 	{
 		auto charCheck = Cast<AVICTIMSCharacter>(pawnCheck);
 
-		if (CharacterReference == nullptr || CharacterReference != charCheck)
+		if (CharacterReference == nullptr || CharacterReference != charCheck || false == bInventoryInitialized)
 		{
 			CharacterReference = charCheck;
 			CharacterReference->MyPlayerController = this;
@@ -161,6 +161,8 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			InventoryManagerComponent->InitializePlayerAttributes();
 
 			CharacterReference->EnableInput(this);
+
+			bInventoryInitialized = true;
 		}
 	}
 

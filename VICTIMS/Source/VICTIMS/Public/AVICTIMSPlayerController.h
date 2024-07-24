@@ -160,6 +160,9 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastRPC_SavePersonalID(const FString& ID);
 
+	UPROPERTY()
+	bool bInventoryInitialized = false;
+
 protected:
 	virtual void BeginPlay() override;
 	

@@ -108,7 +108,7 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 	//MatchReadyAudioWave = matchReadyAudioResource.Object;
 	//KillSound = myAudioResource.Object;
 	//UGameplayStatics::PlaySound2D(UObject * GetWorld(), class USoundBase* Sound, float VolumeMultiplier, float PitchMultiplier, float StartTime)
-	
+
 }
 
 void AVICTIMSCharacter::BeginPlay()
@@ -160,7 +160,6 @@ void AVICTIMSCharacter::BeginPlay()
 	{
 		MyPlayerController->HUDLayoutReference->MainLayout->CompassWidget->AddToViewport();
 	}
-}
 
 
 	//==========================================================================================================
@@ -966,6 +965,7 @@ void AVICTIMSCharacter::AddHousingData(FName playerName)
 
 void AVICTIMSCharacter::LoadHousingData(FName playerName)
 {
+}
 
 void AVICTIMSCharacter::KillWidgetOn(ACharacterBase* DiedChar)
 {
@@ -980,17 +980,17 @@ void AVICTIMSCharacter::ServerRPC_KillWidget_Implementation(ACharacterBase* Died
 void AVICTIMSCharacter::NetMulticastRPC_KillWidget_Implementation(ACharacterBase* DiedChar)
 {
 	MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
-		if (MyPlayerController)
-		{
-			MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->PlayAnimation(MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->KillAnimation);
+	if (MyPlayerController)
+	{
+		MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->PlayAnimation(MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->KillAnimation);
 
-			UGameplayStatics::PlaySound2D(GetWorld(), KillSound, 1, 1, 0);
-			//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI MyPlayerController")), true, true, FColor(1, 1, 1), 30.0f);
+		UGameplayStatics::PlaySound2D(GetWorld(), KillSound, 1, 1, 0);
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI MyPlayerController")), true, true, FColor(1, 1, 1), 30.0f);
 
-		}
-		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI IsLocallyControlled")), true, true, FColor(1, 1, 1), 30.0f);
-	
-	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI NetMulticastRPC_KillWidget_Implementation")), true, true, FColor(1, 1, 1), 30.0f);
+	}
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI IsLocallyControlled")), true, true, FColor(1, 1, 1), 30.0f);
+
+//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI NetMulticastRPC_KillWidget_Implementation")), true, true, FColor(1, 1, 1), 30.0f);
 
 }
 

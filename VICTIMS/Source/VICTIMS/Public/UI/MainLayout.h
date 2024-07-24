@@ -41,6 +41,7 @@ public:
 
 	class UMovingInfoWidget* MovingInfo;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
 	class UKillWidget* KillWidget;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
