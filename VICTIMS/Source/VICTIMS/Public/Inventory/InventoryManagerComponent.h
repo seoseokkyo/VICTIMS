@@ -29,7 +29,7 @@ public:
 	void OnRep_UpdateGoldAmount();
 
 	UPROPERTY(Replicated, ReplicatedUsing = OnRep_UpdateGoldAmount)
-	uint8 Gold;
+	int32 Gold;
 
 	UFUNCTION()
 	void InitializeItemDB();
@@ -194,7 +194,7 @@ public:
 
 	
 	UFUNCTION(Category = "Manager|Private|Inventory")
-	void AddGold(uint8 Amount);
+	void AddGold(int32 Amount);
 
 	UFUNCTION(Category = "Manager|Private|Equipment")
 	void EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot,	UInventoryComponent* ToInventory, uint8 ToInventorySlot);

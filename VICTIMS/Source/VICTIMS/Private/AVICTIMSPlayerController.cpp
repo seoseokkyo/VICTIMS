@@ -184,7 +184,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 
 }
 
-uint8 AVICTIMSPlayerController::UIGetPlayerGold()
+int32 AVICTIMSPlayerController::UIGetPlayerGold()
 {
 	return InventoryManagerComponent->Gold;
 }
@@ -268,7 +268,6 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 			{
 				SetInputMode(FInputModeGameAndUI());
 				bShowMouseCursor = true;
-
 				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
 			}
 			else

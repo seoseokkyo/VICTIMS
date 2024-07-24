@@ -42,6 +42,7 @@
 #include "UI/MainLayout.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Animation/WidgetAnimation.h>
 #include "CompassWedget.h"
+#include "UI/MyHUD.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -794,9 +795,21 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 						if (MyPlayerController->IsContainerOpen())
 						{
 							MyPlayerController->InventoryManagerComponent->Server_CloseContainer();
-							MyPlayerController->InventoryManagerComponent->Server_CloseShop();
+							MyPlayerController->SetInputMode(FInputModeGameOnly());
+							MyPlayerController->bShowMouseCursor = false;
 						}
-
+						if (MyPlayerController->IsShopOpen())
+						{
+							MyPlayerController->InventoryManagerComponent->Server_CloseShop();
+							MyPlayerController->SetInputMode(FInputModeGameOnly());
+							MyPlayerController->bShowMouseCursor = false;
+						}
+						if(MyPlayerController->HUD_Reference->IsAnyWidgetVisible())
+						{
+							MyPlayerController->HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+							MyPlayerController->SetInputMode(FInputModeGameOnly());
+							MyPlayerController->bShowMouseCursor = false;
+						}
 						return;
 					}
 				}

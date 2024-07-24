@@ -32,7 +32,7 @@ void UInventoryLayout::UpdateGoldAmount()
 {
 	if (AVICTIMSPlayerController* Controller = Cast<AVICTIMSPlayerController>(GetOwningPlayer()))
 	{
-		uint8 LocalGoldAmount = Controller->UIGetPlayerGold();
+		int32 LocalGoldAmount = Controller->UIGetPlayerGold();
 
 		Gold_Amount->SetText(FText::AsNumber(LocalGoldAmount));
 	}
