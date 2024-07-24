@@ -345,5 +345,19 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void AddDamage(ACharacterBase* DamagedChar);
+
+	UFUNCTION(BlueprintCallable)
+	void KillWidgetOn(ACharacterBase* DiedChar);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_KillWidget(ACharacterBase* DiedChar);
+
+	UFUNCTION(Client, Reliable)
+	void NetMulticastRPC_KillWidget(ACharacterBase* DiedChar);
+
+
+	UPROPERTY(EditAnywhere)
+	class USoundBase* KillSound;
+
 };
 

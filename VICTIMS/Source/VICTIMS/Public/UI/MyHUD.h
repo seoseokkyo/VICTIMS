@@ -25,7 +25,7 @@ public:
 	UFUNCTION()
 	UUserWidget* GenerateInteractWidget(FText Text);
 
-	UPROPERTY(EditAnywhere, Category = "Default")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	UHUDLayout* HUDReference;
 	
 	UUserWidget* CustomCreateWidget(FName Name);

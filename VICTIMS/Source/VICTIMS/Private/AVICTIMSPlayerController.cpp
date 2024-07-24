@@ -163,6 +163,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			CharacterReference->EnableInput(this);
 		}
 	}
+
 // UI/Game 모드 확인용 디버그 메세지 출력 주석처리
 // 	int viewModeCheck = GetCurrentViewMode(this);
 // 
@@ -178,6 +179,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 // 	{
 // 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
 // 	}
+
 }
 
 uint8 AVICTIMSPlayerController::UIGetPlayerGold()

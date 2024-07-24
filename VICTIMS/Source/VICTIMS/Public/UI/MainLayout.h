@@ -38,7 +38,17 @@ public:
 	class UDropMoneyLayout* DropMoneyLayout;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+
 	class UMovingInfoWidget* MovingInfo;
+
+	class UKillWidget* KillWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UCompassWedget* CompassWidget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UMiniMapWidget* MiniMapWidget;
+
 
 protected:
 	UFUNCTION()

@@ -69,10 +69,19 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s is Dead By %s"), *this->GetActorNameOrLabel(), *DamageCauser->GetActorNameOrLabel()), true, true, FLinearColor::Red, 10.0f);
 
-		AVICTIMSCharacter* Attacker = Cast<AVICTIMSCharacter>(DamageCauser);
-		if (Attacker != nullptr)
+		if (bIsDead==false)
 		{
-			//여기서 추가 작업
+			bIsDead = true;
+			//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s is Dead By %s"), *this->GetActorNameOrLabel(), *DamageCauser->GetActorNameOrLabel()), true, true, FLinearColor::Red, 1000.0f);
+			AfterDieFunction();
+
+			AVICTIMSCharacter* Attacker = Cast<AVICTIMSCharacter>(DamageCauser);
+			if (Attacker != nullptr)
+			{
+				Attacker->NetMulticastRPC_KillWidget(this);
+				//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("WidgetOn")), true, true, FLinearColor::Red, 10.0f);
+			}
+			
 		}
 	}
 
