@@ -149,7 +149,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 	{
 		auto charCheck = Cast<AVICTIMSCharacter>(pawnCheck);
 
-		if (CharacterReference == nullptr || CharacterReference != charCheck)
+		if (CharacterReference == nullptr || CharacterReference != charCheck || false == bInventoryInitialized)
 		{
 			CharacterReference = charCheck;
 			CharacterReference->MyPlayerController = this;
@@ -161,8 +161,11 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			InventoryManagerComponent->InitializePlayerAttributes();
 
 			CharacterReference->EnableInput(this);
+
+			bInventoryInitialized = true;
 		}
 	}
+
 // UI/Game 모드 확인용 디버그 메세지 출력 주석처리
 // 	int viewModeCheck = GetCurrentViewMode(this);
 // 
@@ -178,6 +181,7 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 // 	{
 // 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
 // 	}
+
 }
 
 uint8 AVICTIMSPlayerController::UIGetPlayerGold()

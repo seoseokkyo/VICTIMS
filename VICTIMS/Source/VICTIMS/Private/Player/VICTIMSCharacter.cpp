@@ -38,6 +38,10 @@
 #include "VICTIMSGameMode.h"
 #include "GameFramework/PlayerState.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
+#include "KillWidget.h"
+#include "UI/MainLayout.h"
+#include <../../../../../../../Source/Runtime/UMG/Public/Animation/WidgetAnimation.h>
+#include "CompassWedget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -47,7 +51,7 @@ DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 AVICTIMSCharacter::AVICTIMSCharacter()
 {
 	// Set size for collision capsule
-	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
+	GetCapsuleComponent()->InitCapsuleSize(42.f, 80.0f);
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -99,6 +103,12 @@ AVICTIMSCharacter::AVICTIMSCharacter()
 
 	//che
 	collisionComponent = CreateDefaultSubobject<UCollisionComponent>(TEXT("CollisionComponent"));
+	// Init Audio Resource
+	//static ConstructorHelpers::FObjectFinder<USoundWave> myAudioResource(TEXT("<Reference_Path>"));
+	//MatchReadyAudioWave = matchReadyAudioResource.Object;
+	//KillSound = myAudioResource.Object;
+	//UGameplayStatics::PlaySound2D(UObject * GetWorld(), class USoundBase* Sound, float VolumeMultiplier, float PitchMultiplier, float StartTime)
+
 }
 
 void AVICTIMSCharacter::BeginPlay()
@@ -146,6 +156,10 @@ void AVICTIMSCharacter::BeginPlay()
 	}
 
 	stateComp->UpdateStat();
+	if (IsLocallyControlled())
+	{
+		MyPlayerController->HUDLayoutReference->MainLayout->CompassWidget->AddToViewport();
+	}
 
 
 	//==========================================================================================================
@@ -913,7 +927,6 @@ void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
 			Data->SavedHP = stateComp->runningStat.currentHP;					  // 현재 플레이어 HP 저장
 			Data->SavedGold = MyPlayerController->InventoryManagerComponent->Gold; // 현재 인벤토리 Gold 저장
 			// 			UE_LOG(LogTemp, Warning, TEXT("Save Player Data ---------- Successed"));
-
 		}
 		else
 		{
@@ -937,7 +950,7 @@ void AVICTIMSCharacter::LoadPlayerData(UTestSaveGame* Data)
 		}
 		else
 		{
-			// 			UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
+			//UE_LOG(LogTemp, Warning, TEXT("LoadPlayerData %s"), IsValid(Data) ? TEXT("Success") : TEXT("Failed"));
 		}
 	}
 }
@@ -952,6 +965,33 @@ void AVICTIMSCharacter::AddHousingData(FName playerName)
 
 void AVICTIMSCharacter::LoadHousingData(FName playerName)
 {
+}
+
+void AVICTIMSCharacter::KillWidgetOn(ACharacterBase* DiedChar)
+{
+	ServerRPC_KillWidget_Implementation(DiedChar);
+}
+
+void AVICTIMSCharacter::ServerRPC_KillWidget_Implementation(ACharacterBase* DiedChar)
+{
+	NetMulticastRPC_KillWidget_Implementation(DiedChar);
+}
+
+void AVICTIMSCharacter::NetMulticastRPC_KillWidget_Implementation(ACharacterBase* DiedChar)
+{
+	MyPlayerController = Cast<AVICTIMSPlayerController>(GetController());
+	if (MyPlayerController)
+	{
+		MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->PlayAnimation(MyPlayerController->HUDLayoutReference->MainLayout->KillWidget->KillAnimation);
+
+		UGameplayStatics::PlaySound2D(GetWorld(), KillSound, 1, 1, 0);
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI MyPlayerController")), true, true, FColor(1, 1, 1), 30.0f);
+
+	}
+	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI IsLocallyControlled")), true, true, FColor(1, 1, 1), 30.0f);
+
+//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("is killed UI NetMulticastRPC_KillWidget_Implementation")), true, true, FColor(1, 1, 1), 30.0f);
+
 }
 
 void AVICTIMSCharacter::SetAssignedHouse(AShelter* NewHouse)
