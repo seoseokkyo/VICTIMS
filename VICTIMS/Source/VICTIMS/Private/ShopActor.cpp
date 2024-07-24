@@ -13,10 +13,14 @@ AShopActor::AShopActor()
 	PrimaryActorTick.bCanEverTick = false;
 
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("Inventory Component"));
-	InventoryComponent->NumberOfRowsInventory = 20;
+	InventoryComponent->NumberOfRowsInventory = 30;
 	InventoryComponent->SlotsPerRowInventory = 1;
 	S_Name = "Shop";
 	S_CanShopItems = true;
+
+// 	bIsConsumableShop = false;
+// 	bIsEquipmentShop = false;
+// 	bIsFurnitureShop = false;
 
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Body->SetupAttachment(GetRootComponent());
@@ -75,6 +79,15 @@ bool AShopActor::InitializeInventory()
 	if (HasAuthority())
 	{
 		InventoryItems = GetShopItems();
+// 
+// 		uint8 temp = 30;
+// 		while (true)
+// 		{
+// 			S_NumberOfRows += 1;
+// 			temp++;
+// 
+// 			if (InventoryItems.Num() == temp) break;
+// 		}
 		LoadInventoryItems(InventoryItems.Num(), InventoryItems);
 
 		return true;
@@ -187,43 +200,38 @@ TArray<FSlotStructure> AShopActor::GetShopItems()
 		{
 			DB_ItemList = LoadObject<UDataTable>(this, TEXT("/Script/Engine.DataTable'/Game/Item/Data/Item_DB.Item_DB'"));
 		}
-// 			do 
-// 			{
-// 				LocalItemIndex = FMath::RandRange(0, LootShopItems.Num()-1);	
-// 				if (LocalItemIndexes.Find(LocalItemIndex) == -1)
-// 				{
-// 					FShopList Shop = LootShopItems[LocalItemIndex];
-// 
-// 					LocalItemIndexes.AddUnique(LocalItemIndex);
-// 					FItemStructure* LocalInventoryItem = DB_ItemList->FindRow<FItemStructure>(Shop.ID,"",true);
-// 
-// 					FSlotStructure LocalInventorySlot{};
-// 					LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
-// 
-// 					uint8 LocalItemAmount = FMath::RandRange(1,Shop.Amount);    
-// 					if (LocalItemAmount > GetItemMaxStackSize(LocalInventorySlot))
-// 					{
-// 						LocalItemAmount = GetItemMaxStackSize(LocalInventorySlot);
-// 					}
-// 					SetItemAmount(LocalInventorySlot, LocalItemAmount);
-// 					ShoppingItems.Add(LocalInventorySlot);
-// 					LocalShopCount++;
-// 				}
-// 			} while (LocalShopCount < 3);
 		for (uint8 i = 0; i < LootShopItems.Num()-1; i++)				// FShopList 에 들어있는 모든 아이템요소 로드 
 		{
 			FShopList Shop = LootShopItems[i];
 			LocalItemIndexes.AddUnique(i);
 			FItemStructure* LocalInventoryItem = DB_ItemList->FindRow<FItemStructure>(Shop.ID, "", true);
+
 			if (LocalInventoryItem->ItemType == EItemType::Undefined)
 			{
 				continue;
 			}
 
-			FSlotStructure LocalInventorySlot{};
-			LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
-			SetItemAmount(LocalInventorySlot, 1);
-			ShoppingItems.Add(LocalInventorySlot);
+			if (bIsConsumableShop == true && LocalInventoryItem->ItemType == EItemType::Consumable)
+			{
+				FSlotStructure LocalInventorySlot{};
+				LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
+				SetItemAmount(LocalInventorySlot, 1);
+				ShoppingItems.Add(LocalInventorySlot);
+			}
+			else if (bIsEquipmentShop == true && LocalInventoryItem->ItemType == EItemType::Equipment)
+			{
+				FSlotStructure LocalInventorySlot{};
+				LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
+				SetItemAmount(LocalInventorySlot, 1);
+				ShoppingItems.Add(LocalInventorySlot);
+			}
+			else if (bIsFurnitureShop == true && LocalInventoryItem->ItemType == EItemType::Furniture)
+			{
+				FSlotStructure LocalInventorySlot{};
+				LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
+				SetItemAmount(LocalInventorySlot, 1);
+				ShoppingItems.Add(LocalInventorySlot);
+			}
 		}
 
 		InventoryComponent->NumberOfRowsInventory = LootShopItems.Num()-1;

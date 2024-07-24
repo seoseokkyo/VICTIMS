@@ -86,6 +86,18 @@ public:
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* Head;
 
+// 상점 종류 나누기 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop Settings")
+	bool bIsConsumableShop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop Settings")
+	bool bIsEquipmentShop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Shop Settings")
+	bool bIsFurnitureShop;
+
+
+
+
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
