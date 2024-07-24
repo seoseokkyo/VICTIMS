@@ -16,7 +16,7 @@ class VICTIMS_API UMovingInfoWidget : public UUserWidget
 	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Player List")
-	void AddPlayerName(const FString& PlayerName);
+	void AddPlayerName();
 
 	virtual void NativeConstruct() override;
 

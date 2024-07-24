@@ -16,8 +16,6 @@ void UMovingInfoWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	Button_GoPub->OnClicked.AddDynamic(this, &UMovingInfoWidget::OnClickedPubButton);
-
 	//     APlayerController* PlayerController = GetOwningPlayer();
 	// 
 	//     if (PlayerController)
@@ -28,9 +26,11 @@ void UMovingInfoWidget::NativeConstruct()
 	//         InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);  // 마우스 포인터가 화면 밖으로 나가지 않게 설정
 	//         PlayerController->SetInputMode(InputMode);
 	//     }
+
+
 }
 
-void UMovingInfoWidget::AddPlayerName(const FString& PlayerName)
+void UMovingInfoWidget::AddPlayerName()
 {
 	if (MovingInfo)
 	{
@@ -54,9 +54,14 @@ void UMovingInfoWidget::AddPlayerName(const FString& PlayerName)
 
 void UMovingInfoWidget::ServerRPC_FindPlayers_Implementation()
 {
-	for (TActorIterator<AVICTIMSPlayerController> it(GetWorld()); it; ++it)
+	for (auto it(GetWorld()->GetPlayerControllerIterator()); it; ++it)
 	{
-		ClientRPC_CreateButtons(*(*it)->PlayerID);
+		auto playerCheck = Cast<AVICTIMSPlayerController>(*it);
+
+		if (playerCheck)
+		{
+			ClientRPC_CreateButtons(*playerCheck->playerName);
+		}
 	}
 }
 
@@ -71,11 +76,9 @@ void UMovingInfoWidget::ClientRPC_CreateButtons_Implementation(const FString& pl
 	if (bp_button)
 	{
 		PlayerButton = CreateWidget<UGoOtherPlayerButton>(MovingInfo, bp_button);
+		PlayerButton->playerNameTextBox->SetText(FText::FromString(playerName));
+		MovingInfo->AddChild(PlayerButton);
 	}
-
-	PlayerButton->playerNameTextBox->SetText(FText::FromString(playerName));
-
-	MovingInfo->AddChild(PlayerButton);
 }
 
 void UMovingInfoWidget::MoveTo()

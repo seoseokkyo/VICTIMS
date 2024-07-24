@@ -286,8 +286,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetAssignedHouse(AShelter* NewHouse);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticastRPC_SetAssignedHouse(AShelter* NewHouse);
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_SetAssignedHouse(AShelter* NewHouse);
 
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void Server_GoToHouse();

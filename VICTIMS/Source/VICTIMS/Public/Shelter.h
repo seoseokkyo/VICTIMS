@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = "true"))
 	FString OwnerPlayerID;
 
+	UPROPERTY(Replicated ,VisibleAnywhere, BlueprintReadWrite, Category = "Shelter")
+	FString OwnerPlayerName;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Shelter")
 	int32 HouseNumber;
 
@@ -35,4 +38,15 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetOriginPos(FVector houseLocation);
+
+	UFUNCTION()
+	void SetPlayerName(FString ID);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetPlayerName(const FString& ID);
+
+	UFUNCTION(Netmulticast, Reliable)
+	void NetMulticastRPC_SetPlayerName(const FString& ID);
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

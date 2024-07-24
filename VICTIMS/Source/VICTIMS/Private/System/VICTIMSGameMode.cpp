@@ -11,6 +11,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Shelter.h"
 #include "TestSaveGame.h"
+#include "Net/UnrealNetwork.h"
 
 AVICTIMSGameMode::AVICTIMSGameMode()
 {
@@ -166,6 +167,13 @@ void AVICTIMSGameMode::AssignHouseToPlayer(AVICTIMSPlayerController* NewPlayer)
 EVictimsNetMode AVICTIMSGameMode::GetGameNetMode()
 {
 	return EVictimsNetMode(GetNetMode());
+}
+
+void AVICTIMSGameMode::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AVICTIMSGameMode, Houses);
 }
 
 
