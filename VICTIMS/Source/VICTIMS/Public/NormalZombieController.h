@@ -45,7 +45,7 @@ public:
 	float currentMovingTime = 0.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
-	float onceMovingLimitTime = 10.0f;
+	float onceMovingLimitTime = 3.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
 	bool bMoveStart = false;
@@ -58,6 +58,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
 	bool bSightOn = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
+	bool bMoveAtLocation = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
 	bool bChaseStart = false;

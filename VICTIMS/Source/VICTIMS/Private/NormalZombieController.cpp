@@ -76,10 +76,10 @@ void ANormalZombieController::Tick(float deltaTime)
 		StopMovement();
 
 		bMoveStart = false;
+		bMoveAtLocation = false;
 	}
 
 	currentAttackDelayTime = FMath::Clamp(currentAttackDelayTime += deltaTime, 0, attackDelayTime);
-	currentsightInitDelayTime = FMath::Clamp(currentsightInitDelayTime += deltaTime, 0, sightInitDelayTime);
 	currentMovingTime = FMath::Clamp(currentMovingTime += deltaTime, 0, onceMovingLimitTime);
 
 	SetNoiseDetect(GetNoiseDetect() - deltaTime * 20);
@@ -93,13 +93,24 @@ void ANormalZombieController::Tick(float deltaTime)
 			temp->motionState = ECharacterMotionState::Idle;
 			currentMovingTime = 0.0f;
 
-			onceMovingLimitTime = FMath::RandRange(1, 10);
+			onceMovingLimitTime = FMath::RandRange(1, 4);
 
 			bMoveStart = false;
+			bMoveAtLocation = false;
 		}
 	}
 
 	bool bNoiseDetect = false;
+
+	if (bSightOn)
+	{
+		currentsightInitDelayTime = FMath::Clamp(currentsightInitDelayTime += deltaTime, 0, sightInitDelayTime);
+
+		if (currentsightInitDelayTime >= sightInitDelayTime)
+		{
+			bSightOn = false;
+		}
+	}
 
 	if (bSightOn)
 	{
@@ -148,11 +159,19 @@ void ANormalZombieController::Tick(float deltaTime)
 
 		if (bSightOn)
 		{
+			if (bMoveAtLocation)
+			{
+				StopMovement();
+				bMoveAtLocation = false;
+			}
+
 			MoveToActor(targetActor, 50);
 		}
 		else
 		{
 			MoveToLocation(targetLocation, 100);
+
+			bMoveAtLocation = true;
 		}
 
 		bMoveStart = true;

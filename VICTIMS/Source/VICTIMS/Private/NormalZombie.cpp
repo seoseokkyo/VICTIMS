@@ -200,7 +200,7 @@ void ANormalZombie::EndAttackEvent(float delayTime)
 
 		motionState = ECharacterMotionState::Idle;
 
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("EndAttackEvent")));
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("EndAttackEvent")));
 
 		GetWorldTimerManager().ClearTimer(handler);
 
