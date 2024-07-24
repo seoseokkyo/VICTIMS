@@ -42,6 +42,15 @@ public:
 	std::atomic<float> noiseDetect = 0.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
+	float currentMovingTime = 0.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
+	float onceMovingLimitTime = 10.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
+	bool bMoveStart = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
 	AActor* targetActor;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "MySettings")
@@ -73,7 +82,23 @@ public:
 	//	
 
 	UFUNCTION()
-	void SetNoiseDetect(float value) { noiseDetect.store(FMath::Clamp(value, 0, 1000)); };
+	void SetNoiseDetect(float value);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerRPC_SetNoiseDetect(float value);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticastRPC_SetNoiseDetect(float value);
+
+	// Target Loc
+	UFUNCTION()
+	void SetTargetLocation(FVector loc);
+
+	UFUNCTION(Server, Unreliable)
+	void ServerRPC_SetTargetLocation(FVector loc);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void NetMulticastRPC_SetTargetLocation(FVector loc);
 
 	UFUNCTION()
 	float GetNoiseDetect() { return noiseDetect.load(); };

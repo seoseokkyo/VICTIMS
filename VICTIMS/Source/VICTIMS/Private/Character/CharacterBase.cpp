@@ -101,14 +101,16 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 
 		SetActorRotation(targetDir.Rotation());
 
-		float animTime = PlayAnimMontage(hitReaction, 1.0f);
+		ServerRPC_HitReact();
 
-		FTimerHandle hnd;
-		GetWorldTimerManager().SetTimer(hnd, [&]() {
+		//float animTime = PlayAnimMontage(hitReaction, 1.0f);
 
-			motionState = ECharacterMotionState::Idle;
+		//FTimerHandle hnd;
+		//GetWorldTimerManager().SetTimer(hnd, [&]() {
 
-			}, animTime, false);
+		//	motionState = ECharacterMotionState::Idle;
+
+		//	}, animTime, false);
 	}
 
 	// µð¹ö±×
@@ -168,14 +170,17 @@ void ACharacterBase::NetMulticastRPC_HitReact_Implementation()
 {
 	motionState = ECharacterMotionState::Hit;
 
-	float animTime = PlayAnimMontage(hitReaction, 1.0f);
+	if (hitReaction)
+	{
+		float animTime = PlayAnimMontage(hitReaction, 1.0f);
 
-	FTimerHandle hnd;
-	GetWorldTimerManager().SetTimer(hnd, [&]() {
+		FTimerHandle hnd;
+		GetWorldTimerManager().SetTimer(hnd, [&]() {
 
-		motionState = ECharacterMotionState::Idle;
+			ServerRPC_ToIdle();
 
-		}, animTime, false);
+			}, animTime, false);
+	}
 }
 
 void ACharacterBase::ContinueAttack_Implementation()
@@ -352,6 +357,8 @@ void ACharacterBase::NetMulticastRPC_PerformAttack_Implementation(int useIndex)
 
 		float attackAnimTime = PlayAnimMontage(mainWeapon->attackMontages[useIndex]);
 
+		OnEndAttackEvent.ExecuteIfBound(attackAnimTime);
+
 		//FTimerHandle handler;
 		//GetWorldTimerManager().SetTimer(handler, [&]() {
 
@@ -389,5 +396,17 @@ void ACharacterBase::DieFunction()
 
 	bDead = true;
 
+}
+
+void ACharacterBase::ServerRPC_ToIdle_Implementation()
+{
+	motionState = ECharacterMotionState::Idle;
+
+	NetMulticastRPC_ToIdle(ECharacterMotionState::Idle);
+}
+
+void ACharacterBase::NetMulticastRPC_ToIdle_Implementation(ECharacterMotionState state)
+{
+	motionState = state;
 }
 

@@ -23,7 +23,7 @@ ANormalZombieController::ANormalZombieController()
 	hearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>(TEXT("AI Hearing Config"));
 
 	if (sightConfig != nullptr) {
-		sightConfig->SightRadius = 500.F;
+		sightConfig->SightRadius = 700.F;
 		sightConfig->LoseSightRadius = sightConfig->SightRadius + 25.F;
 		sightConfig->PeripheralVisionAngleDegrees = 45.F;
 		sightConfig->SetMaxAge(5.F); // seconds - perceived stimulus forgotten after this time
@@ -53,6 +53,8 @@ void ANormalZombieController::BeginPlay()
 	Super::BeginPlay();
 
 	SetupPerceptionSystem();
+
+	onceMovingLimitTime = FMath::RandRange(1, 10);
 }
 
 void ANormalZombieController::Tick(float deltaTime)
@@ -69,14 +71,39 @@ void ANormalZombieController::Tick(float deltaTime)
 		return;
 	}
 
+	if (temp->motionState == ECharacterMotionState::Hit || temp->motionState == ECharacterMotionState::Attack)
+	{
+		StopMovement();
+
+		bMoveStart = false;
+	}
+
 	currentAttackDelayTime = FMath::Clamp(currentAttackDelayTime += deltaTime, 0, attackDelayTime);
 	currentsightInitDelayTime = FMath::Clamp(currentsightInitDelayTime += deltaTime, 0, sightInitDelayTime);
+	currentMovingTime = FMath::Clamp(currentMovingTime += deltaTime, 0, onceMovingLimitTime);
 
 	SetNoiseDetect(GetNoiseDetect() - deltaTime * 20);
 
-	if (temp->motionState == ECharacterMotionState::Move)
+	auto myLoc = temp->GetActorLocation();
+
+	if (FVector::Dist(myLoc, targetLocation) < 150 || currentMovingTime >= onceMovingLimitTime)
 	{
-		float distance = FVector::Dist(temp->GetActorLocation(), targetActor->GetActorLocation());
+		if (temp->motionState == ECharacterMotionState::Move)
+		{
+			temp->motionState = ECharacterMotionState::Idle;
+			currentMovingTime = 0.0f;
+
+			onceMovingLimitTime = FMath::RandRange(1, 10);
+
+			bMoveStart = false;
+		}
+	}
+
+	bool bNoiseDetect = false;
+
+	if (bSightOn)
+	{
+		float distance = FVector::Dist(myLoc, targetActor->GetActorLocation());
 
 		if (currentAttackDelayTime >= attackDelayTime)
 		{
@@ -84,148 +111,205 @@ void ANormalZombieController::Tick(float deltaTime)
 			{
 				if (temp->motionState != ECharacterMotionState::Attack)
 				{
-					StopMovement();
-
 					temp->PerformAttack(0, false);
+
+					currentAttackDelayTime = 0.0;
+
+					bSightOn = false;
 				}
-
-				currentAttackDelayTime = 0.0;
-
-				bSightOn = false;
-
-				bChaseStart = false;
 			}
-			else
-			{
-				FVector targetDir = targetActor->GetActorLocation() - temp->GetActorLocation();
-				targetDir.Normalize();
-
-				temp->SetActorRotation(targetDir.Rotation());
-
-				//SetFocus(targetActor);
-
-				MoveToLocation(targetActor->GetActorLocation());
-			}
-		}
-		else
-		{
-			if (distance < 100)
-			{
-				StopMovement();
-
-				temp->motionState = ECharacterMotionState::Idle;
-			}
-			else
-			{
-				FVector targetDir = targetActor->GetActorLocation() - temp->GetActorLocation();
-				targetDir.Normalize();
-
-				temp->SetActorRotation(targetDir.Rotation());
-
-				//SetFocus(targetActor);
-
-				MoveToLocation(targetActor->GetActorLocation());
-			}
-		}
-	}
-
-	bool bFindByHear = false;
-
-	if (bSightOn)
-	{
-		if (temp->motionState == ECharacterMotionState::Idle)
-		{
-			temp->motionState = ECharacterMotionState::Move;
-
-			temp->GetCharacterMovement()->MaxWalkSpeed = 280;
-
-			if (targetActor)
-			{
-				FVector targetDir = targetActor->GetActorLocation() - temp->GetActorLocation();
-				targetDir.Normalize();
-
-				temp->SetActorRotation(targetDir.Rotation());
-
-				//SetFocus(targetActor);
-
-				MoveToLocation(targetActor->GetActorLocation());
-			}
-		}
-
-		if (currentsightInitDelayTime >= sightInitDelayTime)
-		{
-			temp->motionState = ECharacterMotionState::Idle;
-
-			bSightOn = false;
-
-			bChaseStart = false;
-
-			//SetFocus(nullptr);
-
-			targetActor = nullptr;
 		}
 	}
 	else
 	{
-		if (GetNoiseDetect() >= 300)
+		if (GetNoiseDetect() >= 500)
 		{
-			if (temp)
-			{
-				temp->GetCharacterMovement()->MaxWalkSpeed = 280;
+			temp->GetCharacterMovement()->MaxWalkSpeed = 280;
 
-				if (temp->motionState == ECharacterMotionState::Idle)
-				{
-					temp->motionState = ECharacterMotionState::Move;
-
-					targetLocation = targetActor->GetActorLocation();
-
-					bFindByHear = true;
-				}
-			}
+			bNoiseDetect = true;
 		}
-		else if (GetNoiseDetect() >= 200)
+		else if (GetNoiseDetect() >= 300)
 		{
-			if (temp)
-			{
-				temp->GetCharacterMovement()->MaxWalkSpeed = 120;
+			temp->GetCharacterMovement()->MaxWalkSpeed = 180;
 
-				if (temp->motionState == ECharacterMotionState::Idle)
-				{
-					temp->motionState = ECharacterMotionState::Move;
-
-					targetLocation = targetActor->GetActorLocation();
-
-					bFindByHear = true;
-				}
-			}
+			bNoiseDetect = true;
 		}
-		else if (GetNoiseDetect() >= 100)
+		else if (GetNoiseDetect() >= 300)
 		{
-			if (temp)
-			{
-				temp->GetCharacterMovement()->MaxWalkSpeed = 60;
+			temp->GetCharacterMovement()->MaxWalkSpeed = 80;
 
-				if (temp->motionState == ECharacterMotionState::Idle)
-				{
-					temp->motionState = ECharacterMotionState::Move;
-
-					targetLocation = targetActor->GetActorLocation();
-
-					bFindByHear = true;
-				}
-			}
+			bNoiseDetect = true;
 		}
 	}
 
-	if (bFindByHear)
+	if ((bSightOn || bNoiseDetect) && temp->motionState == ECharacterMotionState::Idle && bMoveStart == false)
 	{
-		FVector targetDir = targetLocation - temp->GetActorLocation();
-		targetDir.Normalize();
+		temp->motionState = ECharacterMotionState::Move;
 
-		temp->SetActorRotation(targetDir.Rotation());
+		if (bSightOn)
+		{
+			MoveToActor(targetActor, 50);
+		}
+		else
+		{
+			MoveToLocation(targetLocation, 100);
+		}
 
-		MoveToLocation(targetLocation);
+		bMoveStart = true;
 	}
+
+	//if (temp->motionState == ECharacterMotionState::Move)
+	//{
+	//	float distance = FVector::Dist(temp->GetActorLocation(), targetActor->GetActorLocation());
+
+	//	if (currentAttackDelayTime >= attackDelayTime)
+	//	{
+	//		if (distance < 100)
+	//		{
+	//			if (temp->motionState != ECharacterMotionState::Attack)
+	//			{
+	//				StopMovement();
+
+	//				temp->PerformAttack(0, false);
+	//			}
+
+	//			currentAttackDelayTime = 0.0;
+
+	//			bSightOn = false;
+
+	//			bChaseStart = false;
+	//		}
+	//		else
+	//		{
+	//			FVector targetDir = targetActor->GetActorLocation() - temp->GetActorLocation();
+	//			targetDir.Normalize();
+
+	//			temp->SetActorRotation(targetDir.Rotation());
+
+	//			//SetFocus(targetActor);
+
+	//			MoveToLocation(targetActor->GetActorLocation());
+	//		}
+	//	}
+	//	else
+	//	{
+	//		if (distance < 100)
+	//		{
+	//			StopMovement();
+
+	//			temp->motionState = ECharacterMotionState::Idle;
+	//		}
+	//		else
+	//		{
+	//			FVector targetDir = targetActor->GetActorLocation() - temp->GetActorLocation();
+	//			targetDir.Normalize();
+
+	//			temp->SetActorRotation(targetDir.Rotation());
+
+	//			//SetFocus(targetActor);
+
+	//			MoveToLocation(targetActor->GetActorLocation());
+	//		}
+	//	}
+	//}
+
+	//bool bFindByHear = false;
+
+	//if (bSightOn)
+	//{
+	//	if (temp->motionState == ECharacterMotionState::Idle)
+	//	{
+	//		temp->motionState = ECharacterMotionState::Move;
+
+	//		temp->GetCharacterMovement()->MaxWalkSpeed = 280;
+
+	//		if (targetActor)
+	//		{
+	//			FVector targetDir = targetActor->GetActorLocation() - temp->GetActorLocation();
+	//			targetDir.Normalize();
+
+	//			temp->SetActorRotation(targetDir.Rotation());
+
+	//			//SetFocus(targetActor);
+
+	//			MoveToLocation(targetActor->GetActorLocation());
+	//		}
+	//	}
+
+	//	if (currentsightInitDelayTime >= sightInitDelayTime)
+	//	{
+	//		temp->motionState = ECharacterMotionState::Idle;
+
+	//		bSightOn = false;
+
+	//		bChaseStart = false;
+
+	//		//SetFocus(nullptr);
+
+	//		targetActor = nullptr;
+	//	}
+	//}
+	//else
+	//{
+	//	if (GetNoiseDetect() >= 300)
+	//	{
+	//		if (temp)
+	//		{
+	//			temp->GetCharacterMovement()->MaxWalkSpeed = 280;
+
+	//			if (temp->motionState == ECharacterMotionState::Idle)
+	//			{
+	//				temp->motionState = ECharacterMotionState::Move;
+
+	//				targetLocation = targetActor->GetActorLocation();
+
+	//				bFindByHear = true;
+	//			}
+	//		}
+	//	}
+	//	else if (GetNoiseDetect() >= 200)
+	//	{
+	//		if (temp)
+	//		{
+	//			temp->GetCharacterMovement()->MaxWalkSpeed = 120;
+
+	//			if (temp->motionState == ECharacterMotionState::Idle)
+	//			{
+	//				temp->motionState = ECharacterMotionState::Move;
+
+	//				targetLocation = targetActor->GetActorLocation();
+
+	//				bFindByHear = true;
+	//			}
+	//		}
+	//	}
+	//	else if (GetNoiseDetect() >= 100)
+	//	{
+	//		if (temp)
+	//		{
+	//			temp->GetCharacterMovement()->MaxWalkSpeed = 60;
+
+	//			if (temp->motionState == ECharacterMotionState::Idle)
+	//			{
+	//				temp->motionState = ECharacterMotionState::Move;
+
+	//				targetLocation = targetActor->GetActorLocation();
+
+	//				bFindByHear = true;
+	//			}
+	//		}
+	//	}
+	//}
+
+	//if (bFindByHear)
+	//{
+	//	FVector targetDir = targetLocation - temp->GetActorLocation();
+	//	targetDir.Normalize();
+
+	//	temp->SetActorRotation(targetDir.Rotation());
+
+	//	MoveToLocation(targetLocation);
+	//}
 }
 
 void ANormalZombieController::SetupPerceptionSystem()
@@ -291,8 +375,44 @@ void ANormalZombieController::OnTargetDetected(AActor* _Actor, FAIStimulus const
 
 		SetNoiseDetect(GetNoiseDetect() + Stimulus.Strength);
 
+		SetTargetLocation(Stimulus.StimulusLocation);
+
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Strength : %f"), Stimulus.Strength));
 		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("GetNoiseDetect : %f"), GetNoiseDetect()));
 	}
 	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Type.Name : %s"), *Stimulus.Type.Name.ToString()));
+}
+
+void ANormalZombieController::SetNoiseDetect(float value)
+{
+	ServerRPC_SetNoiseDetect(value);
+}
+
+void ANormalZombieController::SetTargetLocation(FVector loc)
+{
+	ServerRPC_SetTargetLocation(loc);
+}
+
+void ANormalZombieController::ServerRPC_SetTargetLocation_Implementation(FVector loc)
+{
+	targetLocation = loc;
+
+	NetMulticastRPC_SetTargetLocation(targetLocation);
+}
+
+void ANormalZombieController::NetMulticastRPC_SetTargetLocation_Implementation(FVector loc)
+{
+	targetLocation = loc;
+}
+
+void ANormalZombieController::ServerRPC_SetNoiseDetect_Implementation(float value)
+{
+	noiseDetect.store(FMath::Clamp(value, 0, 1000));
+
+	NetMulticastRPC_SetNoiseDetect(noiseDetect.load());
+}
+
+void ANormalZombieController::NetMulticastRPC_SetNoiseDetect_Implementation(float value)
+{
+	noiseDetect.store(FMath::Clamp(value, 0, 1000));
 }

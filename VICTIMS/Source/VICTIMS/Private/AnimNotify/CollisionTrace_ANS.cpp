@@ -39,9 +39,9 @@ void UCollisionTrace_ANS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 			for (auto Comp : comps)
 			{
 				auto mainWeapon = Cast<USkeletalMeshComponent>(Comp);
+
 				if (mainWeapon != nullptr)
 				{
-
 					AVICTIMSCharacter*myPlayer= Cast<AVICTIMSCharacter>(mainWeapon->GetOwner());
 					if (IsValid(myPlayer))
 					{
@@ -52,7 +52,6 @@ void UCollisionTrace_ANS::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 					}
 				}
 			}
-
 		}
 	}
 }

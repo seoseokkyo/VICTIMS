@@ -33,6 +33,8 @@ enum class ECharacterMotionState : int8
 class UAnimMontage;
 class UCombatComponent;
 
+DECLARE_DELEGATE_OneParam(FEndAttackEvent, float);
+
 UCLASS()
 class VICTIMS_API ACharacterBase : public ACharacter, public ICombatInterface
 {
@@ -71,7 +73,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "MySettings")
 	UAnimMontage* hitReaction;	
 
-	UPROPERTY(Replicated, BlueprintReadWrite)
+	UPROPERTY(VisibleAnywhere, Replicated, BlueprintReadWrite)
 	ECharacterMotionState motionState = ECharacterMotionState::Idle;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
@@ -115,7 +117,7 @@ public:
 	void ServerRPC_PerformAttack(int useIndex);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticastRPC_PerformAttack(int useIndex);
+	virtual void NetMulticastRPC_PerformAttack(int useIndex);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_AmountDamage(float damage);
@@ -128,4 +130,12 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void AfterDieFunction();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ToIdle();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_ToIdle(ECharacterMotionState state);
+
+	FEndAttackEvent OnEndAttackEvent;
 };

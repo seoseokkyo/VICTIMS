@@ -56,7 +56,7 @@ void ANormalZombie::BeginPlay()
 	combatComponent->bCombatEnable = true;
 	combatComponent_Additional->bCombatEnable = true;
 
-	int iTemp = 0;
+	OnEndAttackEvent.BindUFunction(this, FName("EndAttackEvent"));
 }
 
 void ANormalZombie::Tick(float DeltaTime)
@@ -188,6 +188,23 @@ void ANormalZombie::PrintInfo()
 
 	FVector loc = GetActorLocation() + FVector(0, 0, 50);
 	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
+}
+
+void ANormalZombie::EndAttackEvent(float delayTime)
+{
+	FTimerHandle handler;
+	GetWorldTimerManager().SetTimer(handler, [&]() {
+
+		combatComponent->bAttacking = false;
+		combatComponent->bAttackSaved = false;
+
+		motionState = ECharacterMotionState::Idle;
+
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("EndAttackEvent")));
+
+		GetWorldTimerManager().ClearTimer(handler);
+
+		}, 1.0f, false, delayTime);
 }
 
 void ANormalZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

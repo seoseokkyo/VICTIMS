@@ -97,7 +97,7 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
+	
 private:
 	/*UPROPERTY()
 	class UEnemyAnimInstance* anim;*/
@@ -112,5 +112,8 @@ private:
 
 	AAIController* GetAIController();
 
-	void PrintInfo();	
+	void PrintInfo();
+
+	UFUNCTION()
+	void EndAttackEvent(float delayTime);
 };
