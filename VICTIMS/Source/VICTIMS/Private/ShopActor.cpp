@@ -24,6 +24,8 @@ AShopActor::AShopActor()
 
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Body->SetupAttachment(GetRootComponent());
+	Body->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	Body->SetGenerateOverlapEvents(true);
 
 	Chest = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Chest"));
 	Chest->SetupAttachment(Body);
