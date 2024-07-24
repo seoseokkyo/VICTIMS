@@ -61,7 +61,7 @@ public:
 	virtual void UI_SellItem_Implementation(const uint8& InventorySlot) override;
 	/* Ends Interface */
 
-	uint8 UIGetPlayerGold();
+	int32 UIGetPlayerGold();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(Category="Inventory", OverrideNativeName="InventoryComponent"))
 	UInventoryManagerComponent* InventoryManagerComponent;

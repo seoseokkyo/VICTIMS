@@ -7,7 +7,7 @@
 #include "MyHUD.h"
 #include "WorldActor.h"
 #include "LootActor.h"
-#include "EquipmentComponent.h"
+#include "EquipmentComponent.h" 
 #include "Components/UniformGridPanel.h"
 #include "Components/UniformGridSlot.h"
 #include "MainLayout.h"
@@ -1626,7 +1626,7 @@ FSlotStructure UInventoryManagerComponent::GetInventorySlotItem(uint8 InventoryS
 	return Slot;
 }
 
-void UInventoryManagerComponent::AddGold(uint8 Amount)
+void UInventoryManagerComponent::AddGold(int32 Amount)
 {
 	Gold += Amount;
 	OnRep_UpdateGoldAmount();
@@ -1814,6 +1814,8 @@ void UInventoryManagerComponent::CloseContainer()
 		if (AContainerActor* CurrentContainerActor = Cast<AContainerActor>(CurrentContainer))
 		{
 			CurrentContainerActor->PlayersViewing.Remove(PlayerController->PlayerState);
+			PlayerController->SetInputMode(FInputModeGameOnly());
+			PlayerController->bShowMouseCursor = false;
 		}
 	}
 
@@ -2026,6 +2028,11 @@ void UInventoryManagerComponent::Client_CloseShop_Implementation()
 {
 	MainLayoutUI->Shop->SetVisibility(ESlateVisibility::Hidden);
 	MainLayoutUI->Inventory->SellButton->SetVisibility(ESlateVisibility::Hidden);
+	if (AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(GetOwner()))
+	{
+		PlayerController->SetInputMode(FInputModeGameOnly());
+		PlayerController->bShowMouseCursor = false;
+	}
 	if (OpenShopSound)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, GetPlayerRef()->GetActorLocation());
@@ -2344,7 +2351,7 @@ void UInventoryManagerComponent::DropMoney()
 {
 	int iTemp = FCString::Atoi(*MainLayoutUI->DropMoneyLayout->Amount->GetText().ToString());
 
-	uint8 money = (uint8)iTemp;
+	int32 money = (int32)iTemp;
 	DropMoneyAmount = iTemp;
 
 	if (money <= 0)
