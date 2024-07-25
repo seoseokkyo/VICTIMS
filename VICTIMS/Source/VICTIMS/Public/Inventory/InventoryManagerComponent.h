@@ -76,6 +76,13 @@ public:
 	void Server_UseInventoryItem(const uint8& InventorySlot);
 
 	UFUNCTION(Server, Reliable)
+	void Server_UseHotbarWeapon(const uint8& InventorySlot);
+
+	UFUNCTION()
+	void UseHotbarWeapon(const uint8& HotbarSlot);
+
+
+	UFUNCTION(Server, Reliable)
 	void Server_UseContainerItem(const uint8& InventorySlot);
 
 	UFUNCTION(Server, Reliable)
@@ -450,4 +457,18 @@ public:
 
 	UPROPERTY()
 	uint8 DropMoneyAmount;
+
+//=======================================================================================================
+// Hotbar weapon
+
+	UPROPERTY()
+	bool bEquipPistol;
+	UPROPERTY()
+	bool bEquipShotGun;
+	UPROPERTY()
+	bool bEquipKnife;
+	UPROPERTY()
+	bool bEquipAxe;
+	UPROPERTY()
+	bool bEquipRifle;
 };
