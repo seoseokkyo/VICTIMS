@@ -24,4 +24,7 @@ struct VICTIMS_API FSlotStructure : public FTableRowBase
 	uint8 Amount;
 
 	uint8 GetAttributeValueByAttribute(EAttributes Attribute);
+
+	UPROPERTY()
+	uint8 slot;
 };
