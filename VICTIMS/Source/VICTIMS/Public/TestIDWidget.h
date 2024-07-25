@@ -23,7 +23,8 @@ public:
 	class UButton* ContinueButton; 
 	UPROPERTY(EditAnywhere, meta=(BindWidget))	// quit 
 	class UButton* QuitButton;
-	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	class USoundBase* ClickSound;	
 
 	UFUNCTION()
 	void OnClickedSignInButton();

@@ -277,4 +277,6 @@ public:
     UPROPERTY(EditAnywhere, Category = "Interact Sound")
 	class USoundBase* PickUpSound;
 
+	UPROPERTY(EditAnywhere, Category = "Start Menu Sound")
+	class USoundBase* BGM;
 };

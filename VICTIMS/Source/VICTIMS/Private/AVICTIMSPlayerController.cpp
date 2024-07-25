@@ -26,6 +26,7 @@
 #include "System/VICTIMSGameMode.h"
 #include "UI/InventoryLayout.h"
 #include "UI/ProfileLayout.h"
+#include "Sound/Soundbase.h"
 #include "DropMoneyLayout.h"
 #include "HousingNotification.h"
 #include "HousingComponent.h"
@@ -62,8 +63,8 @@ void AVICTIMSPlayerController::BeginPlay()
 	if (IsLocalController())					// ID ÀÔ·Â À§Á¬  
 	{
 		if (TestIDWidget_bp)
-		{
-			TestIDWidget = Cast<UTestIDWidget>(CreateWidget(GetWorld(), TestIDWidget_bp));
+		{	
+		TestIDWidget = Cast<UTestIDWidget>(CreateWidget(GetWorld(), TestIDWidget_bp));
 			if (TestIDWidget)
 			{
 				bIsShowUI = true;
@@ -71,19 +72,22 @@ void AVICTIMSPlayerController::BeginPlay()
 				SetInputMode(FInputModeUIOnly());
 				EnableUIMode();
 				bShowMouseCursor = true;
-			}
-		}
-
-		if (IDInvalidWidget_bp)
-		{
-			IDInValidWidget = Cast<UIDInValidWidget>(CreateWidget(GetWorld(), IDInvalidWidget_bp));
-			if (IDInValidWidget)
-			{
-				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+				if (BGM)
+				{
+				UGameplayStatics::PlaySound2D(GetWorld(),BGM);
+				}
 			}
 		}
 	}
 
+	if (IDInvalidWidget_bp)
+	{
+		IDInValidWidget = Cast<UIDInValidWidget>(CreateWidget(GetWorld(), IDInvalidWidget_bp));
+		if (IDInValidWidget)
+		{
+			IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
+	}
 	if (HasAuthority())
 	{
 		UpdateAllClientsPlayerList();
@@ -605,7 +609,6 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 
 				FTimerHandle Time;
 				GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
-
 					IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
 					}, 0.5f, false);
 			}
