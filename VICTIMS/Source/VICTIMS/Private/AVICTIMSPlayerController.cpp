@@ -237,7 +237,6 @@ void AVICTIMSPlayerController::CollectFromPanel(const FName& Name)
 			if (WorldActor->ID == Name)
 			{
 				Server_OnActorUsed(WorldActor);
-
 				return;
 			}
 		}

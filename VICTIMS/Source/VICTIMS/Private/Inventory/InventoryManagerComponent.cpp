@@ -1435,24 +1435,29 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 
 void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStructure InventoryItem)
 {
-
-	ClientRPC_UseConsumableItem(InventoryItem.ItemStructure.Health);
-
-	uint8 AmountToRemove = 1;
-	bool WasFullAmountRemoved = false;
-	uint8 AmountRemoved = 0;
-
-	RemoveFromItemAmount(InventoryItem, AmountToRemove, WasFullAmountRemoved, AmountRemoved);
-
-	if (WasFullAmountRemoved)
+	if (InventoryItem.ItemStructure.IsFood)
 	{
-		InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
+		ClientRPC_UseConsumableItem(InventoryItem.ItemStructure.Health);
+		uint8 AmountToRemove = 1;
+		bool WasFullAmountRemoved = false;
+		uint8 AmountRemoved = 0;
 
-		RemoveItem(PlayerInventory, InventorySlot);
+		RemoveFromItemAmount(InventoryItem, AmountToRemove, WasFullAmountRemoved, AmountRemoved);
+
+		if (WasFullAmountRemoved)
+		{
+			InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
+
+			RemoveItem(PlayerInventory, InventorySlot);
+		}
+		else
+		{
+			AddItem(PlayerInventory, InventorySlot, InventoryItem);
+		}
 	}
 	else
 	{
-		AddItem(PlayerInventory, InventorySlot, InventoryItem);
+		
 	}
 }
  
