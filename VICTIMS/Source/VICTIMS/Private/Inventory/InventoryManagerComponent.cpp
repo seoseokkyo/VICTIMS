@@ -173,6 +173,19 @@ void UInventoryManagerComponent::Server_UseInventoryItem_Implementation(const ui
 	UseInventoryItem(InventorySlot);
 }
 
+void UInventoryManagerComponent::Server_UseHotbarWeapon_Implementation(const uint8& InventorySlot)
+{
+	UseHotbarWeapon(InventorySlot);
+}
+
+void UInventoryManagerComponent::UseHotbarWeapon(const uint8& HotbarSlot)
+{
+	FSlotStructure LocalHotbarSlot = PlayerInventory->GetInventoryItem(HotbarSlot);
+	UseEquipmentItem(HotbarSlot, LocalHotbarSlot, PlayerInventory);
+	Server_UpdateTooltips();
+}
+
+
 void UInventoryManagerComponent::Server_UseContainerItem_Implementation(const uint8& InventorySlot)
 {
 	UseContainerItem(InventorySlot);
@@ -437,8 +450,13 @@ void UInventoryManagerComponent::Client_CheckHotbarSlots_Implementation(const FS
 			{
 				if (Slot.ItemStructure.ID == GetHotbarSlotItem(i).ItemStructure.ID)
 				{
-					ClearHotbarSlotItem(i);
-					break;
+					if (GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Rifle") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Pistol")
+						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_ShotGun") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Knife")
+						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Axe"))
+					{
+						ClearHotbarSlotItem(i);
+						break;
+					}
 				}
 			}
 		}
@@ -730,8 +748,7 @@ void UInventoryManagerComponent::MoveHotbarSlotItem(const uint8& FromSlot, const
 {
 	if (IsDraggedFromInventory)
 	{
-		FSlotStructure SlotStructure = GetInventorySlotItem(FromSlot);
-
+		FSlotStructure SlotStructure = GetInventorySlotItem(FromSlot);	// 여기서 무기 무한복제 됨
 		SetHotbarSlotItem(ToSlot, SlotStructure);
 	}
 
@@ -746,6 +763,14 @@ void UInventoryManagerComponent::MoveHotbarSlotItem(const uint8& FromSlot, const
 			SetHotbarSlotItem(FromSlot, ToSlotItem);
 		}
 		else {
+			if ((bEquipAxe && FromSlotItem.ItemStructure.ID == FName("ID_Axe")) || 
+			    (bEquipKnife && FromSlotItem.ItemStructure.ID == FName("ID_Knife")) ||
+				(bEquipPistol && FromSlotItem.ItemStructure.ID == FName("ID_Pistol")) || 
+				(bEquipRifle && FromSlotItem.ItemStructure.ID == FName("ID_Rifle")) || 
+				(bEquipShotGun && FromSlotItem.ItemStructure.ID == FName("ID_ShotGun")))
+			{
+				UnEquipItem(PlayerInventory, FromSlot,PlayerInventory, ToSlot);
+			}
 			SetHotbarSlotItem(ToSlot, FromSlotItem);
 			ClearHotbarSlotItem(FromSlot);
 		}
@@ -767,11 +792,18 @@ void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
 				break;
 			}
 		}
-
 		if (Tuple.Success)
 		{
 			Tuple.Index = Tuple.Index + (uint8)EEquipmentSlot::Count;
+ 			if (Slot.ItemStructure.ID == FName("ID_Pistol") || Slot.ItemStructure.ID == FName("ID_ShotGun") ||
+ 				Slot.ItemStructure.ID == FName("ID_Knife") || Slot.ItemStructure.ID == FName("ID_Axe") || Slot.ItemStructure.ID == FName("ID_Rifle"))
+ 			{
+ 				Server_UseHotbarWeapon(Tuple.Index);
+ 			}
+ 			else
+	 		{
 			Server_UseInventoryItem(Tuple.Index);
+			}
 		}
 	}
 }
@@ -928,52 +960,85 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 				RemoveItem(FromInventory, FromInventorySlot);
 			}
 
-			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")))
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == false)
 			{
 				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipPistol = true;
+					bEquipRifle = false;
+					bEquipShotGun = false;
+					bEquipKnife = false;
+					bEquipAxe = false;
 				}
 // 				playerReference->UsePistol();
 			}
-			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")))
+//================================================================================================================== NO USE 
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == false)
 			{
 				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipPistol = false;
+					bEquipRifle = true;
+					bEquipShotGun = false;
+					bEquipKnife = false;
+					bEquipAxe = false;
 				}
 // 				playerReference->UseRifle();
 			}
-			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")))
+//==========================================================================================================================
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == false)
 			{
 				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipPistol = false;
+					bEquipRifle = false;
+					bEquipShotGun = false;
+					bEquipKnife = true;
+					bEquipAxe = false;
 				}
 // 				playerReference->UseKnife();
 			}
-			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")))
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == false)
 			{
 				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipPistol = false;
+					bEquipRifle = false;
+					bEquipShotGun = false;
+					bEquipKnife = false;
+					bEquipAxe = false;
 				}
 // 				playerReference->UseAxe();
 			}
-
-
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == false)
+			{
+				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipPistol = false;
+					bEquipRifle = false;
+					bEquipShotGun = true;
+					bEquipKnife = false;
+					bEquipAxe = false;
+				}
+			}
 			UpdateEquippedStats();
 			Server_UpdateTooltips();
 			return;
-
 		}
 		else {
 // 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
@@ -1003,19 +1068,16 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 // 			UE_LOG(LogTemp, Warning, TEXT("CONTAINER CANNOT STORE ITEMS"))
 				return;
 		}
-
 		if (GetItemTypeBySlot(FromInventorySlot) != EItemType::Equipment)
 		{
 // 			UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
 				return;
 		}
-
 		if (GetEquipmentTypeBySlot(ToInventorySlot) != LocalEquipmentSlot)
 		{
 // 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
 				return;
 		}
-
 		AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
 		AddItem(FromInventory, FromInventorySlot, LocalSwapInventoryItem);
 	}
@@ -1037,45 +1099,62 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 		RemoveItem(FromInventory, FromInventorySlot);
 	}
 
-	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")))
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == true)
 	{
 		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipPistol = false;
 		}
 		// 				playerReference->UsePistol();
 	}
-	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")))
+//=======================================================================================================NO USE
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
 	{
 		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipRifle = false;
 		}
 		// 				playerReference->UseRifle();
 	}
-	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")))
+//==============================================================================================================
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
 	{
 		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipKnife = false;
 		}
 		// 				playerReference->UseKnife();
 	}
-	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")))
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
 	{
 		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipAxe = false;
 		}
 		// 				playerReference->UseAxe();
+	}
+	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipShotGun = false;
+		}
+		// 				playerReference->UsePistol();
 	}
 	UpdateEquippedStats();
 	Server_UpdateTooltips();
@@ -1122,15 +1201,77 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 		}
 
 		RemoveItem(Inventory, InventorySlot);
+		Client_CheckHotbarSlots(LocalSlot);
+
+		if (LocalSlot.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == true)
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipPistol = false;
+		}
+		// 				playerReference->UsePistol();
+	}
+//=======================================================================================================NO USE
+	if (LocalSlot.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipRifle = false;
+		}
+		// 				playerReference->UseRifle();
+	}
+//==============================================================================================================
+	if (LocalSlot.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipKnife = false;
+		}
+		// 				playerReference->UseKnife();
+	}
+	if (LocalSlot.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipAxe = false;
+		}
+		// 				playerReference->UseAxe();
+	}
+	if (LocalSlot.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
+	{
+		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		{
+			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			bEquipShotGun = false;
+		}
+		// 				playerReference->UsePistol();
+	}
+
 
 		if (InventorySlot < (uint8)EEquipmentSlot::Count)
 		{
 			UpdateEquippedStats();
 		}
 	}
+
 	else
 	{
 		RemoveItem(Inventory, InventorySlot);
+		Client_CheckHotbarSlots(LocalSlot);
 	}
 }
 
@@ -1460,34 +1601,39 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 
 		if (bCanStoreItems)
 		{
-
-			switch (LocalInventorySlot.ItemStructure.ItemType)
+			if (LocalInventorySlot.ItemStructure.ID != FName("ID_Pistol") && LocalInventorySlot.ItemStructure.ID != FName("ID_Knife") &&
+				LocalInventorySlot.ItemStructure.ID != FName("ID_ShotGun") && LocalInventorySlot.ItemStructure.ID != FName("ID_Axe") &&
+				LocalInventorySlot.ItemStructure.ID != FName("ID_Rifle"))
 			{
-			case EItemType::Equipment:
-				if (InventorySlot < (uint8)EEquipmentSlot::Count)
+
+				switch (LocalInventorySlot.ItemStructure.ItemType)
 				{
-					UseEquipmentItem(InventorySlot, LocalInventorySlot, ContainerInventory);
+				case EItemType::Equipment:
+					if (InventorySlot < (uint8)EEquipmentSlot::Count)
+					{
+						UseEquipmentItem(InventorySlot, LocalInventorySlot, ContainerInventory);
+						break;
+					}
+				case EItemType::Furniture:
+				case EItemType::Consumable:
+				case EItemType::Currency:
+				default:
+					bool bOutSuccess = false;
+					TryToAddItemToInventory(ContainerInventory, LocalInventorySlot, bOutSuccess);
+
+					if (bOutSuccess)
+					{
+						RemoveItem(PlayerInventory, InventorySlot);
+					}
+					else
+					{
+						AddItem(PlayerInventory, InventorySlot, LocalInventorySlot);
+					}
 					break;
 				}
-			case EItemType::Furniture:
-			case EItemType::Consumable:
-			case EItemType::Currency:
-			default:
-				bool bOutSuccess = false;
-				TryToAddItemToInventory(ContainerInventory, LocalInventorySlot, bOutSuccess);
 
-				if (bOutSuccess)
-				{
-					RemoveItem(PlayerInventory, InventorySlot);
-				}
-				else
-				{
-					AddItem(PlayerInventory, InventorySlot, LocalInventorySlot);
-				}
-				break;
+				return;
 			}
-
-			return;
 		}
 	}
 	switch (LocalInventorySlot.ItemStructure.ItemType)

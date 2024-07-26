@@ -16,14 +16,14 @@ public:
 	class UEditableText* ID;
 	UPROPERTY(EditAnywhere, meta=(BindWidget))	// 입력받는 비밀번호 (string)
 	class UEditableText* PassWord;
-
-	UPROPERTY(EditAnywhere, meta=(BindWidget))	// register
+	UPROPERTY(EditAnywhere, meta=(BindWidget))	// register 
 	class UButton* SignInButton;
 	UPROPERTY(EditAnywhere, meta=(BindWidget))	// login
 	class UButton* ContinueButton; 
 	UPROPERTY(EditAnywhere, meta=(BindWidget))	// quit 
 	class UButton* QuitButton;
-	
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	class USoundBase* ClickSound;	
 
 	UFUNCTION()
 	void OnClickedSignInButton();

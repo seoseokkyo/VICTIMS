@@ -266,7 +266,6 @@ public:
     UPROPERTY(EditAnywhere, Category = "Interact Sound")
 	class USoundBase* PickUpSound;
 
-
 	UPROPERTY()
 	TArray<AVICTIMSPlayerController*> otherPlayers;
 
@@ -283,4 +282,7 @@ public:
 	void ClientRPC_UpdatePlayerNameList(const TArray<FString>& otherPlayerNameList);
 
 	FOnChangedPlayerList OnChangedPlayerList;
+
+	UPROPERTY(EditAnywhere, Category = "Start Menu Sound")
+	class USoundBase* BGM;
 };

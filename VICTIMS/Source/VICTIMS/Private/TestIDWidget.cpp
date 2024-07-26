@@ -6,6 +6,8 @@
 #include "AVICTIMSPlayerController.h"
 #include "VICTIMSCharacter.h"
 #include "Shelter.h"
+#include "Sound/Soundbase.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 void UTestIDWidget::NativeConstruct()
 {
@@ -35,7 +37,7 @@ void UTestIDWidget::OnClickedSignInButton()
 			}
 
 			if (IsIDValid)
-			{
+			{	
 				PC->CloseTestIDWidget();
 			}
 			else
@@ -44,6 +46,10 @@ void UTestIDWidget::OnClickedSignInButton()
 				return;
 			}
 		}
+	}
+	if (ClickSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
 	}
 }
 
@@ -79,6 +85,7 @@ void UTestIDWidget::OnClickedContinueButton()
 
 				if (IsIDValid)
 				{
+
 					PC->CloseTestIDWidget();
 				}
 				else
@@ -89,9 +96,16 @@ void UTestIDWidget::OnClickedContinueButton()
 			}
 		}
 	}
+	if (ClickSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+	}
 }
 
 void UTestIDWidget::OnClickedQuitButton()
 {
-
+	if (ClickSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+	}
 }

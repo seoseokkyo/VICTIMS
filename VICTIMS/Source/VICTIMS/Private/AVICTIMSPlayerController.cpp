@@ -26,6 +26,7 @@
 #include "System/VICTIMSGameMode.h"
 #include "UI/InventoryLayout.h"
 #include "UI/ProfileLayout.h"
+#include "Sound/Soundbase.h"
 #include "DropMoneyLayout.h"
 #include "HousingNotification.h"
 #include "HousingComponent.h"
@@ -84,6 +85,11 @@ void AVICTIMSPlayerController::BeginPlay()
 					SetInputMode(FInputModeUIOnly());
 					EnableUIMode();
 					bShowMouseCursor = true;
+					
+					if (BGM)
+					{
+						UGameplayStatics::PlaySound2D(GetWorld(),BGM);
+					}
 				}
 			}
 			else
@@ -620,7 +626,6 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 
 				FTimerHandle Time;
 				GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
-
 					IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
 					}, 0.5f, false);
 			}
