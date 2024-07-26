@@ -19,6 +19,7 @@ void UMovingInfoWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	OnVisibilityChanged.AddDynamic(this, &UMovingInfoWidget::VisibilityChangedEvent);
+	Button_GoPub->OnClicked.AddDynamic(this, &UMovingInfoWidget::OnClickedPubButton);
 }
 
 void UMovingInfoWidget::AddPlayerName()
@@ -92,7 +93,7 @@ void UMovingInfoWidget::ClientRPC_CreateButtons_Implementation(const FString& pl
 
 void UMovingInfoWidget::OnClickedPubButton()
 {
-	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
 
 	if (PC)
 	{
