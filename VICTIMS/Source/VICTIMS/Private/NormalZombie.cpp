@@ -97,7 +97,7 @@ void ANormalZombie::Tick(float DeltaTime)
 void ANormalZombie::DieFunction()
 {
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.2);
-	
+
 	Super::DieFunction();
 
 	//if (HasAuthority())
@@ -108,9 +108,9 @@ void ANormalZombie::DieFunction()
 	//{
 	//	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Client : %s is Dead"), *this->GetActorNameOrLabel()), true, true, //FLinearColor::Red, 10.0f);
 	//}
-	
-	
-	
+
+
+
 	if (DeathSound && motionState != ECharacterMotionState::Die)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
@@ -124,6 +124,13 @@ void ANormalZombie::ServerRPC_DieFunction_Implementation()
 	motionState = ECharacterMotionState::Die;
 
 	GetController<ANormalZombieController>()->SetFocus(nullptr);
+
+	FTimerHandle hnd;
+	GetWorldTimerManager().SetTimer(hnd, [&]() {
+
+		EnableRagdoll();
+
+		}, 2.0f, false);
 
 	NetMulticastRPC_DieFunction();
 }
@@ -142,8 +149,11 @@ void ANormalZombie::NetMulticastRPC_DieFunction_Implementation()
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)
 	{
-		float animTime = PlayAnimMontage(death_Montage);
-		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"));
+		if (death_Montage)
+		{
+			float animTime = PlayAnimMontage(death_Montage);
+			UE_LOG(LogTemp, Warning, TEXT("death_AM!!"));
+		}
 	}
 }
 

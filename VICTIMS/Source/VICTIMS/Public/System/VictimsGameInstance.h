@@ -91,6 +91,12 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const;
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_UpdateMainAddressValue();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_UpdateMainAddressValue(const FString& strAddress);
+
 private:
 
 	UPROPERTY(Replicated)

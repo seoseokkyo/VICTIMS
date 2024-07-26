@@ -252,6 +252,16 @@ void UVictimsGameInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	DOREPLIFETIME(UVictimsGameInstance, mainAddress);	
 }
 
+void UVictimsGameInstance::ServerRPC_UpdateMainAddressValue_Implementation()
+{
+	NetMulticastRPC_UpdateMainAddressValue(mainAddress);
+}
+
+void UVictimsGameInstance::NetMulticastRPC_UpdateMainAddressValue_Implementation(const FString& strAddress)
+{
+	mainAddress = strAddress;
+}
+
 void UVictimsGameInstance::ServerRPC_DedicateServerCheck_Implementation()
 {	
 	NetMulticastRPC_DedicateServerCheck_Implementation(IsRunningDedicatedServer());
