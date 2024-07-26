@@ -97,6 +97,12 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastRPC_UpdateMainAddressValue(const FString& strAddress);
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_RequestRespawn(AVICTIMSPlayerController* playerControllerPTR);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_RequestRespawn(AVICTIMSPlayerController* playerControllerPTR, const FString& addressValue);
+
 private:
 
 	UPROPERTY(Replicated)

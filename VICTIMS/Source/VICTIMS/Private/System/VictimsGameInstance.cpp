@@ -140,6 +140,8 @@ void UVictimsGameInstance::OnStart()
 		UE_LOG(LogTemp, Warning, TEXT("Main Address Number : %s"), *mainAddress);
 	}
 
+	ServerRPC_UpdateMainAddressValue();
+
 	if (FParse::Value(FCommandLine::Get(), TEXT("PORT="), serverPort))
 	{
 		if (serverType == "MainServer")
@@ -162,22 +164,6 @@ void UVictimsGameInstance::OnStart()
 
 		UE_LOG(LogTemp, Warning, TEXT("PORT : %s"), *serverPort);
 	}
-
-	//else
-	//{
-	//	bool bCanBindAll;
-	//	TSharedPtr<FInternetAddr> Addr = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, bCanBindAll);
-
-	//	if (Addr.IsValid() && Addr->IsValid())
-	//	{
-	//		mainAddress = Addr->ToString(false);
-	//		UE_LOG(LogTemp, Warning, TEXT("Not Input Main Address Set By World Address : %s"), *mainAddress);
-	//	}
-	//	else
-	//	{
-	//		UE_LOG(LogTemp, Warning, TEXT("Address Is Not Valid"), *mainAddress);
-	//	}
-	//}
 }
 
 void UVictimsGameInstance::TryToClientTravel(int waitIndex)
@@ -250,6 +236,31 @@ void UVictimsGameInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(UVictimsGameInstance, bIsDedicateServer);
 	DOREPLIFETIME(UVictimsGameInstance, mainAddress);	
+}
+
+void UVictimsGameInstance::ServerRPC_RequestRespawn_Implementation(AVICTIMSPlayerController* playerControllerPTR)
+{
+	ServerRPC_UpdateMainAddressValue();
+
+	ClientRPC_RequestRespawn(playerControllerPTR, mainAddress);
+}
+
+void UVictimsGameInstance::ClientRPC_RequestRespawn_Implementation(AVICTIMSPlayerController* playerControllerPTR, const FString& addressValue)
+{
+	FString strURL = FString::Printf(TEXT("%s:8101"), *addressValue);
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
+	UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
+	UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
+	UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
+
+	strURL = TEXT("192.164.0.34:8101");
+
+	playerControllerPTR->RequestClientTravel(strURL, FString());
 }
 
 void UVictimsGameInstance::ServerRPC_UpdateMainAddressValue_Implementation()
