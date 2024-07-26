@@ -17,6 +17,9 @@ public:
 	UFUNCTION()
 	bool IsAnyWidgetVisible();
 
+	UPROPERTY(BlueprintReadWrite)
+	bool IsWidgetVisible;
+
 	UFUNCTION()
 	void ToggleWindow(const ELayout Layout);
 

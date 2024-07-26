@@ -285,4 +285,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Start Menu Sound")
 	class USoundBase* BGM;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bWidgetBlocked;
 };

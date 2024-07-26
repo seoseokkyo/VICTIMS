@@ -104,6 +104,9 @@ public:
 	UFUNCTION()
 	void Moneying();
 
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_AddGoldFunction(const int32& Gold);
+
 	UPROPERTY()
 	UHPWidget* hpWidget;
 
@@ -118,7 +121,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Interaction")			// 상호작용 범위
 	class USphereComponent* InteractionField;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	class AVICTIMSPlayerController* MyPlayerController;
 	
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite)

@@ -1984,6 +1984,7 @@ void UInventoryManagerComponent::CloseContainer()
 			CurrentContainerActor->PlayersViewing.Remove(PlayerController->PlayerState);
 			PlayerController->SetInputMode(FInputModeGameOnly());
 			PlayerController->bShowMouseCursor = false;
+			PlayerController->bWidgetBlocked = false;
 		}
 	}
 

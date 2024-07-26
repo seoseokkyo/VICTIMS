@@ -678,11 +678,16 @@ void AVICTIMSCharacter::Moneying()
 {
 	if(IsLocallyControlled())
 	{
-		AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(MyPlayerController);
-		if (con)
-		{
-			con->InventoryManagerComponent->AddGold(50);
-		}
+		ServerRPC_AddGoldFunction(50);
+	}
+}
+
+void AVICTIMSCharacter::ServerRPC_AddGoldFunction_Implementation(const int32& Gold)
+{
+	AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(MyPlayerController);
+	if (con)
+	{
+		con->InventoryManagerComponent->AddGold(Gold);
 	}
 }
 

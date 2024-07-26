@@ -288,13 +288,14 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 				SetInputMode(FInputModeGameAndUI());
 				bShowMouseCursor = true;
 				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::Visible);
+				bWidgetBlocked = true;
 			}
 			else
 			{
 				SetInputMode(FInputModeGameOnly());
 				bShowMouseCursor = false;
-
 				HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+				bWidgetBlocked = false;
 			}
 		}
 	}
