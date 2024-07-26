@@ -23,6 +23,8 @@ public class VICTIMS : ModuleRules
                 "VICTIMS/Public/Blackjack",
                 "VICTIMS/Public/Build",
                 "VICTIMS/Public/UI",
+                "VICTIMS/Public/ChatSystem",
+
             });
 
         PrivateIncludePaths.AddRange(new string[] {
@@ -38,6 +40,7 @@ public class VICTIMS : ModuleRules
                 "VICTIMS/Private/Blackjack",
                 "VICTIMS/Private/Build",
                 "VICTIMS/Private/UI",
+                "VICTIMS/Private/ChatSystem",
             });
     }
 }
