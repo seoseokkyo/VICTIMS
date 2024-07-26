@@ -16,22 +16,24 @@ void UGoOtherPlayerButton::NativeConstruct()
 
 void UGoOtherPlayerButton::MoveTo()
 {
-	UWidget* findWidget = nullptr;
+	//UWidget* findWidget = GetParent();
 
-	while (1)
-	{
-		findWidget = Cast<UMovingInfoWidget>(GetParent());
+	//while (1)
+	//{
+	//	auto movingInfoWidget = Cast<UMovingInfoWidget>(findWidget);
 
-		if (nullptr == findWidget)
-		{
-			findWidget = findWidget->GetParent();
-		}
-		else
-		{
-			Cast<UMovingInfoWidget>(findWidget)->HideWidget();
-			break;
-		}
-	}
+	//	if (nullptr == movingInfoWidget)
+	//	{
+	//		findWidget = findWidget->GetParent();
+	//	}
+	//	else
+	//	{
+	//		movingInfoWidget->HideWidget();
+	//		break;
+	//	}
+	//}
+
+	parentMovingInfo->HideWidget();
 
 	auto charCheck = Cast<AVICTIMSCharacter>(GetOwningPlayer()->GetPawn());
 

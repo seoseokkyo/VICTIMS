@@ -48,6 +48,8 @@ void UMovingInfoWidget::AddPlayerName()
 							PlayerButton = CreateWidget<UGoOtherPlayerButton>(MovingInfo, bp_button);
 							PlayerButton->playerNameTextBox->SetText(FText::FromString(playerName));
 							MovingInfo->AddChild(PlayerButton);
+
+							PlayerButton->parentMovingInfo = this;
 						}
 					}
 				}

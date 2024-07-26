@@ -25,4 +25,7 @@ public:
 
 	UFUNCTION()
 	void MoveTo();
+
+	UPROPERTY()
+	class UMovingInfoWidget* parentMovingInfo;
 };
