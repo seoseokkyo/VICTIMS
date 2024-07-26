@@ -396,7 +396,7 @@ void ANormalZombieController::OnTargetDetected(AActor* _Actor, FAIStimulus const
 
 		SetTargetLocation(Stimulus.StimulusLocation);
 
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Strength : %f"), Stimulus.Strength));
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Strength : %f"), Stimulus.Strength));
 		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("GetNoiseDetect : %f"), GetNoiseDetect()));
 	}
 	//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Type.Name : %s"), *Stimulus.Type.Name.ToString()));
