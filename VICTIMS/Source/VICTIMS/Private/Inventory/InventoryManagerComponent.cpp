@@ -749,7 +749,29 @@ void UInventoryManagerComponent::MoveHotbarSlotItem(const uint8& FromSlot, const
 	if (IsDraggedFromInventory)
 	{
 		FSlotStructure SlotStructure = GetInventorySlotItem(FromSlot);	// 여기서 무기 무한복제 됨
-		SetHotbarSlotItem(ToSlot, SlotStructure);
+		FSlotStructure ToSlotItem = GetHotbarSlotItem(ToSlot);
+		bool bEquipped;
+		int temp = 0;
+		for (int i = 0; i < 5; i++)
+		{
+			if (GetHotbarSlotItem(i).ItemStructure.ID == SlotStructure.ItemStructure.ID)
+			{
+				temp = i;
+				bEquipped = true;
+				break;
+			}
+		}
+
+		if (bEquipped)
+		{
+			SetHotbarSlotItem(ToSlot, SlotStructure);
+			ClearHotbarSlotItem(temp);
+		}
+		else
+		{
+			SetHotbarSlotItem(ToSlot, SlotStructure);
+		}
+
 	}
 
 	if (IsDraggedFromHotbar)
