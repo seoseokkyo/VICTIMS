@@ -475,6 +475,9 @@ void AVICTIMSCharacter::DieFunction()
 
 		if (pc)
 		{
+			stateComp->ServerRPC_SetStatePoint(HP, stateComp->runningStat.MaxHP);  // HP max 로 채워주고 바로 자동 저장
+			PC->SaveData();				
+			
 			pc->bShowMouseCursor = true;
 			FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
 			DisableInput(pc);
@@ -482,10 +485,11 @@ void AVICTIMSCharacter::DieFunction()
 	}
 
 	motionState = ECharacterMotionState::Die;
-
+	
 	Super::DieFunction();
 
 	EnableRagdoll();
+																			
 }
 
 
