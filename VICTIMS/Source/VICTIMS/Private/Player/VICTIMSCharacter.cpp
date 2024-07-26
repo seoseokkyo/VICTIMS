@@ -384,6 +384,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
 			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
+			EnhancedInputComponent->BindAction(MoneyingAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::Moneying);
 		}
 	}
 	else
@@ -669,6 +670,18 @@ void AVICTIMSCharacter::PossessedBy(AController* NewController)
 				MyPlayerController = conCheck;
 				SetOwner(MyPlayerController);
 			}
+		}
+	}
+}
+
+void AVICTIMSCharacter::Moneying()
+{
+	if(IsLocallyControlled())
+	{
+		AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(MyPlayerController);
+		if (con)
+		{
+			con->InventoryManagerComponent->AddGold(50);
 		}
 	}
 }

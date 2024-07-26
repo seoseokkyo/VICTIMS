@@ -55,8 +55,10 @@ void UInteractiveText_Entry::NativeOnListItemObjectSet(UObject* ListItemObject)
 
 				}
 				else {
-					UTexture2D* IconTexture = LoadObject<UTexture2D>(this, TEXT("/Script/Engine.Texture2D'/Game/UI/Textures/hand.hand'"));
-					IconImage->SetBrushFromTexture(IconTexture);
+					if (IconTexture)
+					{
+						IconImage->SetBrushFromTexture(IconTexture);
+					}
 
 					NameLabel->SetJustification(ETextJustify::Center);
 

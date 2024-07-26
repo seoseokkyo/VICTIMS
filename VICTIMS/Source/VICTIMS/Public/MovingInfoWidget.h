@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TSubclassOf<class UGoOtherPlayerButton> bp_button;
 
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* WindowTitle;
+
 	UFUNCTION()
 	void OnClickedPubButton();
 
