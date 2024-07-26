@@ -458,6 +458,9 @@ public:
 	UPROPERTY()
 	uint8 DropMoneyAmount;
 
+	UFUNCTION(Client, Reliable)
+	void Client_ShowNotification(const uint8& InventorySlot);
+
 //=======================================================================================================
 // Hotbar weapon
 

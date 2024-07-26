@@ -2256,7 +2256,7 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 	if (LocalInventoryItem.ItemStructure.PriceValue > PC->UIGetPlayerGold())
 	{	// 선택한 아이템을 살 돈이 충분하지 않을 때 
 //		UE_LOG(LogTemp, Warning, TEXT("Don't have enough money"));
-		MainLayoutUI->Shop->ShopSlotsArray[InventorySlot]->ShowNotification();
+		Client_ShowNotification(InventorySlot);
 		return;
 	}
 	bool bOutSuccess = false;
@@ -2584,4 +2584,9 @@ void UInventoryManagerComponent::EquipItemAtLoad(UInventoryComponent* FromInvent
 	{
 // 		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
 	}
+}
+
+void UInventoryManagerComponent::Client_ShowNotification_Implementation(const uint8& InventorySlot)
+{
+	MainLayoutUI->Shop->ShopSlotsArray[InventorySlot]->ShowNotification();
 }
