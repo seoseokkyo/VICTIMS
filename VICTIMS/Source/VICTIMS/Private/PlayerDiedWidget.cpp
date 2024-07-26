@@ -16,46 +16,13 @@ void UPlayerDiedWidget::NativeConstruct()
 
 void UPlayerDiedWidget::OnClickRespawn()
 {
-	auto charCheck = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
+	auto playerCheck = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
 
-	if (charCheck)
+	if (playerCheck)
 	{
 		auto gi = Cast<UVictimsGameInstance>(GetGameInstance());
-		gi->ServerRPC_UpdateMainAddressValue();
 
-		FString strURL = gi->mainAddress + TEXT(":8101");
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
-		UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
-
-		charCheck->RequestClientTravel(strURL, FString());
+		gi->ServerRPC_RequestRespawn(playerCheck);
 	}
 }
 
