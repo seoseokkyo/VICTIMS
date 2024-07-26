@@ -37,12 +37,19 @@ public:
 
 	void ReceiveMsg(const AActor* InManagerOwner, const FVictims_MsgInfo& InMsgInfo) const;
 
+	UFUNCTION(BlueprintCallable)
 	void ReceivedGlobalChat(const AActor* InManagerOwner, const FVictims_MsgInfo& InMsgInfo);
+	UFUNCTION(BlueprintCallable)
 	void SendWhisperMsg(const AActor* InManagerOwner, const FString& InTargetID, const FVictims_MsgInfo& InMsgInfo);
+	UFUNCTION(BlueprintCallable)
 	void SendPartyInvitationsByName(const AActor* InManagerOwner, const FString& InTargetPlayerName) const;
+	UFUNCTION(BlueprintCallable)
 	void CreateNewParty(const AActor* InManagerOwner) const;
+	UFUNCTION(BlueprintCallable)
 	void BreakParty(const AActor* InManagerOwner) const;
+	UFUNCTION(BlueprintCallable)
 	void LeaveParty(const AActor* InManagerOwner) const;
+	UFUNCTION(BlueprintCallable)
 	void AddNewPartyMember(const AActor* InManagerOwner) const;
 
 	UVictimsChatManager* GetChatManagerByPlayerName(const FString& InTargetPlayerName) const;

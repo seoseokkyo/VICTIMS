@@ -230,6 +230,7 @@ void UVictims_ChatBox::UpdateTextColor()
 }
 
 
+
 FReply UVictims_ChatBox::NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent)
 {
 

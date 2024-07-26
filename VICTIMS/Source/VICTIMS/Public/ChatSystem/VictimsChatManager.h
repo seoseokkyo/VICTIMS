@@ -153,12 +153,16 @@ public:
 	UFUNCTION(Server, Unreliable)
 	void Server_ApplyForPartyEntry();
 
+	UFUNCTION(BlueprintCallable)
+	void GmOnPressedWhisperKeyFunc();
+
 protected:
 
 	//~UActorComponent interface
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	//~End of UActorComponent interface
+
 
 private:
 
@@ -187,8 +191,8 @@ private:
 	UFUNCTION()
 	void GmOnPressedSlashFunc();
 
-	UFUNCTION()
-	void GmOnPressedWhisperKeyFunc();
+	//UFUNCTION()
+	//void GmOnPressedWhisperKeyFunc();
 
 	UFUNCTION(Client, Unreliable)
 	void Client_ReceivedChat(const FVictims_MsgInfo& InMsgInfo);

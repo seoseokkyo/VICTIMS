@@ -170,7 +170,7 @@ public:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UVerticalBox> VB_Msg;
 
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
 	TObjectPtr<UButton> AddTabBtn;
 
 	EChatChannelType CurrentChannel{ EChatChannelType::Global };
@@ -196,14 +196,22 @@ public:
 	TObjectPtr<UVictims_ContainerTab> CurrentOpenedTab;
 
 	// Utils
-
+	UFUNCTION(BlueprintCallable)
 	void UpdateCurrentChatBoxMessages(UVictims_ContainerTab* InTarget) const;
+	UFUNCTION(BlueprintCallable)
 	void UpdateMsgInChatBox(UUserWidget* InNewChat) const;
+	UFUNCTION(BlueprintCallable)
 	void ToggleChatBox(bool InIsShow);
+	UFUNCTION(BlueprintCallable)
 	void UpdateCurrentChannel(EChatChannelType InNewChannel, const FString& InPrivateRecipient);
+	UFUNCTION(BlueprintCallable)
 	void FocusChat(bool InIsSlash, bool InIsRemove);
+	UFUNCTION(BlueprintCallable)
 	void UpdateTypingInChannel();
+	UFUNCTION(BlueprintCallable)
 	void UpdateTextColor();
+
+
 
 protected:
 
@@ -212,11 +220,13 @@ protected:
 	virtual FReply NativeOnPreviewKeyDown(const FGeometry& InGeometry, const FKeyEvent& InKeyEvent) override;
 	//~End of UUserWidget Interface
 
+	
+
 private:
 
 	friend class UGmAC_ChatManager;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void SendMsg(const FString& InMsg);
 
 	UFUNCTION()
@@ -230,7 +240,7 @@ private:
 	TMap<EChatChannelType, FChatGeneralInfo> ArrM_GeneralInfoByChannel;
 	TMap<FString, FChatCmdDescOfChannel> ArrM_CmdChannels;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void OnMsgTextChangedFunc(const FText& InText);
 
 	static FText TrimPrecedingAndTrailing(const FString& InText);

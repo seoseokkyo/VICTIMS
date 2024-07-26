@@ -102,6 +102,7 @@ private:
 	UFUNCTION()
 	virtual void OnClickedCancelBtnFunc();
 
+	UFUNCTION(BlueprintCallable)
 	void BeforeRemoveFromParent();
 
 	FBtnContentDel OnClickedAcceptBtn;
