@@ -901,18 +901,18 @@ void AVICTIMSCharacter::Server_RemoveObject_Implementation()
 {
 	if (HousingComponent)
 	{
-		HousingComponent->Server_RemoveObject();
-		Multicast_RemoveObject();
+		HousingComponent->RemoveObject();
+// 		Multicast_RemoveObject();
 	}
 }
 
 
 void AVICTIMSCharacter::Multicast_RemoveObject_Implementation()
 {
-	if (HousingComponent)
-	{
-		HousingComponent->RemoveObject();
-	}
+// 	if (HousingComponent)
+// 	{
+// 		HousingComponent->RemoveObject();
+// 	}
 }
 
 
