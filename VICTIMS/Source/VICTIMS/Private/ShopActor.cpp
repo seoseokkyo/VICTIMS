@@ -198,6 +198,10 @@ TArray<FSlotStructure> AShopActor::GetShopItems()
 		uint8 LocalItemIndex = 0;
 		TArray<uint8> LocalItemIndexes;
 
+		uint8 ConsumableCount = 0;
+		uint8 EquipmentCount = 0;
+		uint8 FurnitureCount = 0;
+
 		if(!IsValid(DB_ItemList))
 		{
 			DB_ItemList = LoadObject<UDataTable>(this, TEXT("/Script/Engine.DataTable'/Game/Item/Data/Item_DB.Item_DB'"));
@@ -219,6 +223,7 @@ TArray<FSlotStructure> AShopActor::GetShopItems()
 				LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
 				SetItemAmount(LocalInventorySlot, 1);
 				ShoppingItems.Add(LocalInventorySlot);
+				ConsumableCount++;
 			}
 			else if (bIsEquipmentShop == true && LocalInventoryItem->ItemType == EItemType::Equipment)
 			{
@@ -226,6 +231,7 @@ TArray<FSlotStructure> AShopActor::GetShopItems()
 				LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
 				SetItemAmount(LocalInventorySlot, 1);
 				ShoppingItems.Add(LocalInventorySlot);
+				EquipmentCount++;
 			}
 			else if (bIsFurnitureShop == true && LocalInventoryItem->ItemType == EItemType::Furniture)
 			{
@@ -233,10 +239,22 @@ TArray<FSlotStructure> AShopActor::GetShopItems()
 				LocalInventorySlot.InitSlot(*LocalInventoryItem, 0);
 				SetItemAmount(LocalInventorySlot, 1);
 				ShoppingItems.Add(LocalInventorySlot);
+				FurnitureCount++;
 			}
 		}
 
-		InventoryComponent->NumberOfRowsInventory = LootShopItems.Num()-1;
+		if(bIsConsumableShop)
+		{	
+			InventoryComponent->NumberOfRowsInventory = ConsumableCount;
+		}
+		if (bIsEquipmentShop)
+		{
+			InventoryComponent->NumberOfRowsInventory = EquipmentCount;
+		}
+		if (bIsFurnitureShop)
+		{
+			InventoryComponent->NumberOfRowsInventory = FurnitureCount;
+		}
 
 		uint8 LocalNumberOfSlotsPerRow = InventoryComponent->SlotsPerRowInventory;
 		InventoryComponent->SlotsPerRowInventory = LocalNumberOfSlotsPerRow;

@@ -20,6 +20,7 @@ void UMovingInfoWidget::NativeConstruct()
 
 	OnVisibilityChanged.AddDynamic(this, &UMovingInfoWidget::VisibilityChangedEvent);
 	Button_GoPub->OnClicked.AddDynamic(this, &UMovingInfoWidget::OnClickedPubButton);
+	WindowTitle->SetText(FText::FromString("select place to visit"));
 }
 
 void UMovingInfoWidget::AddPlayerName()

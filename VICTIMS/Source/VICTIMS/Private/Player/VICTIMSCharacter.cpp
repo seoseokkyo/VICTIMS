@@ -384,6 +384,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar4, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot4);
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
 			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
+			EnhancedInputComponent->BindAction(MoneyingAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::Moneying);
 		}
 	}
 	else
@@ -673,6 +674,18 @@ void AVICTIMSCharacter::PossessedBy(AController* NewController)
 	}
 }
 
+void AVICTIMSCharacter::Moneying()
+{
+	if(IsLocallyControlled())
+	{
+		AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(MyPlayerController);
+		if (con)
+		{
+			con->InventoryManagerComponent->AddGold(50);
+		}
+	}
+}
+
 void AVICTIMSCharacter::OnRep_MainChestMesh()
 {
 	Chest->SetSkeletalMesh(ChestMesh, false);
@@ -888,18 +901,18 @@ void AVICTIMSCharacter::Server_RemoveObject_Implementation()
 {
 	if (HousingComponent)
 	{
-		HousingComponent->Server_RemoveObject();
-		Multicast_RemoveObject();
+		HousingComponent->RemoveObject();
+// 		Multicast_RemoveObject();
 	}
 }
 
 
 void AVICTIMSCharacter::Multicast_RemoveObject_Implementation()
 {
-	if (HousingComponent)
-	{
-		HousingComponent->RemoveObject();
-	}
+// 	if (HousingComponent)
+// 	{
+// 		HousingComponent->RemoveObject();
+// 	}
 }
 
 

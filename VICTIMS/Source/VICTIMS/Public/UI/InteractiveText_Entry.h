@@ -29,7 +29,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	UImage* SelectedImage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UTexture2D* IconTexture;
+
 protected:
+
 	UFUNCTION()
 	virtual void NativeConstruct() override;
 	

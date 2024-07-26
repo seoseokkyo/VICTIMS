@@ -573,60 +573,7 @@ bool UHousingComponent::CanPlacePreviewMesh()
 
 void UHousingComponent::RemoveObject()
 {
-	FVector CameraLocation = Camera->GetComponentLocation();
-	FRotator CameraRotation = Camera->GetComponentRotation();
-	FVector StartLocation = CameraLocation;
-	FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
-
-	FHitResult HitResult;
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(GetOwner());
-
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
-
-	if (bHit)
-	{
-		AActor* HitActor = HitResult.GetActor();
-
-		if (HitActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
-		{
-			int32 RemovedBuildID = IHousingInterface::Execute_ReturnBuildID(HitActor);
-			FName RemovedItemID = Buildables[RemovedBuildID].ID;
-
-			//UE_LOG(LogTemp, Warning, TEXT("%s will remove"), *RemovedItemID.ToString());
-			HitActor->Destroy();
-
- 			AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(PlayerRef->GetController());
- 			if (PlayerController && PlayerController->InventoryManagerComponent)
- 			{
-				FSlotStructure SlotStructure = PlayerController->InventoryManagerComponent->GetItemFromItemDB(RemovedItemID);
-				SlotStructure.Amount = 1;
-
-				bool bSuccess = false;
-				UInventoryComponent* InventoryComponent = Cast<UInventoryComponent>(PlayerController->PlayerInventoryComponent);
-				PlayerController->InventoryManagerComponent->TryToAddItemToInventory(InventoryComponent, SlotStructure, bSuccess);
-
-				if (bSuccess)
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Item successfully added to inventory."));
-					PlayerController->InventoryManagerComponent->Server_UpdateTooltips();
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("Failed to add item to inventory."));
-				}
-			}
-			else
-			{
-				UE_LOG(LogTemp, Error, TEXT("Failed to cast PlayerInventoryComponent to UInventoryComponent."));
-			}
-		}
-	}
-	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
-	if (bHit)
-	{
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5, 12, FColor::Red, false, 1);
-	}
+	Server_RemoveObject();
 }
 
 void UHousingComponent::MoveObject()
@@ -652,13 +599,65 @@ void UHousingComponent::OnRep_IsBuildModeOn()
 
 void UHousingComponent::Server_RemoveObject_Implementation()
 {
-	RemoveObject();
-	Multicast_RemoveObject();
+	FVector CameraLocation = Camera->GetComponentLocation();
+	FRotator CameraRotation = Camera->GetComponentRotation();
+	FVector StartLocation = CameraLocation;
+	FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
+
+	FHitResult HitResult;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(GetOwner());
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
+
+	if (bHit)
+	{
+		AActor* HitActor = HitResult.GetActor();
+
+		if (HitActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
+		{
+			int32 RemovedBuildID = IHousingInterface::Execute_ReturnBuildID(HitActor);
+			FName RemovedItemID = Buildables[RemovedBuildID].ID;
+
+			//UE_LOG(LogTemp, Warning, TEXT("%s will remove"), *RemovedItemID.ToString());
+			HitActor->Destroy();
+
+			AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(PlayerRef->GetController());
+			if (PlayerController && PlayerController->InventoryManagerComponent)
+			{
+				FSlotStructure SlotStructure = PlayerController->InventoryManagerComponent->GetItemFromItemDB(RemovedItemID);
+				SlotStructure.Amount = 1;
+
+				bool bSuccess = false;
+				UInventoryComponent* InventoryComponent = Cast<UInventoryComponent>(PlayerController->PlayerInventoryComponent);
+				PlayerController->InventoryManagerComponent->TryToAddItemToInventory(InventoryComponent, SlotStructure, bSuccess);
+
+				if (bSuccess)
+				{
+					// 					UE_LOG(LogTemp, Warning, TEXT("Item successfully added to inventory."));
+					PlayerController->InventoryManagerComponent->Server_UpdateTooltips();
+				}
+				else
+				{
+					// 					UE_LOG(LogTemp, Warning, TEXT("Failed to add item to inventory."));
+				}
+			}
+			else
+			{
+				// 				UE_LOG(LogTemp, Error, TEXT("Failed to cast PlayerInventoryComponent to UInventoryComponent."));
+			}
+		}
+	}
+	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
+	if (bHit)
+	{
+		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5, 12, FColor::Red, false, 1);
+	}
 }
 
 void UHousingComponent::Multicast_RemoveObject_Implementation()
 {
-	RemoveObject();
+// 	RemoveObject();
 }
 
 void UHousingComponent::Server_MoveObject_Implementation()
