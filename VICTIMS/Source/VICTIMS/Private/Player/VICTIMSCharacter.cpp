@@ -44,6 +44,12 @@
 #include "CompassWedget.h"
 #include "UI/MyHUD.h"
 
+//<<
+#include <filesystem>
+#include <fstream>
+#include <iostream>
+//>>
+
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -199,6 +205,40 @@ void AVICTIMSCharacter::BeginPlay()
 			Head->SetIsReplicated(true);
 		}
 
+		// Load.....
+		//<<
+		if (MyPlayerController)
+		{
+			if (MyPlayerController->bNeedToLoad)
+			{
+				AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+
+				if (PC)
+				{
+					FString strID = MyPlayerController->playerName;
+
+					if (PC->CharacterReference)
+					{
+						PC->CharacterReference->SavePersonalID(strID);
+					}
+
+					PC->SavePersonalID(strID);
+					PC->LoadData(strID);
+
+					if (PC->CharacterReference)
+					{
+						if (PC->CharacterReference->AssignedHouse)
+						{
+							PC->CharacterReference->AssignedHouse->SetPlayerName(strID);
+						}
+					}
+
+					MyPlayerController->bNeedToLoad = false;
+				}
+			}
+		}
+		//>>
+
 		}, 0.5f, false);
 }
 
@@ -321,6 +361,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
 		/********/
 		EnhancedInputComponent->BindAction(HousingBuildAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRightMouseButtonPressed);
+		
 		EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
 
 
@@ -930,6 +971,19 @@ void AVICTIMSCharacter::SaveDataNow()
 	MyPlayerController->SaveData();
 }
 
+void AVICTIMSCharacter::TestDataNow()
+{
+	FString Options = GetWorld()->GetLocalURL();
+	FString ParsedValue;
+
+	if (FParse::Value(*Options, TEXT("TestName"), ParsedValue))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Name Value: %s"), *ParsedValue);
+	}
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s"), *ParsedValue));
+}
+
 void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)
 {
 	if (IsLocallyControlled())
@@ -1054,11 +1108,20 @@ void AVICTIMSCharacter::Server_GoToOtherHouse_Implementation(const FString& othe
 	//	}
 	//}	
 
-	for (TActorIterator<AShelter> it(GetWorld()); it; ++it)
+	//for (TActorIterator<AShelter> it(GetWorld()); it; ++it)
+	//{
+	//	if ((*it)->OwnerPlayerName == otherPlayerName)
+	//	{
+	//		ClientRPC_GoToHouse((*it)->OriginPos);
+	//		break;
+	//	}
+	//}
+	
+	for (auto player : MyPlayerController->otherPlayers)
 	{
-		if ((*it)->OwnerPlayerName == otherPlayerName)
+		if (player->playerName == otherPlayerName)
 		{
-			ClientRPC_GoToHouse((*it)->OriginPos);
+			ClientRPC_GoToHouse(player->CharacterReference->AssignedHouse->OriginPos);
 			break;
 		}
 	}

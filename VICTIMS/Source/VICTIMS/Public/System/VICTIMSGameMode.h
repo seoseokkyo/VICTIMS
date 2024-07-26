@@ -42,6 +42,9 @@ public:
 	EVictimsNetMode GetGameNetMode();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION()
+	TArray<AVICTIMSPlayerController*> GetPlayers();
 };
 
 

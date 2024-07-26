@@ -32,9 +32,6 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_CreateButtons(const FString& playerNames);
 
-	UFUNCTION()
-	void MoveTo();
-
 	UPROPERTY(meta = (BindWidget))
 	class UButton* Button_GoPub;
 
@@ -44,11 +41,9 @@ public:
 	UFUNCTION()
 	void OnClickedPubButton();
 
-	FTimerHandle HideWidgetTimerHandle;
-
 	UFUNCTION()
 	void HideWidget();
 
-	UFUNCTION(BlueprintCallable)
-	void ClearPlayerList();
+	UFUNCTION()
+	void VisibilityChangedEvent(ESlateVisibility InVisibility);
 };

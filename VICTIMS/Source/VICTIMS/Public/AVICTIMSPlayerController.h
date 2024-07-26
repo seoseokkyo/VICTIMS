@@ -14,6 +14,9 @@ class UInventoryManagerComponent;
 class UInteractiveText_Entry;
 class UTestIDWidget;
 
+
+DECLARE_DELEGATE_OneParam(FOnChangedPlayerList, TArray<FString>);
+
 UCLASS()
 class VICTIMS_API AVICTIMSPlayerController : public APlayerController, public IInventoryHUDInterface
 {
@@ -182,6 +185,8 @@ public:
 	//UPROPERTY()
 	//class UTestSaveGame* SavedData;
 
+	bool bNeedToLoad = false;
+
 	UFUNCTION()
 	void CreateSaveData(FString ID);		// 새로 저장파일 만들기
 
@@ -253,22 +258,6 @@ public:
 
 	UPROPERTY()
 	UMovingInfoWidget* MovingInfoWidget;
-
-	void PopulatePlayerList();
-
-	UFUNCTION(Server, Reliable)
-	void Server_RequestPlayerList();
-
-	UFUNCTION(Client, Reliable)
-	void Client_ReceivePlayerList(const TArray<FString>& PlayerNames);
-	
-	TArray<FString> AddedPlayerNames;
-
-	virtual void OnRep_PlayerState() override;
-	void UpdateAllClientsPlayerList();
-
-	UFUNCTION(Server, Reliable)
-	void Server_RequestPlayerListUpdate();
 //=========================================================================================================================
 
 	UFUNCTION()
@@ -277,4 +266,21 @@ public:
     UPROPERTY(EditAnywhere, Category = "Interact Sound")
 	class USoundBase* PickUpSound;
 
+
+	UPROPERTY()
+	TArray<AVICTIMSPlayerController*> otherPlayers;
+
+	UPROPERTY()
+	TArray<FString> otherPlayerNames;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_UpdatePlayerList();
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_UpdatePlayerList(const TArray<AVICTIMSPlayerController*>& otherPlayerList);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_UpdatePlayerNameList(const TArray<FString>& otherPlayerNameList);
+
+	FOnChangedPlayerList OnChangedPlayerList;
 };

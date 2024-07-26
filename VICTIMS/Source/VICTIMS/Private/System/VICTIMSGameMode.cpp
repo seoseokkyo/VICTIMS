@@ -126,6 +126,8 @@ void AVICTIMSGameMode::AssignHouseToPlayer(AVICTIMSPlayerController* NewPlayer)
 				UE_LOG(LogTemp, Warning, TEXT("AssignHouseToPlayer: AssignedHouse is null"));
 				return;
 			}
+
+			AssignedHouse->Ownerplayer = NewPlayer;
 			AssignedHouse->OwnerPlayerID = PlayerID;
 
 			if (PlayerCharacter)
@@ -149,18 +151,7 @@ void AVICTIMSGameMode::AssignHouseToPlayer(AVICTIMSPlayerController* NewPlayer)
 			}
 
 			NextHouseIndex++;
-			//if (PlayerCharacter)
-			//{
-			//	APackedLevelParent* AssignedHouse = Houses[HouseIndex];
-			//	AssignedHouse->OwnerPlayerID = PlayerCharacter->PlayerID;
-			//	
-			//}
 		}
-
-		// 	static int32 HouseIndex = 0;
-		// 	if (HouseIndex < TotalHouses)
-		// 	{
-		//	}
 	}
 }
 
@@ -174,6 +165,24 @@ void AVICTIMSGameMode::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AVICTIMSGameMode, Houses);
+}
+
+TArray<AVICTIMSPlayerController*> AVICTIMSGameMode::GetPlayers()
+{
+	TArray<AVICTIMSPlayerController*> players;
+	players.Empty();
+
+	for (auto it(GetWorld()->GetPlayerControllerIterator()); it; ++it)
+	{
+		auto playerCheck = Cast<AVICTIMSPlayerController>(*it);
+
+		if (playerCheck)
+		{
+			players.Add(playerCheck);
+		}
+	}
+
+	return players;
 }
 
 

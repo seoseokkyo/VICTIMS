@@ -61,13 +61,20 @@ void UTestIDWidget::OnClickedContinueButton()
 			{
 				FString strID = ID->GetText().ToString();
 
-				PC->CharacterReference->SavePersonalID(strID);
+				if (PC->CharacterReference)
+				{
+					PC->CharacterReference->SavePersonalID(strID);
+				}
+
 				PC->SavePersonalID(strID);
 				PC->LoadData(strID);
 
-				if (PC->CharacterReference->AssignedHouse)
+				if (PC->CharacterReference)
 				{
-					PC->CharacterReference->AssignedHouse->SetPlayerName(strID);
+					if (PC->CharacterReference->AssignedHouse)
+					{
+						PC->CharacterReference->AssignedHouse->SetPlayerName(strID);
+					}
 				}
 
 				if (IsIDValid)

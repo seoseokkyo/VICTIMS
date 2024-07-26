@@ -11,66 +11,73 @@
 #include "AVICTIMSPlayerController.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
 #include "GoOtherPlayerButton.h"
+#include "VICTIMSGameMode.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 void UMovingInfoWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	//     APlayerController* PlayerController = GetOwningPlayer();
-	// 
-	//     if (PlayerController)
-	//     {
-	//         PlayerController->bShowMouseCursor = true;
-	//         FInputModeUIOnly InputMode;
-	//         InputMode.SetWidgetToFocus(this->TakeWidget());  // 현재 위젯에 포커스를 맞추기
-	//         InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);  // 마우스 포인터가 화면 밖으로 나가지 않게 설정
-	//         PlayerController->SetInputMode(InputMode);
-	//     }
-
-
+	OnVisibilityChanged.AddDynamic(this, &UMovingInfoWidget::VisibilityChangedEvent);
 }
 
 void UMovingInfoWidget::AddPlayerName()
 {
-	if (MovingInfo)
+	auto myPlayer = GetOwningPlayer();
+	if (myPlayer && myPlayer->IsLocalController())
 	{
-		MovingInfo->ClearChildren();
+		if (MovingInfo)
+		{
+			MovingInfo->ClearChildren();
+		}
 
-		ServerRPC_FindPlayers();
+		if (auto victimPlayer = Cast<AVICTIMSPlayerController>(myPlayer))
+		{
+			victimPlayer->ServerRPC_UpdatePlayerList();
+
+			victimPlayer->OnChangedPlayerList.BindLambda([&, victimPlayer](TArray<FString> arg) {
+
+				for (auto playerName : arg)
+				{
+					if (playerName.IsEmpty() == false)
+					{
+						if (bp_button)
+						{
+							UGoOtherPlayerButton* PlayerButton = nullptr;
+
+							PlayerButton = CreateWidget<UGoOtherPlayerButton>(MovingInfo, bp_button);
+							PlayerButton->playerNameTextBox->SetText(FText::FromString(playerName));
+							MovingInfo->AddChild(PlayerButton);
+						}
+					}
+				}
+
+				victimPlayer->OnChangedPlayerList.Unbind();
+			});
+		}
 	}
 }
 
-//void UMovingInfoWidget::CreatePlayerButton(const FString& PlayerName)
-//{
-//    UButton* PlayerButton = NewObject<UButton>(MovingInfo);
-//    PlayerButton->OnClicked.AddDynamic(this, &UMovingInfoWidget::MoveTo);
-//
-//    UTextBlock* ButtonText = NewObject<UTextBlock>(PlayerButton);
-//    ButtonText->SetText(FText::FromString(PlayerName));
-//    PlayerButton->AddChild(ButtonText);
-//
-//    MovingInfo->AddChild(PlayerButton);
-//}
-
 void UMovingInfoWidget::ServerRPC_FindPlayers_Implementation()
 {
-	for (auto it(GetWorld()->GetPlayerControllerIterator()); it; ++it)
-	{
-		auto playerCheck = Cast<AVICTIMSPlayerController>(*it);
+	auto gameMode = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
 
-		if (playerCheck)
+	if (gameMode)
+	{
+		auto players = gameMode->GetPlayers();
+
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("players Num : %d"), players.Num()));
+
+		for (auto player : players)
 		{
-			ClientRPC_CreateButtons(*playerCheck->playerName);
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("player Ptr : %p"), player));
+			ClientRPC_CreateButtons(player->playerName);
 		}
 	}
 }
 
 void UMovingInfoWidget::ClientRPC_CreateButtons_Implementation(const FString& playerName)
 {
-	//UButton* PlayerButton = NewObject<UButton>(MovingInfo);
-
-	//UGoOtherPlayerButton* PlayerButton = NewObject<UGoOtherPlayerButton>(MovingInfo);
-
 	UGoOtherPlayerButton* PlayerButton = nullptr;
 
 	if (bp_button)
@@ -81,15 +88,9 @@ void UMovingInfoWidget::ClientRPC_CreateButtons_Implementation(const FString& pl
 	}
 }
 
-void UMovingInfoWidget::MoveTo()
-{
-
-}
-
 void UMovingInfoWidget::OnClickedPubButton()
 {
 	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
-	//PC->bShowMouseCursor = true;
 
 	if (PC)
 	{
@@ -99,6 +100,7 @@ void UMovingInfoWidget::OnClickedPubButton()
 			Character->SetActorLocation(FVector(1850, 821, 169));
 		}
 	}
+
 	HideWidget();
 }
 
@@ -113,10 +115,36 @@ void UMovingInfoWidget::HideWidget()
 	}
 }
 
-void UMovingInfoWidget::ClearPlayerList()
+void UMovingInfoWidget::VisibilityChangedEvent(ESlateVisibility InVisibility)
 {
-	if (MovingInfo)
+	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
+
+	//if (GetOwningLocalPlayer() == nullptr)
+	//{
+	//	SetOwningLocalPlayer(PC->GetLocalPlayer());
+	//	SetOwningPlayer(PC);
+	//}
+
+	//if (GetOwningPlayer() == nullptr)
+	//{
+	//	SetOwningLocalPlayer(PC->GetLocalPlayer());
+	//	SetOwningPlayer(PC);
+	//}
+
+	//if (GetOwningPlayerPawn() == nullptr)
+	//{
+	//	SetOwningLocalPlayer(PC->GetLocalPlayer());
+	//	SetOwningPlayer(PC);
+	//}
+
+	//if (GetOwningPlayerState() == nullptr)
+	//{
+	//	SetOwningLocalPlayer(PC->GetLocalPlayer());
+	//	SetOwningPlayer(PC);
+	//}
+
+	if (InVisibility == ESlateVisibility::Visible)
 	{
-		MovingInfo->ClearChildren();
+		AddPlayerName();
 	}
 }

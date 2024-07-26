@@ -31,6 +31,7 @@
 #include "HousingComponent.h"
 #include "MovingInfoWidget.h"
 #include "GameFramework/PlayerState.h"
+#include "Components/EditableText.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -51,8 +52,6 @@ AVICTIMSPlayerController::AVICTIMSPlayerController()
 	CharacterReference = nullptr;
 
 	bReplicates = true;
-
-	AddedPlayerNames.Empty();
 }
 
 void AVICTIMSPlayerController::BeginPlay()
@@ -61,16 +60,35 @@ void AVICTIMSPlayerController::BeginPlay()
 
 	if (IsLocalController())					// ID 입력 위젯  
 	{
+		FString Options = GetWorld()->GetLocalURL();
+		FString ParsedValue;
+
+		if (FParse::Value(*Options, TEXT("TestName="), ParsedValue))
+		{
+			ParsedValue.RemoveFromEnd("=");
+			UE_LOG(LogTemp, Warning, TEXT("Name Value: %s"), *ParsedValue);
+		}
+
+		playerName = ParsedValue;
+
 		if (TestIDWidget_bp)
 		{
 			TestIDWidget = Cast<UTestIDWidget>(CreateWidget(GetWorld(), TestIDWidget_bp));
-			if (TestIDWidget)
+
+			if (ParsedValue.IsEmpty())
 			{
-				bIsShowUI = true;
-				TestIDWidget->AddToViewport();
-				SetInputMode(FInputModeUIOnly());
-				EnableUIMode();
-				bShowMouseCursor = true;
+				if (TestIDWidget)
+				{
+					bIsShowUI = true;
+					TestIDWidget->AddToViewport();
+					SetInputMode(FInputModeUIOnly());
+					EnableUIMode();
+					bShowMouseCursor = true;
+				}
+			}
+			else
+			{
+				bNeedToLoad = true;
 			}
 		}
 
@@ -82,11 +100,6 @@ void AVICTIMSPlayerController::BeginPlay()
 				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
-	}
-
-	if (HasAuthority())
-	{
-		UpdateAllClientsPlayerList();
 	}
 }
 
@@ -500,7 +513,9 @@ void AVICTIMSPlayerController::ServerRPC_RequestClientTravel_Implementation(cons
 
 void AVICTIMSPlayerController::ClientRPC_RequestClientTravel_Implementation(const FString& URL, const FString& Options)
 {
-	UGameplayStatics::OpenLevel(this, FName(*URL), true, Options);
+	FString testOptions = FString::Printf(TEXT("TestName=%s &"), *playerName);
+
+	UGameplayStatics::OpenLevel(this, FName(*URL), true, testOptions);	
 }
 
 void AVICTIMSPlayerController::UI_MoveContainerItem_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot)
@@ -632,7 +647,7 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 		}
 
 		// 서버에 플레이어 리스트 업데이트 요청
-		Server_RequestPlayerListUpdate();
+		////Server_RequestPlayerListUpdate();
 	}
 }
 
@@ -655,7 +670,7 @@ void AVICTIMSPlayerController::SaveData()
 
 void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 {
-	FString ID = PlayerID;
+	FString ID = playerName;
 
 	auto saveData = Cast<UTestSaveGame>(UGameplayStatics::CreateSaveGameObject(UTestSaveGame::StaticClass()));
 	UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
@@ -727,8 +742,10 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			TestIDWidget->IsIDValid = true;
 		}
 
-		if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(CharacterReference))
+		if (AVICTIMSCharacter* p = Cast<AVICTIMSCharacter>(GetPawn()))
 		{
+			CharacterReference = p;
+
 			auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
 
 			CharacterReference->SavePersonalID(ID);
@@ -918,6 +935,32 @@ void AVICTIMSPlayerController::CloseLayouts()
 	// 	return;
 }
 
+void AVICTIMSPlayerController::ServerRPC_UpdatePlayerList_Implementation()
+{
+	otherPlayers = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>()->GetPlayers();
+
+	otherPlayerNames.Reset();
+	for (auto player : otherPlayers)
+	{
+		otherPlayerNames.Add(player->playerName);		
+	}
+
+	ClientRPC_UpdatePlayerList(otherPlayers);
+	ClientRPC_UpdatePlayerNameList(otherPlayerNames);
+}
+
+void AVICTIMSPlayerController::ClientRPC_UpdatePlayerList_Implementation(const TArray<AVICTIMSPlayerController*>& otherPlayerList)
+{
+	otherPlayers = otherPlayerList;
+}
+
+void AVICTIMSPlayerController::ClientRPC_UpdatePlayerNameList_Implementation(const TArray<FString>& otherPlayerNameList)
+{
+	otherPlayerNames = otherPlayerNameList;
+
+	OnChangedPlayerList.ExecuteIfBound(otherPlayerNames);
+}
+
 void AVICTIMSPlayerController::ShowHousingNotification()
 {
 	if (!HousingNotificationWidget)
@@ -954,10 +997,8 @@ void AVICTIMSPlayerController::ShowMovingInfo()
 {
 	if (IsLocalController())
 	{
-		//PopulatePlayerList();
 		if (HUDLayoutReference->MainLayout->MovingInfo->GetVisibility() == ESlateVisibility::Hidden)
 		{
-			HUDLayoutReference->MainLayout->MovingInfo->AddPlayerName();
 			HUDLayoutReference->MainLayout->MovingInfo->SetVisibility(ESlateVisibility::Visible);
 			bIsShowUI = true;
 			EnableUIMode();
@@ -968,161 +1009,5 @@ void AVICTIMSPlayerController::ShowMovingInfo()
 			bIsShowUI = false;
 			DisableUIMode();
 		}
-// 		if (!MovingInfoWidget && MovingInfoWidgetClass)
-// 		{
-// 			MovingInfoWidget = CreateWidget<UMovingInfoWidget>(this, MovingInfoWidgetClass);
-// 			if (MovingInfoWidget)
-// 			{
-// 				MovingInfoWidget->AddToViewport();
-// 				PopulatePlayerList();
-// 			}
-// 		}
-// 		else if (MovingInfoWidget)
-// 		{
-// 			if (MovingInfoWidget->GetVisibility() == ESlateVisibility::Visible)
-// 			{
-// 				MovingInfoWidget->SetVisibility(ESlateVisibility::Hidden);
-// 				bShowMouseCursor = false;
-// 				SetInputMode(FInputModeGameOnly());
-// 			}
-//  			else
-//  			{
-//  				MovingInfoWidget->SetVisibility(ESlateVisibility::Visible);
-// 				
-// 				//PopulatePlayerList();
-// 				//MovingInfoWidget->SetVisibility(ESlateVisibility::Collapsed);
-// 			}
-// 		}
 	}
-}
-
-void AVICTIMSPlayerController::PopulatePlayerList()
-{
-	if (IsLocalController())
-	{
-		if (HUDLayoutReference->MainLayout->MovingInfo)
-		{	
-			CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
-			if (CharacterReference)
-			{
-				FString MyPlayerName = CharacterReference->PersonalID;
-// 				UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList :: MyPlayerName: %s"), *MyPlayerName);
-
-				//for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-				//{
-				//	APlayerController* pc = It->Get();
-				//	//if (pc && pc->PlayerState)
-				//	//{
-				//	//	FString OtherPlayerName = pc->PlayerState->GetPlayerName();
-				//	//	UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList: OtherPlayerName: %s"), *OtherPlayerName);
-				//	//	if (OtherPlayerName != MyPlayerName)
-				//	//	{
-				//	//		//MovingInfoWidget->AddPlayerName(pc->PlayerState->GetPlayerName());
-				//	//		MovingInfoWidget->AddPlayerName(OtherPlayerName);
-
-				//	//	}
-				//	//}
-				//	if (pc)
-				//	{
-				//		FString ControllerName = pc->GetName();
-				//		FString PlayerStateName = pc->PlayerState ? pc->PlayerState->GetPlayerName() : TEXT("Move : No PlayerState");
-
-				//		// 모든 컨트롤러의 이름을 로그로 출력
-				//		UE_LOG(LogTemp, Warning, TEXT("Move :: Controller: %s, PlayerStateName: %s"), *ControllerName, *PlayerStateName);
-
-				//		if (PlayerStateName != MyPlayerName) // 자신의 이름은 제외
-				//		{
-				//			MovingInfoWidget->AddPlayerName(PlayerStateName);
-				//		}
-				//		else
-				//		{
-				//			UE_LOG(LogTemp, Warning, TEXT("Skipping MyPlayerName: %s"), *PlayerStateName);
-				//		}
-				//	}
-				//}
-				Server_RequestPlayerList();
-			}
-		}
-	}
-}
-
-void AVICTIMSPlayerController::Server_RequestPlayerList_Implementation()
-{
-	TArray<FString> PlayerNames;
-
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	{
-		APlayerController* pc = It->Get();
-		if (pc && pc->PlayerState)
-		{
-			FString PlayerStateName = pc->PlayerState->GetPlayerName();
-			if (!PlayerStateName.IsEmpty()) // 빈 이름은 제외
-			{
-				PlayerNames.Add(PlayerStateName);
-			}
-		}
-	}
-	Client_ReceivePlayerList(PlayerNames);
-}
-
-void AVICTIMSPlayerController::Client_ReceivePlayerList_Implementation(const TArray<FString>& PlayerNames)
-{
-	if (HUDLayoutReference->MainLayout->MovingInfo)
-	{	
-		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
-		if (CharacterReference)
-		{
-			FString MyPlayerName = CharacterReference->PersonalID;
-// 			UE_LOG(LogTemp, Warning, TEXT("Move : PopulatePlayerList :: MyPlayerName: %s"), *MyPlayerName);
-
-			for (const FString& PlayerName : PlayerNames)
-			{
-				if (!PlayerName.IsEmpty() && PlayerName != MyPlayerName && !AddedPlayerNames.Contains(PlayerName)) // 자신의 이름은 제외
-				{
-					HUDLayoutReference->MainLayout->MovingInfo->AddPlayerName();
-					AddedPlayerNames.Add(PlayerName);
-				}
-				else
-				{
-// 					UE_LOG(LogTemp, Warning, TEXT("Skipping MyPlayerName: %s"), *PlayerName);
-				}
-			}
-		}
-	}
-}
-
-void AVICTIMSPlayerController::OnRep_PlayerState()
-{
-	Super::OnRep_PlayerState();
-
-	UpdateAllClientsPlayerList();
-}
-
-void AVICTIMSPlayerController::UpdateAllClientsPlayerList()
-{
-	TArray<FString> PlayerNames;
-
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	{
-		APlayerController* pc = It->Get();
-		if (pc && pc->PlayerState)
-		{
-			FString PlayerStateName = pc->PlayerState->GetPlayerName();
-			PlayerNames.Add(PlayerStateName);
-		}
-	}
-
-	for (FConstPlayerControllerIterator It = GetWorld()->GetPlayerControllerIterator(); It; ++It)
-	{
-		APlayerController* pc = It->Get();
-		if (AVICTIMSPlayerController* VPC = Cast<AVICTIMSPlayerController>(pc))
-		{
-			VPC->Client_ReceivePlayerList(PlayerNames);
-		}
-	}
-}
-
-void AVICTIMSPlayerController::Server_RequestPlayerListUpdate_Implementation()
-{
-	UpdateAllClientsPlayerList();
 }

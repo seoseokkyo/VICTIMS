@@ -24,6 +24,9 @@ protected:
 public:
 	virtual void Tick(float DeltaTime) override;
 
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite, Category = "Shelter")
+	class AVICTIMSPlayerController* Ownerplayer;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ExposeOnSpawn = "true"))
 	FString OwnerPlayerID;
 
