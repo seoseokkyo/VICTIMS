@@ -258,7 +258,7 @@ void UVictimsGameInstance::ClientRPC_RequestRespawn_Implementation(AVICTIMSPlaye
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
 	UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
 
-	strURL = TEXT("192.164.0.34:8101");
+	strURL = TEXT("192.168.0.34:8101");
 
 	playerControllerPTR->RequestClientTravel(strURL, FString());
 }
