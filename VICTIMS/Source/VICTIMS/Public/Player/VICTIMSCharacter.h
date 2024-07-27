@@ -61,6 +61,13 @@ public:
 //  인벤토리, 아이템, 상호작용 관련 
 //=====================================================================================================
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullets")
+	int32 PistolBullets;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullets")
+	int32 ShotgunBullets;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ToggleInventory;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

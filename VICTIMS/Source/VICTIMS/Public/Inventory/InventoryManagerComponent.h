@@ -55,6 +55,13 @@ public:
 	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "Manager|Public|Items")
 	void ClientRPC_UseBulletItem(FName Bullet, const int32 count, uint8 Slot);
 
+	UPROPERTY()
+	int32 MaxBullet;
+
+	UPROPERTY()
+	int32 CurrentBullet;
+
+
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
