@@ -48,6 +48,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+
+	UFUNCTION(BlueprintCallable, Category = "Manager|Public|Items")
+	void UseBulletItem(FName Bullet);
+
+	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "Manager|Public|Items")
+	void ClientRPC_UseBulletItem(FName Bullet, const int32 count, uint8 Slot);
+
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -276,6 +284,7 @@ private:
 
 	UFUNCTION(Client, Reliable, Category = "Manager|Private|Items")
 	void ClientRPC_UseConsumableItem(const int32 Health);
+
 
 	UFUNCTION(Category = "Manager|Private|Items")
 	void UseFurnitureItem(uint8 InventorySlot, FSlotStructure InventoryItem);

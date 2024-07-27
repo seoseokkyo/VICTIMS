@@ -998,6 +998,11 @@ void AVICTIMSPlayerController::HideHousingNotification()
 	GetWorld()->GetTimerManager().ClearTimer(HousingNotificationTimerHandle);
 }
 
+void AVICTIMSPlayerController::ServerRPC_TryReload_Implementation(FName Bullet)
+{
+	InventoryManagerComponent->UseBulletItem(Bullet);
+}
+
 void AVICTIMSPlayerController::ShowMovingInfo()
 {
 	if (IsLocalController())

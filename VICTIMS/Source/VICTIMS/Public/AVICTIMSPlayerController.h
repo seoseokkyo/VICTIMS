@@ -166,6 +166,9 @@ public:
 	UPROPERTY()
 	bool bInventoryInitialized = false;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool bHasBullet = false;
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -243,6 +246,9 @@ public:
 	FTimerHandle HousingNotificationTimerHandle;
 	void ShowHousingNotification();
 	void HideHousingNotification();
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerRPC_TryReload(FName Bullet);
 
 	UPROPERTY()
 	class UHousingNotification* HousingNotificationWidget;
