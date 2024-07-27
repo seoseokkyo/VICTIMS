@@ -50,6 +50,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UMiniMapWidget* MiniMapWidget;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UEquippingWeaponWidget* EquipWeaponWidget;
+
 
 protected:
 	UFUNCTION()

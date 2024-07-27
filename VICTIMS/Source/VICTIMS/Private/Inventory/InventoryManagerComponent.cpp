@@ -38,6 +38,8 @@
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/Border.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Sound/SoundBase.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "EquippingWeaponWidget.h"
+#include <../../../../../../../Source/Runtime/CoreUObject/Public/UObject/NoExportTypes.h>
 
 UInventoryManagerComponent::UInventoryManagerComponent()
 {
@@ -954,6 +956,7 @@ void UInventoryManagerComponent::RemoveFromItemAmount(FSlotStructure& InventoryI
 
 void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot)
 {
+
 	if (FromInventory == ToInventory && FromInventorySlot == ToInventorySlot)
 	{
 		return;
@@ -994,6 +997,26 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					bEquipShotGun = false;
 					bEquipKnife = false;
 					bEquipAxe = false;
+
+					AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+					if (pc)
+					{	FSlotStructure BulletItem;
+						CurrentBullet = GetPlayerRef()->PistolBullets;
+						for (int i = 0; i < FromInventory->Inventory.Num(); i++)
+						{
+							if (FromInventory->Inventory[i].ItemStructure.ID == FName("ID_PistolBullet"))
+							{
+								BulletItem = FromInventory->Inventory[i];
+								MaxBullet = BulletItem.Amount;
+								break;
+							}
+							else
+							{
+								MaxBullet = 0;
+							}
+						}
+						pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, CurrentBullet, MaxBullet);
+					}
 				}
 // 				playerReference->UsePistol();
 			}
@@ -1056,6 +1079,27 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					bEquipShotGun = true;
 					bEquipKnife = false;
 					bEquipAxe = false;
+
+					AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+					if (pc)
+					{
+						FSlotStructure BulletItem;
+						CurrentBullet = GetPlayerRef()->ShotgunBullets;
+						for (int i = 0; i < FromInventory->Inventory.Num(); i++)
+						{
+							if (FromInventory->Inventory[i].ItemStructure.ID == FName("ID_ShotGunBullet"))
+							{
+								BulletItem = FromInventory->Inventory[i];
+								MaxBullet = BulletItem.Amount;
+								break;
+							}
+							else
+							{
+								MaxBullet = 0;
+							}
+						}
+						pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, CurrentBullet, MaxBullet);
+					}
 				}
 			}
 			UpdateEquippedStats();
@@ -1128,6 +1172,11 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 			bEquipPistol = false;
 		}
 		// 				playerReference->UsePistol();
@@ -1153,6 +1202,11 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipKnife = false;
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 		}
 		// 				playerReference->UseKnife();
 	}
@@ -1164,6 +1218,11 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipAxe = false;
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 		}
 		// 				playerReference->UseAxe();
 	}
@@ -1175,6 +1234,11 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipShotGun = false;
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 		}
 		// 				playerReference->UsePistol();
 	}
@@ -1233,6 +1297,11 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipPistol = false;
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 		}
 		// 				playerReference->UsePistol();
 	}
@@ -1245,6 +1314,11 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipRifle = false;
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 		}
 		// 				playerReference->UseRifle();
 	}
@@ -1257,6 +1331,11 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipKnife = false;
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 		}
 		// 				playerReference->UseKnife();
 	}
@@ -1268,6 +1347,11 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipAxe = false;
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 		}
 		// 				playerReference->UseAxe();
 	}
@@ -1279,6 +1363,11 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipShotGun = false;
+			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController);
+			if (pc)
+			{
+				pc->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+			}
 		}
 		// 				playerReference->UsePistol();
 	}
@@ -1491,6 +1580,7 @@ void UInventoryManagerComponent::ClientRPC_UseBulletItem_Implementation(FName Bu
 			AddItem(PlayerInventory, Slot, InventoryItem);
 			con->bHasBullet = true;
 		}
+		con->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->UpdateBulletUI(count, InventoryItem.Amount);
 	}
 	else
 	{
@@ -1523,21 +1613,29 @@ void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 				LocalIndex = i; 
 				ReloadCount = 2;
 				con->bHasBullet = true;
-				UE_LOG(LogTemp, Warning, TEXT("Found ShotGun Bullet"));
+// 				UE_LOG(LogTemp, Warning, TEXT("Found ShotGun Bullet"));
 				ClientRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);    // ID_ShotGunBullet 이면 2발 
 				break;
 			}
 			else
 			{
 				con->bHasBullet = false;
+				if (con->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget)
+				{
+					con->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->ShowNotification();
+				}
 			}
 		}
 	}
 	else
 	{
 		// 플레이어 인벤토리에 필요한 총알이 없으면 
-		UE_LOG(LogTemp, Warning, TEXT("Can't Found"));
+// 		UE_LOG(LogTemp, Warning, TEXT("Can't Found"));
 		con->bHasBullet = false;
+		if (con->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget)
+		{
+			con->HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->ShowNotification();
+		}
 	}
 }
 
