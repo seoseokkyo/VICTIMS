@@ -97,7 +97,6 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-	
 private:
 	/*UPROPERTY()
 	class UEnemyAnimInstance* anim;*/

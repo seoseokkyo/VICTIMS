@@ -40,6 +40,8 @@ void ACharacterBase::BeginPlay()
 	stateComp->InitStat();
 	stateComp->UpdateStat();
 	stateComp->dieDelegate.BindUFunction(this, FName("DieFunction"));
+
+	bDead = false;
 }
 
 // Called every frame
@@ -62,6 +64,11 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (bDead)
+	{
+		return 0.0f;
+	}
+
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
 	stateComp->NetMulticastRPC_SetStatePoint(HP, temp);
 

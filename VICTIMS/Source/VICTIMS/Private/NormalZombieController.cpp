@@ -373,7 +373,19 @@ void ANormalZombieController::OnTargetDetected(AActor* _Actor, FAIStimulus const
 		return;
 	}
 
-	targetActor = _Actor;
+	if (auto charCheck = Cast<ACharacterBase>(_Actor))
+	{
+		if (false == charCheck->bDead)
+		{
+			targetActor = _Actor;
+		}
+		else
+		{
+			targetActor = nullptr;
+			return;
+		}
+	}
+
 
 	if (Stimulus.Type.Name == FName("Default__AISense_Sight"))
 	{

@@ -107,6 +107,4 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bIsDedicateServer;
-
-
 };

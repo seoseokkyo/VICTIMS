@@ -15,6 +15,9 @@ class VICTIMS_API UNormalZombieAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 	
 	
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	
-	
+public:
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
+	bool bDead = false;
 };

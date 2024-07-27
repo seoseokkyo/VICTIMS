@@ -84,12 +84,14 @@ void UCollisionComponent::CollisionTrace()
 		if (alreadyHitActors.Contains(lastHitStruct.GetActor()) == false)
 		{
 			hittedActor = lastHitStruct.GetActor();
-			ACharacterBase* AddDamageChar = Cast<ACharacterBase>(hittedActor);
-			if (AddDamageChar!=nullptr)
-			{
-				
-				ownerChar->AddDamage(AddDamageChar);
 
+			if (nullptr != ownerChar)
+			{
+				ACharacterBase* AddDamageChar = Cast<ACharacterBase>(hittedActor);
+				if (AddDamageChar != nullptr)
+				{
+					ownerChar->AddDamage(AddDamageChar);
+				}
 			}
 
 			alreadyHitActors.Add(hittedActor);
