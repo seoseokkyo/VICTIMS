@@ -259,7 +259,7 @@ void UInventoryManagerComponent::Client_SetInventorySlotItem_Implementation(cons
 	SetInventorySlotItem(ContentToAdd, InventorySlot);
 	if (MoveItemSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), MoveItemSound, playerReference->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), MoveItemSound, GetPlayerRef()->GetActorLocation());
 	}
 }
 
@@ -268,7 +268,7 @@ void UInventoryManagerComponent::Client_SetContainerSlotItem_Implementation(cons
 	SetContainerSlotItem(ContentToAdd, InventorySlot);
 	if (MoveItemSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), MoveItemSound, playerReference->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), MoveItemSound, GetPlayerRef()->GetActorLocation());
 	}
 }
 
@@ -287,7 +287,7 @@ void UInventoryManagerComponent::Client_OpenContainer_Implementation(FContainerI
 	LoadContainerSlots(ContainerProperties, InContainerInventory, InPlayerInventory);
 	if (OpenShopSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, playerReference->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, GetPlayerRef()->GetActorLocation());
 	}
 }
 
@@ -296,7 +296,7 @@ void UInventoryManagerComponent::Client_CloseContainer_Implementation()
 	MainLayoutUI->Container->SetVisibility(ESlateVisibility::Hidden);
 	if (OpenShopSound)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, playerReference->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenShopSound, GetPlayerRef()->GetActorLocation());
 	}
 }
 
@@ -984,11 +984,11 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 
 			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == false)
 			{
-				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 					bEquipPistol = true;
 					bEquipRifle = false;
 					bEquipShotGun = false;
@@ -1000,11 +1000,11 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 //================================================================================================================== NO USE 
 			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == false)
 			{
-				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 					bEquipPistol = false;
 					bEquipRifle = true;
 					bEquipShotGun = false;
@@ -1016,11 +1016,11 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 //==========================================================================================================================
 			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == false)
 			{
-				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 					bEquipPistol = false;
 					bEquipRifle = false;
 					bEquipShotGun = false;
@@ -1031,11 +1031,11 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 			}
 			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == false)
 			{
-				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 					bEquipPistol = false;
 					bEquipRifle = false;
 					bEquipShotGun = false;
@@ -1046,11 +1046,11 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 			}
 			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == false)
 			{
-				if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 				{
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-					playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 					bEquipPistol = false;
 					bEquipRifle = false;
 					bEquipShotGun = true;
@@ -1123,11 +1123,11 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 
 	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipPistol = false;
 		}
 		// 				playerReference->UsePistol();
@@ -1135,11 +1135,11 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 //=======================================================================================================NO USE
 	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipRifle = false;
 		}
 		// 				playerReference->UseRifle();
@@ -1147,33 +1147,33 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 //==============================================================================================================
 	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipKnife = false;
 		}
 		// 				playerReference->UseKnife();
 	}
 	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipAxe = false;
 		}
 		// 				playerReference->UseAxe();
 	}
 	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipShotGun = false;
 		}
 		// 				playerReference->UsePistol();
@@ -1227,11 +1227,11 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 
 		if (LocalSlot.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectPistol")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipPistol = false;
 		}
 		// 				playerReference->UsePistol();
@@ -1239,11 +1239,11 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 //=======================================================================================================NO USE
 	if (LocalSlot.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipRifle = false;
 		}
 		// 				playerReference->UseRifle();
@@ -1251,33 +1251,33 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 //==============================================================================================================
 	if (LocalSlot.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipKnife = false;
 		}
 		// 				playerReference->UseKnife();
 	}
 	if (LocalSlot.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipAxe = false;
 		}
 		// 				playerReference->UseAxe();
 	}
 	if (LocalSlot.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
 	{
-		if (UFunction* TriggerFunction = playerReference->FindFunction(TEXT("MocapSelectRifle")))
+		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 		{
 			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			playerReference->ProcessEvent(TriggerFunction, ParamsBuffer);
+			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipShotGun = false;
 		}
 		// 				playerReference->UsePistol();
@@ -1476,7 +1476,7 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(playerReference);
+	Params.AddIgnoredActor(GetPlayerRef());
 
 	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_GameTraceChannel6, Params);
 
