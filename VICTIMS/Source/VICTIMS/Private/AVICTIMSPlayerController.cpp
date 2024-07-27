@@ -33,6 +33,7 @@
 #include "MovingInfoWidget.h"
 #include "GameFramework/PlayerState.h"
 #include "Components/EditableText.h"
+#include "Components/AudioComponent.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -88,7 +89,8 @@ void AVICTIMSPlayerController::BeginPlay()
 					
 					if (BGM)
 					{
-						UGameplayStatics::PlaySound2D(GetWorld(),BGM);
+						BGMComp = UGameplayStatics::CreateSound2D(GetWorld(), BGM);
+						BGMComp->Play();
 					}
 				}
 			}

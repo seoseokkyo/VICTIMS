@@ -42,6 +42,7 @@
 #include "UI/MainLayout.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Animation/WidgetAnimation.h>
 #include "CompassWedget.h"
+#include "MiniMapWidget.h"
 #include "UI/MyHUD.h"
 
 //<<
@@ -158,7 +159,7 @@ void AVICTIMSCharacter::BeginPlay()
 		if (MyPlayerController && MyPlayerController->IsLocalController())
 		{
 			hpWidget = Cast<UHPWidget>(CreateWidget(GetWorld(), hpWidget_bp));
-			hpWidget->AddToViewport();
+			//hpWidget->AddToViewport();
 		}
 	}
 
@@ -166,6 +167,8 @@ void AVICTIMSCharacter::BeginPlay()
 	if (IsLocallyControlled())
 	{
 		MyPlayerController->HUDLayoutReference->MainLayout->CompassWidget->AddToViewport();
+		MyPlayerController->HUDLayoutReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Hidden);
+		MyPlayerController->HUDLayoutReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 

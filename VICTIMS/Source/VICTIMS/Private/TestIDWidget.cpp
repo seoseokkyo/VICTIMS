@@ -8,6 +8,13 @@
 #include "Shelter.h"
 #include "Sound/Soundbase.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "HPWidget.h"
+#include "Components/AudioComponent.h"
+#include "MyHUD.h"
+#include "HUDLayout.h"
+#include "MainLayout.h"
+#include "CompassWedget.h"
+#include "MiniMapWidget.h"
 
 void UTestIDWidget::NativeConstruct()
 {
@@ -37,8 +44,18 @@ void UTestIDWidget::OnClickedSignInButton()
 			}
 
 			if (IsIDValid)
-			{	
+			{
 				PC->CloseTestIDWidget();
+
+				PC->CharacterReference->hpWidget->AddToViewport();
+
+				PC->HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
+				PC->HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
+
+				if (PC->BGMComp)
+				{
+					PC->BGMComp->Stop();
+				}
 			}
 			else
 			{
@@ -87,6 +104,16 @@ void UTestIDWidget::OnClickedContinueButton()
 				{
 
 					PC->CloseTestIDWidget();
+
+					PC->CharacterReference->hpWidget->AddToViewport();
+
+					PC->HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
+					PC->HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
+
+					if (PC->BGMComp)
+					{
+						PC->BGMComp->Stop();
+					}
 				}
 				else
 				{
