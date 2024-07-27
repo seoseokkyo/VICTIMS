@@ -1435,24 +1435,29 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 
 void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStructure InventoryItem)
 {
-
-	ClientRPC_UseConsumableItem(InventoryItem.ItemStructure.Health);
-
-	uint8 AmountToRemove = 1;
-	bool WasFullAmountRemoved = false;
-	uint8 AmountRemoved = 0;
-
-	RemoveFromItemAmount(InventoryItem, AmountToRemove, WasFullAmountRemoved, AmountRemoved);
-
-	if (WasFullAmountRemoved)
+	if (InventoryItem.ItemStructure.IsFood)
 	{
-		InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
+		ClientRPC_UseConsumableItem(InventoryItem.ItemStructure.Health);
+		uint8 AmountToRemove = 1;
+		bool WasFullAmountRemoved = false;
+		uint8 AmountRemoved = 0;
 
-		RemoveItem(PlayerInventory, InventorySlot);
+		RemoveFromItemAmount(InventoryItem, AmountToRemove, WasFullAmountRemoved, AmountRemoved);
+
+		if (WasFullAmountRemoved)
+		{
+			InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
+
+			RemoveItem(PlayerInventory, InventorySlot);
+		}
+		else
+		{
+			AddItem(PlayerInventory, InventorySlot, InventoryItem);
+		}
 	}
 	else
 	{
-		AddItem(PlayerInventory, InventorySlot, InventoryItem);
+		return;
 	}
 }
  
@@ -1462,6 +1467,77 @@ void UInventoryManagerComponent::ClientRPC_UseConsumableItem_Implementation(cons
 	if (UseSound_Consumable)
 	{
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(),UseSound_Consumable, GetPlayerRef()->GetActorLocation());
+	}
+}
+
+void UInventoryManagerComponent::ClientRPC_UseBulletItem_Implementation(FName Bullet, const int32 count, uint8 Slot)
+{
+	AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(playerReference->MyPlayerController);
+	FSlotStructure InventoryItem = PlayerInventory->GetInventoryItem(Slot);
+	if (!InventoryItem.ItemStructure.IsFood)
+	{
+		uint8 AmountToRemove = count;
+		bool WasFullAmountRemoved = false;
+		uint8 AmountRemoved = 0;
+		RemoveFromItemAmount(InventoryItem, count, WasFullAmountRemoved, AmountRemoved);
+		if (WasFullAmountRemoved)
+		{
+			InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
+			con->bHasBullet = true;
+			RemoveItem(PlayerInventory, Slot);
+		}
+		else
+		{
+			AddItem(PlayerInventory, Slot, InventoryItem);
+			con->bHasBullet = true;
+		}
+	}
+	else
+	{
+		con->bHasBullet = false;
+	}
+}
+
+void UInventoryManagerComponent::UseBulletItem(FName Bullet)
+{
+	int32 ReloadCount = 0;
+	uint8 LocalIndex = 0;
+	if (AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(GetPlayerRef()->MyPlayerController))
+	{	
+		con->bHasBullet = false;
+		// 플레이어 인벤토리 갖고있는 아이템 만큼 반복문 돌려서 총알아이템 있는지 확인
+		for (uint8 i = 0; i < con->InventoryManagerComponent->PlayerInventory->Inventory.Num(); i++)
+		{ 
+			if (con->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID == Bullet && Bullet == FName("ID_PistolBullet"))							// 플레이어가 요청한 총알 ID와 일치한지 확인 
+			{
+				LocalIndex = i;
+				ReloadCount = 8;
+				UE_LOG(LogTemp, Warning, TEXT("Found Pistol Bullet"));
+				con->bHasBullet = true;
+				ClientRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);	 // ID_PistolBullet 이면 8발
+				break;
+
+			}
+			else if (con->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID == Bullet && Bullet == FName("ID_ShotGunBullet"))
+			{
+				LocalIndex = i; 
+				ReloadCount = 2;
+				con->bHasBullet = true;
+				UE_LOG(LogTemp, Warning, TEXT("Found ShotGun Bullet"));
+				ClientRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);    // ID_ShotGunBullet 이면 2발 
+				break;
+			}
+			else
+			{
+				con->bHasBullet = false;
+			}
+		}
+	}
+	else
+	{
+		// 플레이어 인벤토리에 필요한 총알이 없으면 
+		UE_LOG(LogTemp, Warning, TEXT("Can't Found"));
+		con->bHasBullet = false;
 	}
 }
 

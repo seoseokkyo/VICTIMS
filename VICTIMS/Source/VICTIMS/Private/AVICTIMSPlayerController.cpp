@@ -237,7 +237,6 @@ void AVICTIMSPlayerController::CollectFromPanel(const FName& Name)
 			if (WorldActor->ID == Name)
 			{
 				Server_OnActorUsed(WorldActor);
-
 				return;
 			}
 		}
@@ -997,6 +996,11 @@ void AVICTIMSPlayerController::HideHousingNotification()
 	}
 
 	GetWorld()->GetTimerManager().ClearTimer(HousingNotificationTimerHandle);
+}
+
+void AVICTIMSPlayerController::ServerRPC_TryReload_Implementation(FName Bullet)
+{
+	InventoryManagerComponent->UseBulletItem(Bullet);
 }
 
 void AVICTIMSPlayerController::ShowMovingInfo()

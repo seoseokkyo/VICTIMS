@@ -40,6 +40,9 @@ public:
 	bool IsInShop;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool IsFood; 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 PriceValue;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
