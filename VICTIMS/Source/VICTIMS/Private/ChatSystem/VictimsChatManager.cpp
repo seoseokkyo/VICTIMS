@@ -53,7 +53,7 @@ UVictimsChatManager::UVictimsChatManager(const FObjectInitializer& ObjectInitial
 			WhisperServerWidgetPath(L"/Script/UMGEditor.WidgetBlueprint'/GmDynamicMultiChatSystem/Blueprints/Widgets/Notify/BP_WhisperServer'")
 		{}
 	};
-
+	///Game/MyCustomFolder/Blueprints/Widgets/BP_ChatBox
 	static FHiHoRefAssist Ho;
 
 	if (!ChatWidgetClassRef && Ho.MainChatWidgetClassPath.Succeeded())
@@ -105,10 +105,10 @@ UVictimsChatManager::UVictimsChatManager(const FObjectInitializer& ObjectInitial
 	{
 		ArrM_GeneralInfoByChannel.Add(EChatChannelType::Global) = FChatGeneralInfo(FLinearColor(0.85f, 0.85f, 0.85f, 0.85f), NewDefaultFontInfo);
 	}
-	if (!ArrM_GeneralInfoByChannel.Contains(EChatChannelType::Friend))
-	{
-		ArrM_GeneralInfoByChannel.Add(EChatChannelType::Friend) = FChatGeneralInfo(FLinearColor(1.f, 0.65f, 0.f, 1.f), NewDefaultFontInfo);/*Orange*/
-	}
+//	if (!ArrM_GeneralInfoByChannel.Contains(EChatChannelType::Friend))
+//	{
+//		ArrM_GeneralInfoByChannel.Add(EChatChannelType::Friend) = FChatGeneralInfo(FLinearColor(1.f, 0.65f, 0.f, 1.f), NewDefaultFontInfo);/*Orange*/
+//	}
 	if (!ArrM_GeneralInfoByChannel.Contains(EChatChannelType::Party))
 	{
 		ArrM_GeneralInfoByChannel.Add(EChatChannelType::Party) = FChatGeneralInfo(FLinearColor(0.3137f, 0.73725f, 0.913725f, 1.f), NewDefaultFontInfo);/*Sky blue*/
@@ -138,10 +138,10 @@ UVictimsChatManager::UVictimsChatManager(const FObjectInitializer& ObjectInitial
 	{
 		ArrM_FilteringSettingsForEachChannel.Add(EChatChannelType::Global) = true;
 	}
-	if (!ArrM_FilteringSettingsForEachChannel.Contains(EChatChannelType::Friend))
-	{
-		ArrM_FilteringSettingsForEachChannel.Add(EChatChannelType::Friend) = true;
-	}
+//	if (!ArrM_FilteringSettingsForEachChannel.Contains(EChatChannelType::Friend))
+//	{
+//		ArrM_FilteringSettingsForEachChannel.Add(EChatChannelType::Friend) = true;
+//	}
 	if (!ArrM_FilteringSettingsForEachChannel.Contains(EChatChannelType::Party))
 	{
 		ArrM_FilteringSettingsForEachChannel.Add(EChatChannelType::Party) = true;
@@ -466,8 +466,8 @@ void UVictimsChatManager::Server_ProcessMsg_Implementation(const FVictims_MsgInf
 		case EChatChannelType::Global:
 			ChatSubsystem->ReceivedGlobalChat(GetOwner(), InMsgInfo);
 			break;
-		case EChatChannelType::Friend:
-			break;
+//		case EChatChannelType::Friend:
+//			break;
 		case EChatChannelType::Party:
 			Server_ReceivedPartyChat();
 			break;

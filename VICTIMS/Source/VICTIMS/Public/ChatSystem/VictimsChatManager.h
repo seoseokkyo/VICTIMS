@@ -29,11 +29,11 @@ struct FChatPartyInfo
 		:
 	PartyLeader(InNewPartyLeader)
 	{}
-
-	UPROPERTY()
+public:
+	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<APlayerState> PartyLeader;
 
-	UPROPERTY()
+	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<APlayerState>> PartyMembers;
 	
 };
