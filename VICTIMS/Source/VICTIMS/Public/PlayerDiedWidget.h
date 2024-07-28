@@ -20,6 +20,9 @@ public:
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	class UButton* QuitGameButton;
 
+	UPROPERTY(EditAnywhere)
+	class USoundBase* DeadSound;
+
 protected:
 	virtual void NativeConstruct() override;
 
