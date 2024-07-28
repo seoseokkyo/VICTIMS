@@ -25,7 +25,7 @@ void UEquippingWeaponWidget::SetWeaponIcon(FName WeaponName, int32 CurrentBullet
 		if (Knife)
 		{
 			WeaponIcon->SetBrushFromTexture(Knife);
-			BulletBorder->SetVisibility(ESlateVisibility::Collapsed);
+			BulletBorder->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 	if (tempName == FName("ID_Axe"))
@@ -33,7 +33,7 @@ void UEquippingWeaponWidget::SetWeaponIcon(FName WeaponName, int32 CurrentBullet
 		if (Axe)
 		{
 			WeaponIcon->SetBrushFromTexture(Axe);
-			BulletBorder->SetVisibility(ESlateVisibility::Collapsed);
+			BulletBorder->SetVisibility(ESlateVisibility::Hidden);
 		}
 	}
 	if (tempName == FName("ID_Pistol"))
@@ -64,10 +64,14 @@ void UEquippingWeaponWidget::HideWeaponIcon()
 	MainBorder->SetVisibility(ESlateVisibility::Hidden);
 }
 
-void UEquippingWeaponWidget::UpdateBulletUI(int32 Bullets, int32 MaxBullets)
+void UEquippingWeaponWidget::UpdateMaxBullet(int32 Bullets)
+{
+	MaxBullet->SetText(FText::AsNumber(Bullets));
+}
+
+void UEquippingWeaponWidget::UpdateCurrentBullet(int32 Bullets)
 {
 	CurrentBullet->SetText(FText::AsNumber(Bullets));
-	MaxBullet->SetText(FText::AsNumber(MaxBullets));
 }
 
 void UEquippingWeaponWidget::ShowNotification()

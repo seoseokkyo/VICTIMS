@@ -93,8 +93,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_UseHotbarWeapon(const uint8& InventorySlot);
 
-	UFUNCTION()
-	void UseHotbarWeapon(const uint8& HotbarSlot);
+	UFUNCTION(Client, Reliable)
+	void Client_UseHotbarWeapon(const uint8& HotbarSlot);
 
 
 	UFUNCTION(Server, Reliable)

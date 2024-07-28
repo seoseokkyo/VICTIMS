@@ -51,7 +51,10 @@ public:
 	void HideWeaponIcon();
 
 	UFUNCTION(BlueprintCallable)
-	void UpdateBulletUI(int32 Bullets, int32 MaxBullets);
+	void UpdateMaxBullet(int32 Bullets);
+
+	UFUNCTION(BlueprintCallable)
+	void UpdateCurrentBullet(int32 Bullets);
 
 	UFUNCTION()
 	void ShowNotification();
