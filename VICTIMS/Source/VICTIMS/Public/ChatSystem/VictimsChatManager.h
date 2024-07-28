@@ -7,6 +7,8 @@
 #include "Components/ActorComponent.h"
 #include "Victims_ChatBox.h"
 #include "ChatChannelTypeDef.h"
+
+#include "VICTIMSCharacter.h"
 #include "VictimsChatManager.generated.h"
 
 class UVictims_ChatMsg;
@@ -14,6 +16,7 @@ struct FVictims_MsgInfo;
 class UVictims_ChatBox;
 class APlayerState;
 class UVictims_FloatingWidget;
+class UPartyComponent;
 
 USTRUCT(BlueprintType)
 struct FChatPartyInfo
@@ -33,9 +36,12 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<APlayerState> PartyLeader;
 
+
 	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<APlayerState>> PartyMembers;
-	
+
+
+
 };
 
 UCLASS(ClassGroup = (MultiChatSystem), meta = (BlueprintSpawnableComponent))
@@ -46,6 +52,18 @@ class VICTIMS_API UVictimsChatManager : public UActorComponent
 public:
 
 	UVictimsChatManager(const FObjectInitializer& ObjectInitializer);
+
+
+	//PartyComponent Ä³½Ì
+	UPROPERTY(BlueprintReadWrite, Replicated)
+	UPartyComponent* ownerPartyComponent;
+	
+	UPROPERTY(BlueprintReadWrite, Replicated)
+	AVICTIMSCharacter* ownerCharacter;
+	
+	UPROPERTY(BlueprintReadWrite, Replicated)
+	FString PartyName;
+	//
 
 	UPROPERTY(EditDefaultsOnly, Category = "Init Settings|Short cut")
 	struct FKey WhisperShortcutKey{EKeys::J};
@@ -156,6 +174,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void GmOnPressedWhisperKeyFunc();
 
+	UPROPERTY(Replicated, BlueprintReadWrite)
+	FChatPartyInfo PartyInfo;
+
+	UFUNCTION(BlueprintCallable)
+	UVictimsChatManager* GetChatManagerFromActor(AActor* InTarget) const;
+
 protected:
 
 	//~UActorComponent interface
@@ -171,8 +195,7 @@ private:
 	UPROPERTY(Replicated)
 	FString PlayerName;
 
-	UPROPERTY(Replicated)
-	FChatPartyInfo PartyInfo;
+	
 
 	UPROPERTY()
 	FVictims_MsgInfo MsgInfo;
@@ -180,7 +203,7 @@ private:
 	FString SimpleLeaderID;
 
 	APlayerState* GetPSFromActor(AActor* InTarget) const;
-	UVictimsChatManager* GetChatManagerFromActor(AActor* InTarget) const;
+	
 	bool IsLeaderOfTheParty() const;
 
 	// Bind input functions

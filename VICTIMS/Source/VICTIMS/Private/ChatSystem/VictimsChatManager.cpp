@@ -25,6 +25,7 @@
 #include <Engine/GameInstance.h>
 #include "Victims_ChatSubsystem.h"
 #include "Victims_FloatingWidget.h"
+#include <AVICTIMSPlayerController.h>
 
 
 UVictimsChatManager::UVictimsChatManager(const FObjectInitializer& ObjectInitializer)
@@ -237,6 +238,54 @@ void UVictimsChatManager::Server_LeaveParty_Implementation()
 	if (IsLeaderOfTheParty())
 	{
 		Server_BreakParty();
+
+		//////////////////////////////////파티 컴포넌트 호출///////////////////////////////////////////////////////////////////////
+		if (ownerCharacter)
+		{
+			PartyName = ownerCharacter->GetName();
+		
+			ownerPartyComponent->ServerRPC_preBreakParty_Implementation();
+		}
+		//생성 시점이 안 맞아서 널포인터가 뜨니까, 다시 캐싱 해주자
+		else
+		{
+			AVICTIMSPlayerController* OwnerController = Cast<AVICTIMSPlayerController>(GetOwner());
+			if (OwnerController)
+			{
+				// 소유자의 UPartyComponent를 캐싱!!!!!
+				UPartyComponent* OwnerPartyComponent = OwnerController->FindComponentByClass<UPartyComponent>();
+				if (OwnerPartyComponent)
+				{
+					ownerPartyComponent = OwnerPartyComponent;
+		
+		
+					APawn* ownerPawn = OwnerController->GetPawn();
+					if (ownerPawn)
+					{
+		
+						AVICTIMSCharacter* ownerVictimsChar = Cast<AVICTIMSCharacter>(ownerPawn);
+						if (ownerVictimsChar)
+						{
+							ownerCharacter = ownerVictimsChar;
+		
+		
+							if (ownerCharacter)
+							{
+								ownerPartyComponent->ServerRPC_preBreakParty_Implementation();
+							}
+						}
+		
+		
+		
+					}
+		
+		
+				}
+			}
+		}
+
+
+
 	}
 	else if (LeaderChatManager)
 	{
@@ -370,7 +419,7 @@ void UVictimsChatManager::ExpelPartyMember_Implementation(AActor* InTargetMember
 	PartyInfo.PartyMembers.Remove(GetPSFromActor(InTargetMember));
 
 }
-
+//여기서 아주 배열로 받아버려..?
 void UVictimsChatManager::Server_AddNewPartyMember_Implementation(AActor* InNewPartyMember)
 {
 	if (!InNewPartyMember)
@@ -446,6 +495,54 @@ void UVictimsChatManager::Server_CreateNewParty_Implementation()
 		Client_ReceivedChat(FVictims_MsgInfo(FDateTime::Now(),
 			ArrM_CmdChannels[FString("CreateParty")].DescOfChannel,
 			ArrM_CmdChannels[FString("CreateParty")].ChannelToTransmitExplanation, false));
+
+		//////////////////////////////////파티 컴포넌트 호출///////////////////////////////////////////////////////////////////////
+		if (ownerCharacter)
+		{
+			PartyName = ownerCharacter->GetName();
+		
+			ownerPartyComponent->ServerRPC_CreateNewParty(ownerCharacter, PartyName);
+		}
+		//생성 시점이 안 맞아서 널포인터가 뜨니까, 다시 캐싱 해주자
+		else
+		{
+			AVICTIMSPlayerController* OwnerController = Cast<AVICTIMSPlayerController>(GetOwner());
+			if (OwnerController)
+			{
+				// 소유자의 UPartyComponent를 캐싱!!!!!
+				UPartyComponent* OwnerPartyComponent = OwnerController->FindComponentByClass<UPartyComponent>();
+				if (OwnerPartyComponent)
+				{
+					ownerPartyComponent = OwnerPartyComponent;
+		
+		
+					APawn* ownerPawn = OwnerController->GetPawn();
+					if (ownerPawn)
+					{
+		
+						AVICTIMSCharacter* ownerVictimsChar = Cast<AVICTIMSCharacter>(ownerPawn);
+						if (ownerVictimsChar)
+						{
+							ownerCharacter = ownerVictimsChar;
+		
+							
+							if (ownerCharacter)
+							{ 
+								PartyName = ownerCharacter->GetName();
+		
+								ownerPartyComponent->ServerRPC_CreateNewParty_Implementation(ownerCharacter, PartyName);
+							}
+						}
+		
+		
+						
+					}
+		
+					
+				}
+			}
+		}
+		
 	}
 	else
 	{
@@ -674,8 +771,32 @@ void UVictimsChatManager::BeginPlay()
 				GetChatSubsystem()->RegisterChatManager(this);
 			}));
 	}
-}
 
+	////partyComponent캐싱
+	//AVICTIMSPlayerController* OwnerController = Cast<AVICTIMSPlayerController>(GetOwner());
+	//if (OwnerController)
+	//{
+	//	// 소유자의 UPartyComponent를 캐싱!!!!!
+	//	UPartyComponent* OwnerPartyComponent = OwnerController->FindComponentByClass<UPartyComponent>();
+	//	if (OwnerPartyComponent)
+	//	{
+	//		ownerPartyComponent=OwnerPartyComponent;
+	//
+	//
+	//		APawn*ownerPawn = OwnerController->GetPawn();
+	//		if (ownerPawn)
+	//		{
+	//
+	//			AVICTIMSCharacter* ownerVictimsChar=Cast<AVICTIMSCharacter>(ownerPawn);
+	//			if (ownerVictimsChar)
+	//			{
+	//				ownerCharacter=ownerVictimsChar;
+	//			}
+	//
+	//		}
+	//	}
+	//}
+}
 void UVictimsChatManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	GetChatSubsystem()->UnregisterChatManager(this);

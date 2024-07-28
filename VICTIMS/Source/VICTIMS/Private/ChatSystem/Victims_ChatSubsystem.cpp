@@ -5,6 +5,7 @@
 
 
 #include "VictimsChatManager.h"
+#include <PartyComponent.h>
 
 
 UVictims_ChatSubsystem::UVictims_ChatSubsystem()

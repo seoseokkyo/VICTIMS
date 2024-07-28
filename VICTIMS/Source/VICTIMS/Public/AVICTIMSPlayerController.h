@@ -5,6 +5,8 @@
 #include "GameFramework/PlayerController.h"
 #include "InventoryHUDInterface.h"
 #include "Tuples.h"
+
+#include "PartyComponent.h"
 #include "AVICTIMSPlayerController.generated.h"
 
 class UDatatable;
@@ -13,7 +15,6 @@ class UEquipmentComponent;
 class UInventoryManagerComponent;
 class UInteractiveText_Entry;
 class UTestIDWidget;
-
 UCLASS()
 class VICTIMS_API AVICTIMSPlayerController : public APlayerController, public IInventoryHUDInterface
 {
@@ -162,6 +163,10 @@ public:
 
 	UPROPERTY()
 	bool bInventoryInitialized = false;
+
+	//che
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UPartyComponent* partycomponent;
 
 protected:
 	virtual void BeginPlay() override;
