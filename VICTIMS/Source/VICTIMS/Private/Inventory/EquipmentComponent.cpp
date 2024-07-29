@@ -93,10 +93,6 @@ void UEquipmentComponent::ServerRPC_UpdateEquippedMeshes_Implementation(uint8 In
 				FeetMesh->SetSkeletalMesh(NewMesh, false);
 			}
 			break;
-		case EEquipmentSlot::Hands:
-			// 			EquipmentCharacterReference->HandsMesh = NewMesh;
-			// 			EquipmentCharacterReference->OnRep_MainHandsMesh();
-			break;
 		case EEquipmentSlot::Legs:
 			BottomMesh = EquipmentCharacterReference->Legs;
 			if (NewMesh == nullptr)
@@ -160,10 +156,6 @@ void UEquipmentComponent::NetMulticastRPC_UpdateEquippedMeshes_Implementation(ui
 				FeetMesh->SetSkeletalMesh(NewMesh, false);
 				EquipmentCharacterReference->SetFeetMesh(NewMesh);
 			}
-			break;
-		case EEquipmentSlot::Hands:
-// 			EquipmentCharacterReference->HandsMesh = NewMesh;
-// 			EquipmentCharacterReference->OnRep_MainHandsMesh();
 			break;
 		case EEquipmentSlot::Legs:
 			BottomMesh = EquipmentCharacterReference->Legs;

@@ -468,6 +468,11 @@ void AVICTIMSCharacter::DieFunction()
 	{
 		DiedWidget = CreateWidget<UPlayerDiedWidget>(GetWorld(), DiedWidget_bp);
 		DiedWidget->AddToViewport(0);
+		FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
+		if (DiedWidget->DeadSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), DiedWidget->DeadSound);
+		}
 
 		auto pc = Cast<APlayerController>(Controller);
 
@@ -477,7 +482,6 @@ void AVICTIMSCharacter::DieFunction()
 			PC->SaveData();				
 			
 			pc->bShowMouseCursor = true;
-			FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
 			DisableInput(pc);
 		}
 	}

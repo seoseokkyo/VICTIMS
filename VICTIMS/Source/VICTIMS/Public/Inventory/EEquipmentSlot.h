@@ -11,7 +11,6 @@ enum class EEquipmentSlot : int8
 	Weapon				UMETA(DisplayName="Weapon"),
 	Chest				UMETA(DisplayName="Chest"),
 	Feet				UMETA(DisplayName="Feet"),
-	Hands				UMETA(DisplayName="Hands"),
 	Legs				UMETA(DisplayName="Legs"),
 	Head				UMETA(DisplayName="Head"),
 	Count				UMETA(Hidden)

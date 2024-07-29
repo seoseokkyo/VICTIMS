@@ -46,28 +46,23 @@ void UInventoryComponent::InitInventory(uint8 InventorySize)
 	{
 		if (Index == 0)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Head);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Weapon);
 		}
 		else if (Index == 1)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Weapon);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Head);
 		}
 		else if (Index == 2)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Feet);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Chest);
 		}
 		else if (Index == 3)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Chest);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Legs);
 		}
-
 		else if (Index == 4)
 		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Hands);
-		}
-		else if (Index == 5)
-		{
-			SlotStructure = GetEmptySlot(EEquipmentSlot::Legs);
+			SlotStructure = GetEmptySlot(EEquipmentSlot::Feet);
 		}
 		else
 		{
@@ -208,10 +203,6 @@ FSlotStructure UInventoryComponent::GetEmptySlot(EEquipmentSlot FromEquipmentTyp
 	else if (FromEquipmentType == EEquipmentSlot::Feet)
 	{
 		Name = "No_Feet";
-	}
-	else if (FromEquipmentType == EEquipmentSlot::Hands)
-	{
-		Name = "No_Hands";
 	}
 	else if (FromEquipmentType == EEquipmentSlot::Legs)
 	{
