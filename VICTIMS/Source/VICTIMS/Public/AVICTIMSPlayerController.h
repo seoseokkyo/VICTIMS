@@ -165,8 +165,8 @@ public:
 	bool bInventoryInitialized = false;
 
 	//che
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
-	UPartyComponent* partycomponent;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	//UPartyComponent* partycomponent;
 
 protected:
 	virtual void BeginPlay() override;

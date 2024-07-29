@@ -40,7 +40,7 @@ AVICTIMSPlayerController::AVICTIMSPlayerController()
 	PlayerInventoryComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
 
 	//che
-	partycomponent = CreateDefaultSubobject<UPartyComponent>(TEXT("PartyComponent"));
+	//partycomponent = CreateDefaultSubobject<UPartyComponent>(TEXT("PartyComponent"));
 
 	InventoryManagerComponent->NumberOfRowsInventory = PlayerInventoryComponent->NumberOfRowsInventory;
 	InventoryManagerComponent->SlotsPerRowInventory = PlayerInventoryComponent->SlotsPerRowInventory;

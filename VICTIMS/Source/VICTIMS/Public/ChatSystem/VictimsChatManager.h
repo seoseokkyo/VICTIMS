@@ -17,6 +17,7 @@ class UVictims_ChatBox;
 class APlayerState;
 class UVictims_FloatingWidget;
 class UPartyComponent;
+class AVICTIMSPlayerController;
 
 USTRUCT(BlueprintType)
 struct FChatPartyInfo
@@ -32,15 +33,19 @@ struct FChatPartyInfo
 		:
 	PartyLeader(InNewPartyLeader)
 	{}
+
 public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<APlayerState> PartyLeader;
 
-
 	UPROPERTY(BlueprintReadWrite)
 	TArray<TObjectPtr<APlayerState>> PartyMembers;
 
+	UPROPERTY(BlueprintReadWrite)
+	TArray<AVICTIMSPlayerController*> PartyMemberActors;
 
+	UPROPERTY(BlueprintReadWrite)
+	AVICTIMSPlayerController* PartyLeaderActor;
 
 };
 
@@ -180,6 +185,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UVictimsChatManager* GetChatManagerFromActor(AActor* InTarget) const;
 
+	UFUNCTION(BlueprintCallable)
+	APlayerState* GetPSFromActor(AActor* InTarget) const;
+
 protected:
 
 	//~UActorComponent interface
@@ -202,7 +210,6 @@ private:
 	
 	FString SimpleLeaderID;
 
-	APlayerState* GetPSFromActor(AActor* InTarget) const;
 	
 	bool IsLeaderOfTheParty() const;
 

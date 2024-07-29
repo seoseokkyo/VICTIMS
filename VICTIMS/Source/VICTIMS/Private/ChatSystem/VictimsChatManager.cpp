@@ -26,6 +26,7 @@
 #include "Victims_ChatSubsystem.h"
 #include "Victims_FloatingWidget.h"
 #include <AVICTIMSPlayerController.h>
+#include <Kismet/KismetSystemLibrary.h>
 
 
 UVictimsChatManager::UVictimsChatManager(const FObjectInitializer& ObjectInitializer)
@@ -239,53 +240,53 @@ void UVictimsChatManager::Server_LeaveParty_Implementation()
 	{
 		Server_BreakParty();
 
-		//////////////////////////////////파티 컴포넌트 호출///////////////////////////////////////////////////////////////////////
-		if (ownerCharacter)
-		{
-			PartyName = ownerCharacter->GetName();
-		
-			ownerPartyComponent->ServerRPC_preBreakParty_Implementation();
-		}
-		//생성 시점이 안 맞아서 널포인터가 뜨니까, 다시 캐싱 해주자
-		else
-		{
-			AVICTIMSPlayerController* OwnerController = Cast<AVICTIMSPlayerController>(GetOwner());
-			if (OwnerController)
-			{
-				// 소유자의 UPartyComponent를 캐싱!!!!!
-				UPartyComponent* OwnerPartyComponent = OwnerController->FindComponentByClass<UPartyComponent>();
-				if (OwnerPartyComponent)
-				{
-					ownerPartyComponent = OwnerPartyComponent;
-		
-		
-					APawn* ownerPawn = OwnerController->GetPawn();
-					if (ownerPawn)
-					{
-		
-						AVICTIMSCharacter* ownerVictimsChar = Cast<AVICTIMSCharacter>(ownerPawn);
-						if (ownerVictimsChar)
-						{
-							ownerCharacter = ownerVictimsChar;
-		
-		
-							if (ownerCharacter)
-							{
-								ownerPartyComponent->ServerRPC_preBreakParty_Implementation();
-							}
-						}
-		
-		
-		
-					}
-		
-		
-				}
-			}
-		}
-
-
-
+		////////////////////////////////////파티 컴포넌트 호출///////////////////////////////////////////////////////////////////////
+		//if (ownerCharacter)
+		//{
+		//	PartyName = ownerCharacter->GetName();
+		//
+		//	ownerPartyComponent->ServerRPC_preBreakParty_Implementation();
+		//}
+		////생성 시점이 안 맞아서 널포인터가 뜨니까, 다시 캐싱 해주자
+		//else
+		//{
+		//	AVICTIMSPlayerController* OwnerController = Cast<AVICTIMSPlayerController>(GetOwner());
+		//	if (OwnerController)
+		//	{
+		//		// 소유자의 UPartyComponent를 캐싱!!!!!
+		//		UPartyComponent* OwnerPartyComponent = OwnerController->FindComponentByClass<UPartyComponent>();
+		//		if (OwnerPartyComponent)
+		//		{
+		//			ownerPartyComponent = OwnerPartyComponent;
+		//
+		//
+		//			APawn* ownerPawn = OwnerController->GetPawn();
+		//			if (ownerPawn)
+		//			{
+		//
+		//				AVICTIMSCharacter* ownerVictimsChar = Cast<AVICTIMSCharacter>(ownerPawn);
+		//				if (ownerVictimsChar)
+		//				{
+		//					ownerCharacter = ownerVictimsChar;
+		//
+		//
+		//					if (ownerCharacter)
+		//					{
+		//						ownerPartyComponent->ServerRPC_preBreakParty_Implementation();
+		//					}
+		//				}
+		//
+		//
+		//
+		//			}
+		//
+		//
+		//		}
+		//	}
+		//}
+		//
+		//
+		//
 	}
 	else if (LeaderChatManager)
 	{
@@ -370,13 +371,22 @@ void UVictimsChatManager::Server_BreakParty_Implementation()
 }
 
 void UVictimsChatManager::Server_SendPartyInvitationsByName_Implementation(const FString& InTargetPlayerName)
-{
+{	
 	if (!IsLeaderOfTheParty())
 	{
 		Client_ReceivedChat(FVictims_MsgInfo(FDateTime::Now(), L"You are not the leader of the party.",
 			EChatChannelType::Game, false));
 		return;
 	}
+
+	// 파티 멤버 수 리더 포함 5명으로 제한
+	if (PartyInfo.PartyMembers.Num()>4)
+	{
+		Client_ReceivedChat(FVictims_MsgInfo(FDateTime::Now(), L"Party Is Full.",
+			EChatChannelType::Game, false));
+		return;
+	}
+
 	const UVictims_ChatSubsystem* ChatSubsystem{ GetChatSubsystem() };
 	if (!ChatSubsystem)
 	{
@@ -417,7 +427,17 @@ void UVictimsChatManager::ExpelPartyMember_Implementation(AActor* InTargetMember
 		TargetChatManager->PartyInfo = nullptr;
 	}
 	PartyInfo.PartyMembers.Remove(GetPSFromActor(InTargetMember));
-
+	/////////////////////////파티//////////////////////////////////////////////////
+	AVICTIMSPlayerController* temp = Cast<AVICTIMSPlayerController>(InTargetMember);
+	if (temp)
+	{
+		if (PartyInfo.PartyMemberActors.Contains(temp))
+		{
+			PartyInfo.PartyMemberActors.Remove(temp);
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ActorComplite")));
+		}
+		
+	}
 }
 //여기서 아주 배열로 받아버려..?
 void UVictimsChatManager::Server_AddNewPartyMember_Implementation(AActor* InNewPartyMember)
@@ -439,18 +459,28 @@ void UVictimsChatManager::Server_AddNewPartyMember_Implementation(AActor* InNewP
 		if (UVictimsChatManager * NewMembersChatManager{ TargetPS->GetOwningController()->FindComponentByClass<UVictimsChatManager>() })
 		{
 			// UE_LOG(LogTemp, Error, L"NewMembersChatManager is valid.");
-			if (PartyInfo.PartyMembers.Contains(InNewPartyMember) || NewMembersChatManager->PartyInfo.PartyLeader)
-			{
-				//@TODO Should we find out whether they belong to the same party or different parties?
-				UE_CLOG(bIsDebuggingMode, LogTemp, Error, L"New party member is already in the party.");
-				return;
-			}
+			//if (PartyInfo.PartyMembers.Contains(InNewPartyMember) || NewMembersChatManager->PartyInfo.PartyLeader)
+			//{
+			//	//@TODO Should we find out whether they belong to the same party or different parties?
+			//	UE_CLOG(bIsDebuggingMode, LogTemp, Error, L"New party member is already in the party.");
+			//	return;
+			//}
 
 			// UE_LOG(LogTemp, Error, L"Add Party Member()");
 			PartyInfo.PartyMembers.Add(TargetPS);
+			/////////////////////////////파티멤버액터추가////////////////////////////////////
+			AVICTIMSPlayerController* temp = Cast<AVICTIMSPlayerController>(InNewPartyMember);
+			if (temp)
+			{
+					PartyInfo.PartyMemberActors.Add(temp);
+					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ActorComplite")));
 
+					
+			}
 			//@TODO Should I move it inside the FGmPartyInfo structure?
 			NewMembersChatManager->PartyInfo = PartyInfo;
+			NewMembersChatManager->PartyInfo.PartyLeaderActor=PartyInfo.PartyLeaderActor;
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ActorComplite")));
 
 			const FVictims_MsgInfo NewMsgInfo{ FVictims_MsgInfo(FDateTime::Now(),
 				NewMembersChatManager->GetPlayerName() + FString(" has joined the party."),
@@ -492,56 +522,70 @@ void UVictimsChatManager::Server_CreateNewParty_Implementation()
 		UE_CLOG(bIsDebuggingMode, LogTemp, Error, L"You have successfully created a party.");
 		PartyInfo.PartyLeader = TargetPS;
 
+		////////////////////리더 액터 캐싱, 파티워젯////////////////////
+		
+		AVICTIMSPlayerController* temp =Cast<AVICTIMSPlayerController>(GetOwner());
+		if (temp)
+		{
+			PartyInfo.PartyLeaderActor = temp;
+			if (PartyInfo.PartyLeaderActor)
+			{
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("ActorComplite")));
+			}
+		}
+
+		
+		//////
 		Client_ReceivedChat(FVictims_MsgInfo(FDateTime::Now(),
 			ArrM_CmdChannels[FString("CreateParty")].DescOfChannel,
 			ArrM_CmdChannels[FString("CreateParty")].ChannelToTransmitExplanation, false));
 
-		//////////////////////////////////파티 컴포넌트 호출///////////////////////////////////////////////////////////////////////
-		if (ownerCharacter)
-		{
-			PartyName = ownerCharacter->GetName();
-		
-			ownerPartyComponent->ServerRPC_CreateNewParty(ownerCharacter, PartyName);
-		}
-		//생성 시점이 안 맞아서 널포인터가 뜨니까, 다시 캐싱 해주자
-		else
-		{
-			AVICTIMSPlayerController* OwnerController = Cast<AVICTIMSPlayerController>(GetOwner());
-			if (OwnerController)
-			{
-				// 소유자의 UPartyComponent를 캐싱!!!!!
-				UPartyComponent* OwnerPartyComponent = OwnerController->FindComponentByClass<UPartyComponent>();
-				if (OwnerPartyComponent)
-				{
-					ownerPartyComponent = OwnerPartyComponent;
-		
-		
-					APawn* ownerPawn = OwnerController->GetPawn();
-					if (ownerPawn)
-					{
-		
-						AVICTIMSCharacter* ownerVictimsChar = Cast<AVICTIMSCharacter>(ownerPawn);
-						if (ownerVictimsChar)
-						{
-							ownerCharacter = ownerVictimsChar;
-		
-							
-							if (ownerCharacter)
-							{ 
-								PartyName = ownerCharacter->GetName();
-		
-								ownerPartyComponent->ServerRPC_CreateNewParty_Implementation(ownerCharacter, PartyName);
-							}
-						}
-		
-		
-						
-					}
-		
-					
-				}
-			}
-		}
+		////////////////////////////////////파티 컴포넌트 호출///////////////////////////////////////////////////////////////////////
+		//if (ownerCharacter)
+		//{
+		//	PartyName = ownerCharacter->GetName();
+		//
+		//	ownerPartyComponent->ServerRPC_CreateNewParty(ownerCharacter, PartyName);
+		//}
+		////생성 시점이 안 맞아서 널포인터가 뜨니까, 다시 캐싱 해주자
+		//else
+		//{
+		//	AVICTIMSPlayerController* OwnerController = Cast<AVICTIMSPlayerController>(GetOwner());
+		//	if (OwnerController)
+		//	{
+		//		// 소유자의 UPartyComponent를 캐싱!!!!!
+		//		UPartyComponent* OwnerPartyComponent = OwnerController->FindComponentByClass<UPartyComponent>();
+		//		if (OwnerPartyComponent)
+		//		{
+		//			ownerPartyComponent = OwnerPartyComponent;
+		//
+		//
+		//			APawn* ownerPawn = OwnerController->GetPawn();
+		//			if (ownerPawn)
+		//			{
+		//
+		//				AVICTIMSCharacter* ownerVictimsChar = Cast<AVICTIMSCharacter>(ownerPawn);
+		//				if (ownerVictimsChar)
+		//				{
+		//					ownerCharacter = ownerVictimsChar;
+		//
+		//					
+		//					if (ownerCharacter)
+		//					{ 
+		//						PartyName = ownerCharacter->GetName();
+		//
+		//						ownerPartyComponent->ServerRPC_CreateNewParty_Implementation(ownerCharacter, PartyName);
+		//					}
+		//				}
+		//
+		//
+		//				
+		//			}
+		//
+		//			
+		//		}
+		//	}
+		//}
 		
 	}
 	else
@@ -906,12 +950,16 @@ APlayerState* UVictimsChatManager::GetPSFromActor(AActor* InTarget) const
 
 UVictimsChatManager* UVictimsChatManager::GetChatManagerFromActor(AActor* InTarget) const
 {
-	const APlayerState* TargetPS{ GetPSFromActor(InTarget) };
-	if (!TargetPS)
-	{
-		return nullptr;
-	}
-	return TargetPS->GetOwningController()->FindComponentByClass<UVictimsChatManager>();
+
+		const APlayerState* TargetPS{ GetPSFromActor(InTarget) };
+		if (!TargetPS)
+		{
+			return nullptr;
+		}
+		
+			return TargetPS->GetOwningController()->FindComponentByClass<UVictimsChatManager>();
+		
+
 }
 
 bool UVictimsChatManager::IsLeaderOfTheParty() const
