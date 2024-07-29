@@ -206,7 +206,7 @@ TArray<FSlotStructure> AShopActor::GetShopItems()
 		{
 			DB_ItemList = LoadObject<UDataTable>(this, TEXT("/Script/Engine.DataTable'/Game/Item/Data/Item_DB.Item_DB'"));
 		}
-		for (uint8 i = 0; i < LootShopItems.Num()-1; i++)				// FShopList 에 들어있는 모든 아이템요소 로드 
+		for (uint8 i = 0; i < LootShopItems.Num(); i++)				// FShopList 에 들어있는 모든 아이템요소 로드 
 		{
 			FShopList Shop = LootShopItems[i];
 			LocalItemIndexes.AddUnique(i);
