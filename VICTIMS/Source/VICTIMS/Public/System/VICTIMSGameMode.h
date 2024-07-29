@@ -45,6 +45,12 @@ public:
 
 	UFUNCTION()
 	TArray<AVICTIMSPlayerController*> GetPlayers();
+
+	UFUNCTION()
+	class AShelter* FindUnOwnedHouse();
+
+	UFUNCTION()
+	void ClearHouseOwnership(FString strPlayerName);
 };
 
 

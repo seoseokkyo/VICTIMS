@@ -339,11 +339,6 @@ public:
 	UFUNCTION()
 	void SaveDataNow();
 
-	//<<
-	UFUNCTION()
-	void TestDataNow();
-	//>>
-
 	UFUNCTION()			// 플레이어 정보 데이터 저장
 	void SavePlayerData(UTestSaveGame* Data);
 	

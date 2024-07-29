@@ -45,12 +45,6 @@
 #include "MiniMapWidget.h"
 #include "UI/MyHUD.h"
 
-//<<
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-//>>
-
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
 //////////////////////////////////////////////////////////////////////////
@@ -994,19 +988,6 @@ void AVICTIMSCharacter::SaveDataNow()
 	// 	GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Blue, "Saved");
 
 	MyPlayerController->SaveData();
-}
-
-void AVICTIMSCharacter::TestDataNow()
-{
-	FString Options = GetWorld()->GetLocalURL();
-	FString ParsedValue;
-
-	if (FParse::Value(*Options, TEXT("TestName"), ParsedValue))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Name Value: %s"), *ParsedValue);
-	}
-
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s"), *ParsedValue));
 }
 
 void AVICTIMSCharacter::SavePlayerData(UTestSaveGame* Data)

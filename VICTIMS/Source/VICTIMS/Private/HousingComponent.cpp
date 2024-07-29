@@ -466,6 +466,8 @@ void UHousingComponent::SpawnBuild(bool Moving, AActor* Movable, const FTransfor
 			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Buildable.Actor, Transform, SpawnParams);
+			// Å×½ºÆ®
+			//SpawnedActor->Tags.Add(FName(*PlayerRef->MyPlayerController->playerName));
 
 			// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("UHousingComponent :: SpawnBuild :: SpawnedActor : %p"), SpawnedActor));
 
