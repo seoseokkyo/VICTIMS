@@ -2830,3 +2830,36 @@ void UInventoryManagerComponent::Client_ShowNotification_Implementation(const ui
 {
 	MainLayoutUI->Shop->ShopSlotsArray[InventorySlot]->ShowNotification();
 }
+
+void UInventoryManagerComponent::Client_ClearHotbarWeapon_Implementation(const FSlotStructure& HotbarSlot)
+{
+	bool Success = false;
+	TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
+	for (uint8 i = 0; i < LocalInventoryUI2.Num(); i++)
+	{
+		if (HotbarSlot.ItemStructure.ID == LocalInventoryUI2[i]->SlotStructure.ItemStructure.ID)
+		{
+			Success = true;
+			break;
+		}
+	}
+	if (!Success)
+	{
+		TArray<UHotbar_Slot*> Hotbar = MainLayoutUI->Hotbar->HotbarSlotsArray;
+
+		for (uint8 i = 0; i < Hotbar.Num(); i++) {
+			{
+				if (HotbarSlot.ItemStructure.ID == GetHotbarSlotItem(i).ItemStructure.ID)
+				{
+// 					if (GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Rifle") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Pistol")
+// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_ShotGun") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Knife")
+// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Axe"))
+// 					{
+						ClearHotbarSlotItem(i);
+						break;
+					/*}*/
+				}
+			}
+		}
+	}
+}
