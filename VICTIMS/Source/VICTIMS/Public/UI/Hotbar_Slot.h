@@ -46,6 +46,7 @@ public:
 	UFUNCTION()
 	void SetKeyNumber(uint8 InNumber);
 
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	UBorder* SlotBorder;

@@ -799,6 +799,27 @@ void UInventoryManagerComponent::MoveHotbarSlotItem(const uint8& FromSlot, const
 
 void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
 {
+
+	if (bEquipAxe || bEquipKnife || bEquipPistol || bEquipShotGun)
+	{
+		FReturnTupleBoolInt Tuple2{};
+		TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
+		FSlotStructure Slot2 = PlayerInventory->GetEmptySlot(EEquipmentSlot::Undefined);
+
+		for (int i = 0; i < LocalInventoryUI2.Num(); i++)
+		{
+			if (Slot2.ItemStructure.ID == LocalInventoryUI2[i]->SlotStructure.ItemStructure.ID)
+			{
+				Tuple2.Success = true;
+				Tuple2.Index = i;
+				break;
+			}
+		}
+		Tuple2.Index = Tuple2.Index + (uint8)EEquipmentSlot::Count;
+		Server_UnEquipToInventory(HotbarSlot, Tuple2.Index);
+	}
+	else
+	{
 	FReturnTupleBoolInt Tuple{};
 	FSlotStructure Slot = GetHotbarSlotItem(HotbarSlot);
 
@@ -814,17 +835,18 @@ void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
 		}
 		if (Tuple.Success)
 		{
-			Tuple.Index = Tuple.Index + (uint8)EEquipmentSlot::Count;
 //  			if (Slot.ItemStructure.ID == FName("ID_Pistol") || Slot.ItemStructure.ID == FName("ID_ShotGun") ||
-//  				Slot.ItemStructure.ID == FName("ID_Knife") || Slot.ItemStructure.ID == FName("ID_Axe") || Slot.ItemStructure.ID == FName("ID_Rifle"))
-// //  			{
-// //  				Server_UseHotbarWeapon(Tuple.Index);
-// //  			}
-// //  			else
+//   				Slot.ItemStructure.ID == FName("ID_Knife") || Slot.ItemStructure.ID == FName("ID_Axe") || Slot.ItemStructure.ID == FName("ID_Rifle"))
+//   			{
+//   				Server_UseHotbarWeapon(Tuple.Index);
+//   			}
+//   			else
 // 	 		{
-			Server_UseInventoryItem(Tuple.Index);
+				Tuple.Index = Tuple.Index + (uint8)EEquipmentSlot::Count;
+				Server_UseInventoryItem(Tuple.Index);
 			/*}*/
 		}
+	}
 	}
 }
 
@@ -1320,100 +1342,102 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 		RemoveItem(Inventory, InventorySlot);
 		Client_CheckHotbarSlots(LocalSlot);
 
+		if (LocalSlot.ItemStructure.ID == FName("ID_Pistol") || LocalSlot.ItemStructure.ID == FName("ID_ShotGun") || LocalSlot.ItemStructure.ID == FName("ID_Knife") || LocalSlot.ItemStructure.ID == FName("ID_Axe"))
+		{
+			Client_ClearHotbarWeapon(LocalSlot);
+		}
+
 		if (LocalSlot.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipPistol = false;
-
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
 			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipPistol = false;
+
+				AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
+				if (pc)
+				{
+					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				}
 			}
 		}
 		// 				playerReference->UsePistol();
-	}
 //=======================================================================================================NO USE
-	if (LocalSlot.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
+		if (LocalSlot.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipRifle = false;
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipRifle = false;
+				AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
+				if (pc)
+				{
+					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				}
 			}
+			// 				playerReference->UseRifle();
 		}
-		// 				playerReference->UseRifle();
-	}
 //==============================================================================================================
-	if (LocalSlot.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+		if (LocalSlot.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipKnife = false;
-
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipKnife = false;
+
+				AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
+				if (pc)
+				{
+					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				}
 			}
+			// 				playerReference->UseKnife();
 		}
-		// 				playerReference->UseKnife();
-	}
-	if (LocalSlot.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+		if (LocalSlot.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipAxe = false;
-
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipAxe = false;
+
+				AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
+				if (pc)
+				{
+					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				}
 			}
+			// 				playerReference->UseAxe();
 		}
-		// 				playerReference->UseAxe();
-	}
-	if (LocalSlot.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
+		if (LocalSlot.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipShotGun = false;
-
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipShotGun = false;
+
+				AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
+				if (pc)
+				{
+					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				}
 			}
+			// 				playerReference->UsePistol();
 		}
-		// 				playerReference->UsePistol();
-	}
-
-
 		if (InventorySlot < (uint8)EEquipmentSlot::Count)
 		{
 			UpdateEquippedStats();
 		}
 	}
-
 	else
 	{
 		RemoveItem(Inventory, InventorySlot);
@@ -2807,4 +2831,37 @@ void UInventoryManagerComponent::EquipItemAtLoad(UInventoryComponent* FromInvent
 void UInventoryManagerComponent::Client_ShowNotification_Implementation(const uint8& InventorySlot)
 {
 	MainLayoutUI->Shop->ShopSlotsArray[InventorySlot]->ShowNotification();
+}
+
+void UInventoryManagerComponent::Client_ClearHotbarWeapon_Implementation(const FSlotStructure& HotbarSlot)
+{
+	bool Success = false;
+	TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
+	for (uint8 i = 0; i < LocalInventoryUI2.Num(); i++)
+	{
+		if (HotbarSlot.ItemStructure.ID == LocalInventoryUI2[i]->SlotStructure.ItemStructure.ID)
+		{
+			Success = true;
+			break;
+		}
+	}
+	if (!Success)
+	{
+		TArray<UHotbar_Slot*> Hotbar = MainLayoutUI->Hotbar->HotbarSlotsArray;
+
+		for (uint8 i = 0; i < Hotbar.Num(); i++) {
+			{
+				if (HotbarSlot.ItemStructure.ID == GetHotbarSlotItem(i).ItemStructure.ID)
+				{
+// 					if (GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Rifle") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Pistol")
+// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_ShotGun") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Knife")
+// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Axe"))
+// 					{
+						ClearHotbarSlotItem(i);
+						break;
+					/*}*/
+				}
+			}
+		}
+	}
 }

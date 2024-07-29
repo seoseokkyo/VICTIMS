@@ -133,8 +133,7 @@ bool UHotbar_Slot::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEven
 	bool bIsDraggedFromHotbar = DragDropOperation->IsDraggedFromHotbar;
 
 	IInventoryHUDInterface::Execute_UI_MoveHotbarItem(PlayerController, DraggedSlotIndex, HotbarSlotIndex,
-		bIsDraggedFromInventory, bIsDraggedFromHotbar);
-
+	bIsDraggedFromInventory, bIsDraggedFromHotbar);
 	return true;
 }
 
