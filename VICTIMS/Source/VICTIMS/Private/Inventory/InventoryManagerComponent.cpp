@@ -1319,6 +1319,13 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 		{
 			WActor->StaticMesh->SetSimulatePhysics(true);
 			WActor->Amount = LocalSlot.Amount;
+
+			FTimerHandle Timer;
+			GetWorld()->GetTimerManager().ClearTimer(Timer);
+			GetWorld()->GetTimerManager().SetTimer(Timer, [&, WActor](){
+				WActor->Destroy();
+			}, 10.f, false);
+
 			if (DropSound)
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DropSound, WActor->GetActorLocation());
