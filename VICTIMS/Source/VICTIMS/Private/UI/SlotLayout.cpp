@@ -20,7 +20,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Sound/SoundBase.h>
 
-USlotLayout::USlotLayout(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer)
+USlotLayout::USlotLayout(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 }
 
@@ -265,7 +265,7 @@ void USlotLayout::UpdateSlotInfo()
 
 	Icon->SetBrushFromTexture(SlotStructure.ItemStructure.Icon);
 	ItemBorder->SetBrushColor(GetBorderColor());
-	
+
 }
 
 void USlotLayout::SetNameBoxVisibility()
@@ -289,10 +289,10 @@ void USlotLayout::UseItem()
 	{
 		IInventoryHUDInterface::Execute_UI_UseContainerItem(PlayerController, InventorySlotIndex);
 	}
-	else if(NativeFromInventory)
+	else if (NativeFromInventory)
 	{
 		if (HasItem())
-		{	
+		{
 			if (PlayerController->InventoryManagerComponent->IsSelling == false)
 			{
 				IInventoryHUDInterface::Execute_UI_UseInventoryItem(PlayerController, InventorySlotIndex);
@@ -359,7 +359,10 @@ void USlotLayout::DisplayTooltip()
 
 void USlotLayout::HideTooltip()
 {
-	GetToolTip()->SetVisibility(ESlateVisibility::Hidden);
+	if (GetToolTip())
+	{
+		GetToolTip()->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 bool USlotLayout::HasItem()

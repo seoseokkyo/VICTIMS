@@ -103,7 +103,7 @@ void UInventoryManagerComponent::InitializeItemDB()
 	}
 	else
 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("UDataTable not Loaded"))
+		// 		UE_LOG(LogTemp, Warning, TEXT("UDataTable not Loaded"))
 	}
 }
 
@@ -164,8 +164,8 @@ void UInventoryManagerComponent::TryToAddItemToInventory(UInventoryComponent* In
 	}
 	else
 	{
-// 		UE_LOG(LogTemp, Verbose, TEXT("Inventory Full"))
-			bOutSuccess = false;
+		// 		UE_LOG(LogTemp, Verbose, TEXT("Inventory Full"))
+		bOutSuccess = false;
 		return;
 	}
 }
@@ -666,7 +666,7 @@ void UInventoryManagerComponent::Client_UpdateInventoryTooltips_Implementation(c
 		if (!IsValid(Tooltip))
 		{
 			Tooltip = CreateWidget<UW_ItemTooltip>(GetWorld(), WidgetLayout->Widget);
-// 			UE_LOG(LogTemp, Verbose, TEXT("Creating Inventory Tooltip"))
+			// 			UE_LOG(LogTemp, Verbose, TEXT("Creating Inventory Tooltip"))
 		}
 
 		if (Slot.ItemStructure.ItemType == EItemType::Equipment)
@@ -713,7 +713,7 @@ void UInventoryManagerComponent::Client_UpdateContainerTooltips_Implementation(c
 		if (!IsValid(Tooltip))
 		{
 			Tooltip = CreateWidget<UW_ItemTooltip>(GetWorld(), WidgetLayout->Widget);
-// 			UE_LOG(LogTemp, Verbose, TEXT("Creating Container Tooltip"))
+			// 			UE_LOG(LogTemp, Verbose, TEXT("Creating Container Tooltip"))
 		}
 
 		if (Slot.ItemStructure.ItemType == EItemType::Equipment)
@@ -783,13 +783,13 @@ void UInventoryManagerComponent::MoveHotbarSlotItem(const uint8& FromSlot, const
 			SetHotbarSlotItem(FromSlot, ToSlotItem);
 		}
 		else {
-			if ((bEquipAxe && FromSlotItem.ItemStructure.ID == FName("ID_Axe")) || 
-			    (bEquipKnife && FromSlotItem.ItemStructure.ID == FName("ID_Knife")) ||
-				(bEquipPistol && FromSlotItem.ItemStructure.ID == FName("ID_Pistol")) || 
-				(bEquipRifle && FromSlotItem.ItemStructure.ID == FName("ID_Rifle")) || 
+			if ((bEquipAxe && FromSlotItem.ItemStructure.ID == FName("ID_Axe")) ||
+				(bEquipKnife && FromSlotItem.ItemStructure.ID == FName("ID_Knife")) ||
+				(bEquipPistol && FromSlotItem.ItemStructure.ID == FName("ID_Pistol")) ||
+				(bEquipRifle && FromSlotItem.ItemStructure.ID == FName("ID_Rifle")) ||
 				(bEquipShotGun && FromSlotItem.ItemStructure.ID == FName("ID_ShotGun")))
 			{
-				UnEquipItem(PlayerInventory, FromSlot,PlayerInventory, ToSlot);
+				UnEquipItem(PlayerInventory, FromSlot, PlayerInventory, ToSlot);
 			}
 			SetHotbarSlotItem(ToSlot, FromSlotItem);
 			ClearHotbarSlotItem(FromSlot);
@@ -815,13 +815,13 @@ void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
 		if (Tuple.Success)
 		{
 			Tuple.Index = Tuple.Index + (uint8)EEquipmentSlot::Count;
-//  			if (Slot.ItemStructure.ID == FName("ID_Pistol") || Slot.ItemStructure.ID == FName("ID_ShotGun") ||
-//  				Slot.ItemStructure.ID == FName("ID_Knife") || Slot.ItemStructure.ID == FName("ID_Axe") || Slot.ItemStructure.ID == FName("ID_Rifle"))
-// //  			{
-// //  				Server_UseHotbarWeapon(Tuple.Index);
-// //  			}
-// //  			else
-// 	 		{
+			//  			if (Slot.ItemStructure.ID == FName("ID_Pistol") || Slot.ItemStructure.ID == FName("ID_ShotGun") ||
+			//  				Slot.ItemStructure.ID == FName("ID_Knife") || Slot.ItemStructure.ID == FName("ID_Axe") || Slot.ItemStructure.ID == FName("ID_Rifle"))
+			// //  			{
+			// //  				Server_UseHotbarWeapon(Tuple.Index);
+			// //  			}
+			// //  			else
+			// 	 		{
 			Server_UseInventoryItem(Tuple.Index);
 			/*}*/
 		}
@@ -965,23 +965,23 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 		if (GetEquipmentTypeBySlot(ToInventorySlot) == LocalEquipmentSlotType)
 		{
 			FSlotStructure LocalSwapInventoryItem = ToInventory->GetInventorySlot(ToInventorySlot);
-// 			if (LocalInventoryItem.ItemStructure.ID != FName("ID_Pistol") && LocalInventoryItem.ItemStructure.ID != FName("ID_ShotGun") && LocalInventoryItem.ItemStructure.ID != FName("ID_Knife") && LocalInventoryItem.ItemStructure.ID != FName("ID_Axe"))
-// 			{
-				if (ItemIsValid(LocalSwapInventoryItem))
+			// 			if (LocalInventoryItem.ItemStructure.ID != FName("ID_Pistol") && LocalInventoryItem.ItemStructure.ID != FName("ID_ShotGun") && LocalInventoryItem.ItemStructure.ID != FName("ID_Knife") && LocalInventoryItem.ItemStructure.ID != FName("ID_Axe"))
+			// 			{
+			if (ItemIsValid(LocalSwapInventoryItem))
+			{
+				if (!CanContainerStoreItems(FromInventory))
 				{
-					if (!CanContainerStoreItems(FromInventory))
-					{
-						return;
-					}
+					return;
+				}
 
-					AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
-					AddItem(FromInventory, FromInventorySlot, LocalSwapInventoryItem);
-				}
-				else
-				{
-					AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
-					RemoveItem(FromInventory, FromInventorySlot);
-				}
+				AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
+				AddItem(FromInventory, FromInventorySlot, LocalSwapInventoryItem);
+			}
+			else
+			{
+				AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
+				RemoveItem(FromInventory, FromInventorySlot);
+			}
 			/*}*/
 
 			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == false)
@@ -1012,17 +1012,14 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 							MaxBullet = 0;
 						}
 					}
-					AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-					if (pc)
-					{
-						pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, CurrentBullet, MaxBullet);
-					}
+
+					ClientRPC_SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, CurrentBullet, MaxBullet);
 				}
 				// 				playerReference->UsePistol();
 			}
-			else if (LocalInventoryItem.ItemStructure.ID == FName("ID_Pistol") && bEquipPistol) 
+			else if (LocalInventoryItem.ItemStructure.ID == FName("ID_Pistol") && bEquipPistol)
 			{
-				UnEquipItem(PlayerInventory,FromInventorySlot,PlayerInventory,ToInventorySlot);
+				UnEquipItem(PlayerInventory, FromInventorySlot, PlayerInventory, ToInventorySlot);
 			}
 			//================================================================================================================== NO USE 
 			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == false)
@@ -1053,11 +1050,8 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					bEquipShotGun = false;
 					bEquipKnife = true;
 					bEquipAxe = false;
-					AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-					if (pc)
-					{
-						pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, 0, 0);
-					}
+
+					ClientRPC_SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, 0, 0);
 				}
 			}
 			else if (LocalInventoryItem.ItemStructure.ID == FName("ID_Knife") && bEquipKnife)
@@ -1066,69 +1060,63 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 			}
 			// 				playerReference->UseKnife();
 
-		if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == false)
-		{
-			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == false)
 			{
-				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-				bEquipPistol = false;
-				bEquipRifle = false;
-				bEquipShotGun = false;
-				bEquipKnife = false;
-				bEquipAxe = true;
-				AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-				if (pc)
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 				{
-					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, 0, 0);
-				}
-			}
-			// 				playerReference->UseAxe();
-		}
-		else if (LocalInventoryItem.ItemStructure.ID == FName("ID_Axe") && bEquipAxe)
-		{
-			UnEquipItem(PlayerInventory, FromInventorySlot, PlayerInventory, ToInventorySlot);
-		}
-		if (LocalInventoryItem.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == false)
-		{
-			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
-			{
-				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-				bEquipPistol = false;
-				bEquipRifle = false;
-				bEquipShotGun = true;
-				bEquipKnife = false;
-				bEquipAxe = false;
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipPistol = false;
+					bEquipRifle = false;
+					bEquipShotGun = false;
+					bEquipKnife = false;
+					bEquipAxe = true;
 
-
-				FSlotStructure BulletItem;
-				CurrentBullet = GetPlayerRef()->ShotgunBullets;
-				for (int i = 0; i < FromInventory->Inventory.Num(); i++)
-				{
-					if (FromInventory->Inventory[i].ItemStructure.ID == FName("ID_ShotGunBullet"))
-					{
-						BulletItem = FromInventory->Inventory[i];
-						MaxBullet = BulletItem.Amount;
-						break;
-					}
-					else
-					{
-						MaxBullet = 0;
-					}
+					ClientRPC_SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, 0, 0);
 				}
-				AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-				if (pc)
-				{
-					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, CurrentBullet, MaxBullet);
-				}
+				// 				playerReference->UseAxe();
 			}
-			else if (LocalInventoryItem.ItemStructure.ID == FName("ID_ShotGun") && bEquipShotGun)
+			else if (LocalInventoryItem.ItemStructure.ID == FName("ID_Axe") && bEquipAxe)
 			{
 				UnEquipItem(PlayerInventory, FromInventorySlot, PlayerInventory, ToInventorySlot);
 			}
+			if (LocalInventoryItem.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == false)
+			{
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipPistol = false;
+					bEquipRifle = false;
+					bEquipShotGun = true;
+					bEquipKnife = false;
+					bEquipAxe = false;
+
+
+					FSlotStructure BulletItem;
+					CurrentBullet = GetPlayerRef()->ShotgunBullets;
+					for (int i = 0; i < FromInventory->Inventory.Num(); i++)
+					{
+						if (FromInventory->Inventory[i].ItemStructure.ID == FName("ID_ShotGunBullet"))
+						{
+							BulletItem = FromInventory->Inventory[i];
+							MaxBullet = BulletItem.Amount;
+							break;
+						}
+						else
+						{
+							MaxBullet = 0;
+						}
+					}
+
+					ClientRPC_SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, CurrentBullet, MaxBullet);
+				}
+				else if (LocalInventoryItem.ItemStructure.ID == FName("ID_ShotGun") && bEquipShotGun)
+				{
+					UnEquipItem(PlayerInventory, FromInventorySlot, PlayerInventory, ToInventorySlot);
+				}
 			}
 		}
 		UpdateEquippedStats();
@@ -1138,7 +1126,7 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 
 	else
 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
+		// 		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
 	}
 }
 
@@ -1152,26 +1140,26 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 	FSlotStructure LocalInventoryItem = FromInventory->GetInventorySlot(FromInventorySlot);
 	FSlotStructure LocalSwapInventoryItem = ToInventory->GetInventorySlot(ToInventorySlot);
 	EEquipmentSlot LocalEquipmentSlot = GetEquipmentTypeBySlot(FromInventorySlot);
-// 
-// 	if (LocalInventoryItem.ItemStructure.ID != FName("ID_Pistol") && LocalInventoryItem.ItemStructure.ID != FName("ID_ShotGun") && LocalInventoryItem.ItemStructure.ID != FName("ID_Knife") && LocalInventoryItem.ItemStructure.ID != FName("ID_Axe"))
-// 	{
+	// 
+	// 	if (LocalInventoryItem.ItemStructure.ID != FName("ID_Pistol") && LocalInventoryItem.ItemStructure.ID != FName("ID_ShotGun") && LocalInventoryItem.ItemStructure.ID != FName("ID_Knife") && LocalInventoryItem.ItemStructure.ID != FName("ID_Axe"))
+	// 	{
 
 	if (ItemIsValid(LocalSwapInventoryItem))
 	{
 		if (!CanContainerStoreItems(ToInventory))
 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("CONTAINER CANNOT STORE ITEMS"))
-				return;
+			// 			UE_LOG(LogTemp, Warning, TEXT("CONTAINER CANNOT STORE ITEMS"))
+			return;
 		}
 		if (GetItemTypeBySlot(FromInventorySlot) != EItemType::Equipment)
 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
-				return;
+			// 			UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
+			return;
 		}
 		if (GetEquipmentTypeBySlot(ToInventorySlot) != LocalEquipmentSlot)
 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
-				return;
+			// 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
+			return;
 		}
 		AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
 		AddItem(FromInventory, FromInventorySlot, LocalSwapInventoryItem);
@@ -1184,8 +1172,8 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			{
 				if (GetEquipmentTypeBySlot(ToInventorySlot) != LocalEquipmentSlot)
 				{
-// 					UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
-						return;
+					// 					UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
+					return;
 				}
 			}
 		}
@@ -1203,15 +1191,12 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipPistol = false;
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
-			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
-			}
+
+			ClientRPC_HideWeaponIcon();
 		}
 		// 				playerReference->UsePistol();
 	}
-//=======================================================================================================NO USE
+	//=======================================================================================================NO USE
 	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
 	{
 		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
@@ -1223,7 +1208,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 		}
 		// 				playerReference->UseRifle();
 	}
-//==============================================================================================================
+	//==============================================================================================================
 	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
 	{
 		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
@@ -1232,11 +1217,8 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipKnife = false;
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
-			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
-			}
+
+			ClientRPC_HideWeaponIcon();
 		}
 		// 				playerReference->UseKnife();
 	}
@@ -1249,11 +1231,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipAxe = false;
 
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
-			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
-			}
+			ClientRPC_HideWeaponIcon();
 		}
 		// 				playerReference->UseAxe();
 	}
@@ -1265,11 +1243,8 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipShotGun = false;
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
-			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
-			}
+
+			ClientRPC_HideWeaponIcon();
 		}
 		// 				playerReference->UsePistol();
 	}
@@ -1321,91 +1296,72 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 		Client_CheckHotbarSlots(LocalSlot);
 
 		if (LocalSlot.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipPistol = false;
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
+			{
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipPistol = false;
 
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
-			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				ClientRPC_HideWeaponIcon();
 			}
+			// 				playerReference->UsePistol();
 		}
-		// 				playerReference->UsePistol();
-	}
-//=======================================================================================================NO USE
-	if (LocalSlot.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
+		//=======================================================================================================NO USE
+		if (LocalSlot.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipRifle = false;
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
-			}
-		}
-		// 				playerReference->UseRifle();
-	}
-//==============================================================================================================
-	if (LocalSlot.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
-		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipKnife = false;
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipRifle = false;
 
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
-			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				ClientRPC_HideWeaponIcon();
 			}
+			// 				playerReference->UseRifle();
 		}
-		// 				playerReference->UseKnife();
-	}
-	if (LocalSlot.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+		//==============================================================================================================
+		if (LocalSlot.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipAxe = false;
-
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipKnife = false;
+
+				ClientRPC_HideWeaponIcon();
 			}
+			// 				playerReference->UseKnife();
 		}
-		// 				playerReference->UseAxe();
-	}
-	if (LocalSlot.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
-	{
-		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
+		if (LocalSlot.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
 		{
-			uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
-			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
-			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
-			bEquipShotGun = false;
-
-			AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
-			if (pc)
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipAxe = false;
+
+				ClientRPC_HideWeaponIcon();
 			}
+			// 				playerReference->UseAxe();
 		}
-		// 				playerReference->UsePistol();
-	}
+		if (LocalSlot.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
+		{
+			if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
+			{
+				uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+				bEquipShotGun = false;
+
+				ClientRPC_HideWeaponIcon();
+			}
+			// 				playerReference->UsePistol();
+		}
 
 
 		if (InventorySlot < (uint8)EEquipmentSlot::Count)
@@ -1475,7 +1431,7 @@ void UInventoryManagerComponent::MoveItem(UInventoryComponent* FromInventory, ui
 		else {
 			if (!CanContainerStoreItems(FromInventory))
 			{
-					return;
+				return;
 			}
 			else {
 				AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
@@ -1545,6 +1501,9 @@ void UInventoryManagerComponent::UseEquipmentItem(uint8 InventorySlot, FSlotStru
 		EEquipmentSlot LocalEquipmentSlot = GetItemEquipmentSlot(InventoryItem);
 
 		uint8 OutInventorySlot = 0;
+
+		Cast<UEquipmentComponent>(PlayerInventory)->UpdateEquippedMeshes(InventorySlot);
+
 		if (GetEmptyEquipmentSlotByType(LocalEquipmentSlot, OutInventorySlot))
 		{
 			Server_EquipFromInventory(InventorySlot, OutInventorySlot);
@@ -1584,17 +1543,17 @@ void UInventoryManagerComponent::UseConsumableItem(uint8 InventorySlot, FSlotStr
 		return;
 	}
 }
- 
+
 void UInventoryManagerComponent::ClientRPC_UseConsumableItem_Implementation(const int32 Health)
 {
 	GetPlayerRef()->stateComp->AddStatePoint(EStateType::HP, Health);
 	if (UseSound_Consumable)
 	{
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(),UseSound_Consumable, GetPlayerRef()->GetActorLocation());
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), UseSound_Consumable, GetPlayerRef()->GetActorLocation());
 	}
 }
 
-void UInventoryManagerComponent::ClientRPC_UseBulletItem_Implementation(FName Bullet, const int32 count, uint8 Slot)
+void UInventoryManagerComponent::ServerRPC_UseBulletItem_Implementation(FName Bullet, const int32 count, uint8 Slot)
 {
 	AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(GetOwner());
 	FSlotStructure InventoryItem = PlayerInventory->GetInventoryItem(Slot);
@@ -1615,12 +1574,8 @@ void UInventoryManagerComponent::ClientRPC_UseBulletItem_Implementation(FName Bu
 			AddItem(PlayerInventory, Slot, InventoryItem);
 			con->bHasBullet = true;
 		}
-		AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetOwner());
-		if (pc)
-		{
-			pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(InventoryItem.Amount);
-			pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateCurrentBullet(count);
-		}
+
+		ClientRPC_UseBulletItem(InventoryItem.Amount, count);
 	}
 	else
 	{
@@ -1628,33 +1583,52 @@ void UInventoryManagerComponent::ClientRPC_UseBulletItem_Implementation(FName Bu
 	}
 }
 
+void UInventoryManagerComponent::ClientRPC_UseBulletItem_Implementation(const int32 maxBullets, const int32 count)
+{
+	AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetOwner());
+	if (pc)
+	{
+		pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(maxBullets);
+		pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateCurrentBullet(count);
+	}
+}
+
+void UInventoryManagerComponent::ClientRPC_BulletNotification_Implementation()
+{
+	if (AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(GetOwner()))
+	{
+		con->HUDLayoutReference->MainLayout->EquipWeaponWidget->ShowNotification();
+	}
+}
+
+
 void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 {
 	int32 ReloadCount = 0;
 	uint8 LocalIndex = 0;
-	if (AVICTIMSPlayerController* con= Cast<AVICTIMSPlayerController>(GetOwner()))
-	{	
+	if (AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(GetOwner()))
+	{
 		con->bHasBullet = false;
 		// 플레이어 인벤토리 갖고있는 아이템 만큼 반복문 돌려서 총알아이템 있는지 확인
 		for (uint8 i = 0; i < con->InventoryManagerComponent->PlayerInventory->Inventory.Num(); i++)
-		{ 
+		{
 			if (con->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID == Bullet && Bullet == FName("ID_PistolBullet"))							// 플레이어가 요청한 총알 ID와 일치한지 확인 
 			{
 				LocalIndex = i;
 				ReloadCount = 8;
 				UE_LOG(LogTemp, Warning, TEXT("Found Pistol Bullet"));
 				con->bHasBullet = true;
-				ClientRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);	 // ID_PistolBullet 이면 8발
+				ServerRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);	 // ID_PistolBullet 이면 8발
 				break;
 
 			}
 			else if (con->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID == Bullet && Bullet == FName("ID_ShotGunBullet"))
 			{
-				LocalIndex = i; 
+				LocalIndex = i;
 				ReloadCount = 2;
 				con->bHasBullet = true;
-// 				UE_LOG(LogTemp, Warning, TEXT("Found ShotGun Bullet"));
-				ClientRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);    // ID_ShotGunBullet 이면 2발 
+				// 				UE_LOG(LogTemp, Warning, TEXT("Found ShotGun Bullet"));
+				ServerRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);    // ID_ShotGunBullet 이면 2발 
 				break;
 			}
 			else
@@ -1664,15 +1638,16 @@ void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 		}
 		if (con->bHasBullet == false)
 		{
-			con->HUDLayoutReference->MainLayout->EquipWeaponWidget->ShowNotification();
+			ClientRPC_BulletNotification();
 		}
 	}
 	else
 	{
 		// 플레이어 인벤토리에 필요한 총알이 없으면 
 // 		UE_LOG(LogTemp, Warning, TEXT("Can't Found"));
-		con->bHasBullet = false;
-		con->HUDLayoutReference->MainLayout->EquipWeaponWidget->ShowNotification();
+//		여기는 con이 널포인터
+		//con->bHasBullet = false;
+		ClientRPC_BulletNotification();
 
 	}
 }
@@ -1726,7 +1701,7 @@ void UInventoryManagerComponent::UseFurnitureItem(uint8 InventorySlot, FSlotStru
 		// UE_LOG(LogTemp, Warning, TEXT("Cannot use furniture item here. GO HOME."));
 		if (GEngine)
 		{
-// 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cannot use furniture item here. GO HOME."));
+			// 			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, TEXT("Cannot use furniture item here. GO HOME."));
 		}
 	}
 
@@ -1820,12 +1795,12 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 		}
 		else
 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("No matching BuildID found in housing data table for Item ID: %s"), *ItemID.ToString());
+			// 			UE_LOG(LogTemp, Warning, TEXT("No matching BuildID found in housing data table for Item ID: %s"), *ItemID.ToString());
 		}
 	}
 }
 
- void UInventoryManagerComponent::UseInventoryItem(const uint8& InventorySlot)
+void UInventoryManagerComponent::UseInventoryItem(const uint8& InventorySlot)
 {
 	FSlotStructure LocalInventorySlot = PlayerInventory->GetInventoryItem(InventorySlot);
 
@@ -1835,39 +1810,39 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 
 		if (bCanStoreItems)
 		{
-// 			if (LocalInventorySlot.ItemStructure.ID != FName("ID_Pistol") && LocalInventorySlot.ItemStructure.ID != FName("ID_Knife") &&
-// 				LocalInventorySlot.ItemStructure.ID != FName("ID_ShotGun") && LocalInventorySlot.ItemStructure.ID != FName("ID_Axe") &&
-// 				LocalInventorySlot.ItemStructure.ID != FName("ID_Rifle"))
-// 			{
+			// 			if (LocalInventorySlot.ItemStructure.ID != FName("ID_Pistol") && LocalInventorySlot.ItemStructure.ID != FName("ID_Knife") &&
+			// 				LocalInventorySlot.ItemStructure.ID != FName("ID_ShotGun") && LocalInventorySlot.ItemStructure.ID != FName("ID_Axe") &&
+			// 				LocalInventorySlot.ItemStructure.ID != FName("ID_Rifle"))
+			// 			{
 
-				switch (LocalInventorySlot.ItemStructure.ItemType)
+			switch (LocalInventorySlot.ItemStructure.ItemType)
+			{
+			case EItemType::Equipment:
+				if (InventorySlot < (uint8)EEquipmentSlot::Count)
 				{
-				case EItemType::Equipment:
-					if (InventorySlot < (uint8)EEquipmentSlot::Count)
-					{
-						UseEquipmentItem(InventorySlot, LocalInventorySlot, ContainerInventory);
-						break;
-					}
-				case EItemType::Furniture:
-				case EItemType::Consumable:
-				case EItemType::Currency:
-				default:
-					bool bOutSuccess = false;
-					TryToAddItemToInventory(ContainerInventory, LocalInventorySlot, bOutSuccess);
-
-					if (bOutSuccess)
-					{
-						RemoveItem(PlayerInventory, InventorySlot);
-					}
-					else
-					{
-						AddItem(PlayerInventory, InventorySlot, LocalInventorySlot);
-					}
+					UseEquipmentItem(InventorySlot, LocalInventorySlot, ContainerInventory);
 					break;
 				}
+			case EItemType::Furniture:
+			case EItemType::Consumable:
+			case EItemType::Currency:
+			default:
+				bool bOutSuccess = false;
+				TryToAddItemToInventory(ContainerInventory, LocalInventorySlot, bOutSuccess);
 
-// 				return;
-// 			}
+				if (bOutSuccess)
+				{
+					RemoveItem(PlayerInventory, InventorySlot);
+				}
+				else
+				{
+					AddItem(PlayerInventory, InventorySlot, LocalInventorySlot);
+				}
+				break;
+			}
+
+			// 				return;
+			// 			}
 		}
 	}
 	switch (LocalInventorySlot.ItemStructure.ItemType)
@@ -1954,7 +1929,7 @@ void UInventoryManagerComponent::SetInventorySlotItem(const FSlotStructure& Cont
 			if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController()))
 			{
 				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(ContentToAdd.Amount);
-			}		
+			}
 		}
 	}
 }
@@ -2467,6 +2442,26 @@ void UInventoryManagerComponent::Client_UpdateShopTooltips_Implementation(const 
 	}
 }
 
+void UInventoryManagerComponent::ClientRPC_SetWeaponIcon_Implementation(FName WeaponName, int32 CurrentBullets, int32 MaxBullets)
+{
+	AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
+
+	if (pc)
+	{
+		pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->SetWeaponIcon(WeaponName, CurrentBullets, MaxBullets);
+	}
+}
+
+void UInventoryManagerComponent::ClientRPC_HideWeaponIcon_Implementation()
+{
+	AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController());
+
+	if (pc)
+	{
+		pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->HideWeaponIcon();
+	}
+}
+
 void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 {
 	FSlotStructure LocalInventoryItem = ShopInventory->GetInventoryItem(InventorySlot);
@@ -2481,7 +2476,7 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 	TryToAddItemToInventory(PlayerInventory, LocalInventoryItem, bOutSuccess);	// 플레이어 인벤토리에 아이템 추가
 	if (bOutSuccess)
 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("Successfully Perchased!"));
+		// 		UE_LOG(LogTemp, Warning, TEXT("Successfully Perchased!"));
 	}
 	else
 	{
@@ -2575,7 +2570,7 @@ void UInventoryManagerComponent::AddShopSlot(uint8 Row, uint8 Column, uint8 Slot
 	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetOwner());
 	FWidgetsLayoutBP* WidgetLayout = Cast<AMyHUD>(PC->HUD_Reference)->GetWidgetBPClass("ShopSlot_WBP");
 	UShop_Slo* LocalSlot = CreateWidget<UShop_Slo>(GetWorld(), WidgetLayout->Widget);
-	
+
 	MainLayoutUI->Shop->ShopGirdPanel->AddChild(LocalSlot);
 	MainLayoutUI->Shop->ShopSlotsArray.Add(LocalSlot);
 
@@ -2724,7 +2719,7 @@ bool UInventoryManagerComponent::CanShopItems(UInventoryComponent* Inventory)
 // Drop Money
 
 void UInventoryManagerComponent::Client_ShowDropMoneyLayout_Implementation()
-{	
+{
 	MainLayoutUI->DropMoneyLayout->SetVisibility(ESlateVisibility::Visible);
 }
 
@@ -2751,14 +2746,14 @@ void UInventoryManagerComponent::DropMoney()
 			}, 0.5f, false);
 	}
 	if (money > Gold)
-	{	
+	{
 		MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Visible);
 
 		FTimerHandle Time;
-		GetWorld()->GetTimerManager().SetTimer(Time, [&](){
-		MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Collapsed);
-		return;
-		}, 0.5f, false);
+		GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+			MainLayoutUI->DropMoneyLayout->NotificationBorder->SetVisibility(ESlateVisibility::Collapsed);
+			return;
+			}, 0.5f, false);
 	}
 	else if (money <= Gold)
 	{
@@ -2791,16 +2786,21 @@ void UInventoryManagerComponent::EquipItemAtLoad(UInventoryComponent* FromInvent
 
 			UpdateEquippedStats();
 			Server_UpdateTooltips();
+
+			if (auto castCheck = Cast<UEquipmentComponent>(PlayerInventory))
+			{
+				castCheck->UpdateEquippedMeshes(ToInventorySlot);
+			}
 			return;
 
 		}
 		else {
-// 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
+			// 			UE_LOG(LogTemp, Warning, TEXT("ITEM CAN NOT BE EQUIPPED IN THAT SLOT"))
 		}
 	}
 	else
 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
+		// 		UE_LOG(LogTemp, Warning, TEXT("ITEM IS NOT EQUIPPABLE"))
 	}
 }
 

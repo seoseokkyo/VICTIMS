@@ -56,6 +56,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void UpdateCurrentBullet(int32 Bullets);
 
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void ClientRPC_UpdateCurrentBullet(int32 Bullets);
+
 	UFUNCTION()
 	void ShowNotification();
 

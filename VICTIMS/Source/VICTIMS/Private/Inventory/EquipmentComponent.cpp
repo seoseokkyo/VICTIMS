@@ -38,25 +38,25 @@ void UEquipmentComponent::SetInventoryItem(uint8 InventorySlot, FSlotStructure& 
 {
 	Super::SetInventoryItem(InventorySlot, Item);						// 장비칸 내용 업데이트 
 
-	UpdateEquippedMeshes(InventorySlot);
+	//UpdateEquippedMeshes(InventorySlot);
 }
 
 void UEquipmentComponent::UpdateEquippedMeshes(uint8 InventorySlot)
 {																		// 장비아이템 매시 업데이트 
 	if (IsValid(EquipmentCharacterReference))
 	{
-		//if (GetOwnerRole() == ROLE_Authority)
-		//{
-		//	FSlotStructure Slot = GetInventoryItem(InventorySlot);
-		//	USkeletalMesh* NewMesh = Slot.ItemStructure.SkeletalMesh;
-		//	NetMulticastRPC_UpdateEquippedMeshes(InventorySlot, Slot, NewMesh);
-		//}
-		//else
-		//{
-		//	ServerRPC_UpdateEquippedMeshes(InventorySlot);
-		//}
+		if (GetOwnerRole() == ROLE_Authority)
+		{
+			FSlotStructure Slot = GetInventoryItem(InventorySlot);
+			USkeletalMesh* NewMesh = Slot.ItemStructure.SkeletalMesh;
+			NetMulticastRPC_UpdateEquippedMeshes(InventorySlot, Slot, NewMesh);
+		}
+		else
+		{
+			ServerRPC_UpdateEquippedMeshes(InventorySlot);
+		}
 
-		ServerRPC_UpdateEquippedMeshes(InventorySlot);
+		//ServerRPC_UpdateEquippedMeshes(InventorySlot);
 	}
 }
 
@@ -67,7 +67,7 @@ void UEquipmentComponent::ServerRPC_UpdateEquippedMeshes_Implementation(uint8 In
 
 	if (IsValid(EquipmentCharacterReference))
 	{
-		switch ((EEquipmentSlot)InventorySlot)
+		switch ((EEquipmentSlot)Slot.ItemStructure.EquipmentSlot)
 		{
 		case EEquipmentSlot::Weapon:
 			break;
@@ -127,7 +127,7 @@ void UEquipmentComponent::NetMulticastRPC_UpdateEquippedMeshes_Implementation(ui
 {
 	if (IsValid(EquipmentCharacterReference))
 	{
-		switch ((EEquipmentSlot)InventorySlot)
+		switch ((EEquipmentSlot)Slot.ItemStructure.EquipmentSlot)
 		{
 		case EEquipmentSlot::Weapon:
 			break;

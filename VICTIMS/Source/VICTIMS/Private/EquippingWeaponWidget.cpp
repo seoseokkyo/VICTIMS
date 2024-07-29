@@ -71,6 +71,11 @@ void UEquippingWeaponWidget::UpdateMaxBullet(int32 Bullets)
 
 void UEquippingWeaponWidget::UpdateCurrentBullet(int32 Bullets)
 {
+	ClientRPC_UpdateCurrentBullet(Bullets);
+}
+
+void UEquippingWeaponWidget::ClientRPC_UpdateCurrentBullet_Implementation(int32 Bullets)
+{
 	CurrentBullet->SetText(FText::AsNumber(Bullets));
 }
 

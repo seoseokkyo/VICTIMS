@@ -52,8 +52,11 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Manager|Public|Items")
 	void UseBulletItem(FName Bullet);
 
+	UFUNCTION(Server, Reliable, BlueprintCallable, Category = "Manager|Public|Items")
+	void ServerRPC_UseBulletItem(FName Bullet, const int32 count, uint8 Slot);
+
 	UFUNCTION(Client, Reliable, BlueprintCallable, Category = "Manager|Public|Items")
-	void ClientRPC_UseBulletItem(FName Bullet, const int32 count, uint8 Slot);
+	void ClientRPC_UseBulletItem(const int32 maxBullets, const int32 count);
 
 	UPROPERTY()
 	int32 MaxBullet;
@@ -61,7 +64,8 @@ public:
 	UPROPERTY()
 	int32 CurrentBullet;
 
-
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_BulletNotification();
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -416,6 +420,13 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "UI Sound")
 	class USoundBase* OpenShopSound;
+
+	//<< SetWeaponIcon ฐüทร
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_SetWeaponIcon(FName WeaponName, int32 CurrentBullets, int32 MaxBullets);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_HideWeaponIcon();
 
 protected:
 
