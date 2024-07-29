@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.4",
+	"EngineAssociation": "{F4B79965-4288-8303-E5FE-3B941E1EE628}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -73,6 +73,14 @@
 			"Name": "MinimapPlugin",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/ad08325742e24fb0836391bca25c72bb"
+		},
+		{
+			"Name": "GmDynamicMultiChatSystem",
+			"Enabled": false,
+			"MarketplaceURL": "https://publish.unrealengine.com/v3/edit-product/64db727476d04b81b72e23751ced41c8",
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
 		}
 	],
 	"TargetPlatforms": [

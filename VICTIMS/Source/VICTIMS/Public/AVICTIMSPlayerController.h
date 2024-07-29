@@ -5,6 +5,8 @@
 #include "GameFramework/PlayerController.h"
 #include "InventoryHUDInterface.h"
 #include "Tuples.h"
+
+#include "PartyComponent.h"
 #include "AVICTIMSPlayerController.generated.h"
 
 class UDatatable;
