@@ -158,6 +158,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_ClearHotbarSlot(const uint8& HotbarSlot);
 
+	UFUNCTION(Client, Reliable)
+	void Client_ClearHotbarWeapon(const FSlotStructure& HotbarSlot);
+
 	UFUNCTION(Server, Reliable)
 	void Server_UpdateTooltips();
 
