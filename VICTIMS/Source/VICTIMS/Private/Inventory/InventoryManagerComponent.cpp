@@ -2495,6 +2495,15 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 		return;
 	}
 	bool bOutSuccess = false;
+	if (LocalInventoryItem.ItemStructure.ID == FName("ID_PistolBullet"))
+	{
+		LocalInventoryItem.Amount = 24;
+	}
+	else if (LocalInventoryItem.ItemStructure.ID == FName("ID_ShotGunBullet"))
+	{
+		LocalInventoryItem.Amount = 10; 
+	}
+
 	TryToAddItemToInventory(PlayerInventory, LocalInventoryItem, bOutSuccess);	// 플레이어 인벤토리에 아이템 추가
 	if (bOutSuccess)
 	{
