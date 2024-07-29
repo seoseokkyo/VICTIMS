@@ -802,21 +802,32 @@ void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
 
 	if (bEquipAxe || bEquipKnife || bEquipPistol || bEquipShotGun)
 	{
-		FReturnTupleBoolInt Tuple2{};
-		TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
-		FSlotStructure Slot2 = PlayerInventory->GetEmptySlot(EEquipmentSlot::Undefined);
-
+		// 		FReturnTupleBoolInt Tuple2{};
+		 		TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
+		// 		FSlotStructure Slot2 = PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon);
+		// 		for (int i = 0; i < LocalInventoryUI2.Num(); i++)
+		// 		{
+		// 			if (Slot2.ItemStructure.ID == LocalInventoryUI2[i]->SlotStructure.ItemStructure.ID)
+		// 			{
+		// 				Tuple2.Success = true;
+		// 				Tuple2.Index = i;
+		// 				break;
+		// 			}
+		// 		}
+		// 		Tuple2.Index = Tuple2.Index + (uint8)EEquipmentSlot::Count;
+		// 		Server_UnEquipToInventory(HotbarSlot, Tuple2.Index);
+		FSlotStructure Slot2 = PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon);
+		int t = 0;
+		FSlotStructure Slot3 = GetHotbarSlotItem(HotbarSlot);
 		for (int i = 0; i < LocalInventoryUI2.Num(); i++)
 		{
-			if (Slot2.ItemStructure.ID == LocalInventoryUI2[i]->SlotStructure.ItemStructure.ID)
+			if (GetInventorySlotItem(i).ItemStructure.ID == FName("ID_Empty"))
 			{
-				Tuple2.Success = true;
-				Tuple2.Index = i;
-				break;
+			    t = i;	
 			}
 		}
-		Tuple2.Index = Tuple2.Index + (uint8)EEquipmentSlot::Count;
-		Server_UnEquipToInventory(HotbarSlot, Tuple2.Index);
+		UnEquipItem(PlayerInventory, Slot2.slot, PlayerInventory, t);
+		
 	}
 	else
 	{
