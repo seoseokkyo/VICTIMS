@@ -799,6 +799,27 @@ void UInventoryManagerComponent::MoveHotbarSlotItem(const uint8& FromSlot, const
 
 void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
 {
+
+	if (bEquipAxe || bEquipKnife || bEquipPistol || bEquipShotGun)
+	{
+		FReturnTupleBoolInt Tuple2{};
+		TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
+		FSlotStructure Slot2 = PlayerInventory->GetEmptySlot(EEquipmentSlot::Undefined);
+
+		for (int i = 0; i < LocalInventoryUI2.Num(); i++)
+		{
+			if (Slot2.ItemStructure.ID == LocalInventoryUI2[i]->SlotStructure.ItemStructure.ID)
+			{
+				Tuple2.Success = true;
+				Tuple2.Index = i;
+				break;
+			}
+		}
+		Tuple2.Index = Tuple2.Index + (uint8)EEquipmentSlot::Count;
+		Server_UnEquipToInventory(HotbarSlot, Tuple2.Index);
+	}
+	else
+	{
 	FReturnTupleBoolInt Tuple{};
 	FSlotStructure Slot = GetHotbarSlotItem(HotbarSlot);
 
@@ -814,17 +835,18 @@ void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
 		}
 		if (Tuple.Success)
 		{
-			Tuple.Index = Tuple.Index + (uint8)EEquipmentSlot::Count;
-			//  			if (Slot.ItemStructure.ID == FName("ID_Pistol") || Slot.ItemStructure.ID == FName("ID_ShotGun") ||
-			//  				Slot.ItemStructure.ID == FName("ID_Knife") || Slot.ItemStructure.ID == FName("ID_Axe") || Slot.ItemStructure.ID == FName("ID_Rifle"))
-			// //  			{
-			// //  				Server_UseHotbarWeapon(Tuple.Index);
-			// //  			}
-			// //  			else
-			// 	 		{
-			Server_UseInventoryItem(Tuple.Index);
+//  			if (Slot.ItemStructure.ID == FName("ID_Pistol") || Slot.ItemStructure.ID == FName("ID_ShotGun") ||
+//   				Slot.ItemStructure.ID == FName("ID_Knife") || Slot.ItemStructure.ID == FName("ID_Axe") || Slot.ItemStructure.ID == FName("ID_Rifle"))
+//   			{
+//   				Server_UseHotbarWeapon(Tuple.Index);
+//   			}
+//   			else
+// 	 		{
+				Tuple.Index = Tuple.Index + (uint8)EEquipmentSlot::Count;
+				Server_UseInventoryItem(Tuple.Index);
 			/*}*/
 		}
+	}
 	}
 }
 
