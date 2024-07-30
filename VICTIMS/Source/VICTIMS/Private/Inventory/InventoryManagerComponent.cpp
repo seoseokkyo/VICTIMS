@@ -1870,11 +1870,10 @@ void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 			{
 				LocalIndex = i;
 				ReloadCount = 8;
-				UE_LOG(LogTemp, Warning, TEXT("Found Pistol Bullet"));
+// 				UE_LOG(LogTemp, Warning, TEXT("Found Pistol Bullet"));
 				con->bHasBullet = true;
 				ServerRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);	 // ID_PistolBullet ÀÌ¸é 8¹ß
 				break;
-
 			}
 			else if (con->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID == Bullet && Bullet == FName("ID_ShotGunBullet"))
 			{
