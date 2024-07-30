@@ -514,6 +514,8 @@ void AVICTIMSPlayerController::OnActorUsed(AActor* Actor1)
 
 void AVICTIMSPlayerController::RequestClientTravel(const FString& URL, const FString& Options)
 {
+	SaveData();
+
 	ServerRPC_RequestClientTravel(URL, Options);
 }
 
