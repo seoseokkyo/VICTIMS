@@ -66,7 +66,7 @@ void UEquippingWeaponWidget::HideWeaponIcon()
 
 void UEquippingWeaponWidget::UpdateMaxBullet(int32 Bullets)
 {
-	MaxBullet->SetText(FText::AsNumber(Bullets));
+	ClientRPC_UpdateMaxBullet(Bullets);
 }
 
 void UEquippingWeaponWidget::UpdateCurrentBullet(int32 Bullets)
@@ -77,6 +77,11 @@ void UEquippingWeaponWidget::UpdateCurrentBullet(int32 Bullets)
 void UEquippingWeaponWidget::ClientRPC_UpdateCurrentBullet_Implementation(int32 Bullets)
 {
 	CurrentBullet->SetText(FText::AsNumber(Bullets));
+}
+
+void UEquippingWeaponWidget::ClientRPC_UpdateMaxBullet_Implementation(int32 Bullets)
+{
+	MaxBullet->SetText(FText::AsNumber(Bullets));
 }
 
 void UEquippingWeaponWidget::ShowNotification()

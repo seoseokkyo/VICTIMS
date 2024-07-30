@@ -675,6 +675,15 @@ void AVICTIMSCharacter::PossessedBy(AController* NewController)
 	}
 }
 
+void AVICTIMSCharacter::OnRep_PistolBullets()
+{
+	PistolBullets = 8;
+}
+void AVICTIMSCharacter::OnRep_ShotgunBullets()
+{
+	ShotgunBullets = 2;
+}
+
 void AVICTIMSCharacter::Moneying()
 {
 	if(IsLocallyControlled())
