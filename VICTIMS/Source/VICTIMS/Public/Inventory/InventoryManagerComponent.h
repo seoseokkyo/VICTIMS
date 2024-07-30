@@ -153,8 +153,25 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void Client_MoveHotbarSlotItem(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar);
+
+	UFUNCTION(Client, Reliable)
+	void Client_MoveHotbarSlotItem1(const uint8& FromSlot, const uint8& ToSlot, const int& Index,const FSlotStructure& Slot, const bool bEquipped);
+
+	UFUNCTION(Client, Reliable)
+	void Client_MoveHotbarSlotItem2(const uint8& FromSlot, const uint8& ToSlot, const FSlotStructure& FromItem, const FSlotStructure& ToItem);
+
+	UFUNCTION(Server, Reliable)
+	void Server_MoveHotbarSlotItem(const uint8& FromSlot, const uint8& ToSlot, const TArray<FSlotStructure>& HotbarInventory, const FSlotStructure& InPlayerInventory, const FSlotStructure& InEquipmentInventory);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_UseHotbarSlot(const uint8& HotbarSlot, const FSlotStructure& HotbarItem);
+
 	UFUNCTION(Client, Reliable)
 	void Client_UseHotbarSlot(const uint8& HotbarSlot);
+
+	UFUNCTION(Client, Reliable)
+	void Client_UseHotbarItem(const uint8& HotbarSlot, const FSlotStructure& Slot, const FSlotStructure& Slot2, const bool bEquipping);
+
 	UFUNCTION(Client, Reliable)
 	void Client_ClearHotbarSlot(const uint8& HotbarSlot);
 
@@ -242,8 +259,13 @@ protected:
 private:
 	UFUNCTION(Category = "UserInterface|Private|Hotbar")
 	void MoveHotbarSlotItem(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar);
+
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_Test(const uint8& FromSlot, const uint8& ToSlot, const TArray<FSlotStructure>& arrayTemp, const FSlotStructure& InEquipmentInventory);
+
 	UFUNCTION(Category = "UserInterface|Private|Hotbar")
-	void UseHotbarSlot(const uint8& HotbarSlot);
+	void UseHotbarSlot(const uint8& HotbarSlot, const FSlotStructure& Slot, const FSlotStructure& Slot2, const bool bEquipping);
 	UFUNCTION(Category = "UserInterface|Private|Hotbar")
 	void ClearHotbarSlotItem(const uint8& HotbarSlot);
 
@@ -494,14 +516,32 @@ public:
 //=======================================================================================================
 // Hotbar weapon
 
-	UPROPERTY()
+	UPROPERTY(ReplicatedUsing = "OnRep_EquipPistol")
 	bool bEquipPistol;
-	UPROPERTY()
+
+	UFUNCTION()
+	void OnRep_EquipPistol(bool Equiped);
+
+	UPROPERTY(ReplicatedUsing = "OnRep_EquipShotGun")
 	bool bEquipShotGun;
-	UPROPERTY()
+
+	UFUNCTION()
+	void OnRep_EquipShotGun(bool Equiped);
+
+
+	UPROPERTY(ReplicatedUsing = "OnRep_EquipKnife")
 	bool bEquipKnife;
-	UPROPERTY()
+
+	UFUNCTION()
+	void OnRep_EquipKnife(bool Equiped);
+
+	UPROPERTY(ReplicatedUsing = "OnRep_EquipAxe")
 	bool bEquipAxe;
-	UPROPERTY()
+
+	UFUNCTION()
+	void OnRep_EquipAxe(bool Equiped);
+
+	UPROPERTY(Replicated)
 	bool bEquipRifle;
+
 };
