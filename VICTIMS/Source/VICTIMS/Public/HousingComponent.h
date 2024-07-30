@@ -165,19 +165,23 @@ class VICTIMS_API UHousingComponent : public UActorComponent
     UFUNCTION(BlueprintCallable)
     void RemoveObject();
 
+    UFUNCTION(Client, Reliable)
+    void ClientRPC_RemoveObject();
 
     UFUNCTION(Server, Reliable)
-    void Server_RemoveObject();
-
+    void Server_RemoveObject(FVector startLocation, FVector endLocation);
 
     UFUNCTION(NetMulticast, Reliable)
-    void Multicast_RemoveObject();
+    void Multicast_RemoveObject(FVector startLocation, FVector endLocation, FHitResult hitResult, bool bHit);
+
+    UFUNCTION(Client, Reliable)
+    void ClientRPC_MoveObject();
 
     UFUNCTION(Server, Reliable)
-    void Server_MoveObject();
+    void Server_MoveObject(FVector startLocation, FVector endLocation);
 
     UFUNCTION(NetMulticast, Reliable)
-    void Multicast_MoveObject(FVector StartLocation, FVector EndLocation);
+    void Multicast_MoveObject(FVector StartLocation, FVector EndLocation, FHitResult hitResult, bool bHit);
 
     virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

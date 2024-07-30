@@ -239,7 +239,7 @@ void UHousingComponent::BuildCycle()
 			}
 		}
 	}
-	
+
 	if (IsBuildModeOn)
 	{
 		GetWorld()->GetTimerManager().SetTimer(BuildCycleTimerHandle, this, &UHousingComponent::BuildDelay, 0.1f, false);
@@ -575,12 +575,27 @@ bool UHousingComponent::CanPlacePreviewMesh()
 
 void UHousingComponent::RemoveObject()
 {
-	Server_RemoveObject();
+	ClientRPC_RemoveObject();
+}
+
+void UHousingComponent::ClientRPC_RemoveObject_Implementation()
+{
+	if (auto charCheck = Cast<AVICTIMSCharacter>(GetOwner()))
+	{
+		auto cam = charCheck->GetFollowCamera();
+
+		FVector CameraLocation = cam->GetComponentLocation();
+		FRotator CameraRotation = cam->GetComponentRotation();
+		FVector StartLocation = CameraLocation;
+		FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
+
+		Server_RemoveObject(StartLocation, EndLocation);
+	}
 }
 
 void UHousingComponent::MoveObject()
 {
-	Server_MoveObject();
+	ClientRPC_MoveObject();
 }
 
 void UHousingComponent::OnRep_IsBuildModeOn()
@@ -599,18 +614,23 @@ void UHousingComponent::OnRep_IsBuildModeOn()
 }
 
 
-void UHousingComponent::Server_RemoveObject_Implementation()
+void UHousingComponent::Server_RemoveObject_Implementation(FVector startLocation, FVector endLocation)
 {
-	FVector CameraLocation = Camera->GetComponentLocation();
-	FRotator CameraRotation = Camera->GetComponentRotation();
-	FVector StartLocation = CameraLocation;
-	FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
+	//FVector CameraLocation = Camera->GetComponentLocation();
+	//FRotator CameraRotation = Camera->GetComponentRotation();
+	//FVector StartLocation = CameraLocation;
+	//FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
+
+	//FVector CharLocation = GetOwner()->GetActorLocation();
+	//FRotator CharRotation = GetOwner()->GetActorRotation();
+	//FVector StartLocation = CharLocation;
+	//FVector EndLocation = StartLocation + (CharRotation.Vector() * 1500.0f);
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, startLocation, endLocation, ECC_Visibility, Params);
 
 	if (bHit)
 	{
@@ -650,19 +670,22 @@ void UHousingComponent::Server_RemoveObject_Implementation()
 			}
 		}
 	}
+
+	Multicast_RemoveObject(startLocation, endLocation, HitResult, bHit);
+}
+
+void UHousingComponent::Multicast_RemoveObject_Implementation(FVector StartLocation, FVector EndLocation, FHitResult hitResult, bool bHit)
+{
+	// 	RemoveObject();
+
 	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
 	if (bHit)
 	{
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5, 12, FColor::Red, false, 1);
+		DrawDebugSphere(GetWorld(), hitResult.ImpactPoint, 5, 12, FColor::Red, false, 1);
 	}
 }
 
-void UHousingComponent::Multicast_RemoveObject_Implementation()
-{
-// 	RemoveObject();
-}
-
-void UHousingComponent::Server_MoveObject_Implementation()
+void UHousingComponent::Server_MoveObject_Implementation(FVector startLocation, FVector endLocation)
 {
 	//if (!IsMoving || !MoveableActor)
 	//{
@@ -675,28 +698,16 @@ void UHousingComponent::Server_MoveObject_Implementation()
 	//IsBuildModeOn = false;
 	IsMoving = true;
 
-	FVector CameraLocation = Camera->GetComponentLocation();
-	FRotator CameraRotation = Camera->GetComponentRotation();
-	FVector StartLocation = CameraLocation;
-	FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
-
-	Multicast_MoveObject(StartLocation, EndLocation);
-}
-
-void UHousingComponent::Multicast_MoveObject_Implementation(FVector StartLocation, FVector EndLocation)
-{
 
 	FHitResult HitResult;
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
 
-	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, StartLocation, EndLocation, ECC_Visibility, Params);
+	bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, startLocation, endLocation, ECC_Visibility, Params);
 
 	if (bHit)
 	{
 		MoveableActor = HitResult.GetActor();
-
-		// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("UHousingComponent :: Multicast_MoveObject :: Movable : %p"), MoveableActor));
 
 		if (MoveableActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
 		{
@@ -708,18 +719,37 @@ void UHousingComponent::Multicast_MoveObject_Implementation(FVector StartLocatio
 			this->BuildID = BuildID;
 
 			LaunchBuildMode(ItemID);
-
-
 		}
 		else
 		{
 			// 여기서 movable이 아닌 액터가 Hit된경우 처리
 		}
 	}
+
+	Multicast_MoveObject(startLocation, endLocation, HitResult, bHit);
+}
+
+void UHousingComponent::Multicast_MoveObject_Implementation(FVector StartLocation, FVector EndLocation, FHitResult hitResult, bool bHit)
+{
 	DrawDebugLine(GetWorld(), StartLocation, EndLocation, FColor::Green, false, 1, 0, 1);
 	if (bHit)
 	{
-		DrawDebugSphere(GetWorld(), HitResult.ImpactPoint, 5, 12, FColor::Red, false, 1);
+		DrawDebugSphere(GetWorld(), hitResult.ImpactPoint, 5, 12, FColor::Red, false, 1);
+	}
+}
+
+void UHousingComponent::ClientRPC_MoveObject_Implementation()
+{
+	if (auto charCheck = Cast<AVICTIMSCharacter>(GetOwner()))
+	{
+		auto cam = charCheck->GetFollowCamera();
+
+		FVector CameraLocation = cam->GetComponentLocation();
+		FRotator CameraRotation = cam->GetComponentRotation();
+		FVector StartLocation = CameraLocation;
+		FVector EndLocation = StartLocation + (CameraRotation.Vector() * 1500.0f);
+
+		Server_MoveObject(StartLocation, EndLocation);
 	}
 }
 

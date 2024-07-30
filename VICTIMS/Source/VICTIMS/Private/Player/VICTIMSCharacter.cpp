@@ -899,6 +899,11 @@ void AVICTIMSCharacter::OnRemoveObject()
 {
 	if (HousingComponent)
 	{
+		if (IsLocallyControlled())
+		{
+			HousingComponent->Camera = FollowCamera;
+		}
+
 		Server_RemoveObject();
 	}
 }
@@ -934,7 +939,7 @@ void AVICTIMSCharacter::Server_MoveObject_Implementation()
 {
 	if (HousingComponent)
 	{
-		HousingComponent->Server_MoveObject();
+		HousingComponent->ClientRPC_MoveObject();
 		Multicast_MoveObject();
 	}
 }
