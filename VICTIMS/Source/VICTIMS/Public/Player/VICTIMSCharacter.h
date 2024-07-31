@@ -61,11 +61,17 @@ public:
 //  인벤토리, 아이템, 상호작용 관련 
 //=====================================================================================================
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullets")
+	UPROPERTY(EditAnywhere, ReplicatedUsing ="OnRep_PistolBullets", BlueprintReadWrite, Category = "Bullets")
 	int32 PistolBullets;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bullets")
+	UFUNCTION(meta=(OverrideNativeName="OnRep_PistolBullets"))
+	void OnRep_PistolBullets();
+
+	UPROPERTY(EditAnywhere, ReplicatedUsing = "OnRep_ShotgunBullets",BlueprintReadWrite, Category = "Bullets")
 	int32 ShotgunBullets;
+
+	UFUNCTION(meta=(OverrideNativeName="OnRep_ShotgunBullets"))
+	void OnRep_ShotgunBullets();
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))

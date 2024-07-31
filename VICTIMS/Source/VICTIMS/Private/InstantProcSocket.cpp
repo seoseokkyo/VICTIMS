@@ -15,7 +15,7 @@ void UInstantProcSocket::InitializeSocket()
     FString Address = gameInst->mainAddress;
     int32 Port = 8001;
 
-    UE_LOG(LogTemp, Log, TEXT("Connected to server at %d"), Port);
+//     UE_LOG(LogTemp, Log, TEXT("Connected to server at %d"), Port);
 
     TSharedRef<FInternetAddr> RemoteAddress = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->CreateInternetAddr();
     bool bIsValid;
@@ -27,23 +27,23 @@ void UInstantProcSocket::InitializeSocket()
         bConnection = Socket->Connect(*RemoteAddress);
         if (bConnection)
         {
-            UE_LOG(LogTemp, Log, TEXT("Connected to server at %s"), *RemoteAddress->ToString(true));
+//             UE_LOG(LogTemp, Log, TEXT("Connected to server at %s"), *RemoteAddress->ToString(true));
             SendDataToServer();
         }
         else
         {
-            UE_LOG(LogTemp, Error, TEXT("Failed to connect to server"));
+//             UE_LOG(LogTemp, Error, TEXT("Failed to connect to server"));
         }
     }
     else
     {
-        UE_LOG(LogTemp, Error, TEXT("Invalid address"));
+//         UE_LOG(LogTemp, Error, TEXT("Invalid address"));
     }
 }
 
 void UInstantProcSocket::SendDataToServer()
 {
-    FString Message = FString::Printf(TEXT("InstantProcSocket_Completed_Port_%d"), InstantProcPortNum);
+//     FString Message = FString::Printf(TEXT("InstantProcSocket_Completed_Port_%d"), InstantProcPortNum);
     SendData(Message);
 
     // 서버로부터 응답 받기

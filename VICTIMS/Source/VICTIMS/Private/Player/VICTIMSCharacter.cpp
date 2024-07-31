@@ -365,7 +365,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		//상호작용 =====================================================================================================================
 		if (MyPlayerController == nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController == nullptr"));
+// 			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController == nullptr"));
 		}
 		else
 		{
@@ -673,6 +673,15 @@ void AVICTIMSCharacter::PossessedBy(AController* NewController)
 			}
 		}
 	}
+}
+
+void AVICTIMSCharacter::OnRep_PistolBullets()
+{
+	PistolBullets = 8;
+}
+void AVICTIMSCharacter::OnRep_ShotgunBullets()
+{
+	ShotgunBullets = 2;
 }
 
 void AVICTIMSCharacter::Moneying()

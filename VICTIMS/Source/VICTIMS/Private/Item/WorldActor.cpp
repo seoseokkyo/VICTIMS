@@ -31,7 +31,7 @@ void AWorldActor::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("WorldActor : UDataTable not Loaded"))
+// 		UE_LOG(LogTemp, Warning, TEXT("WorldActor : UDataTable not Loaded"));
 	}
 
 	Server_InitializeItemData();
@@ -54,7 +54,7 @@ bool AWorldActor::LoadItemFromList()
 
 	if (!NewItemData)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Loading Item... returned NULL."));
+// 		UE_LOG(LogTemp, Warning, TEXT("Loading Item... returned NULL."));
 		return false;
 	}
 

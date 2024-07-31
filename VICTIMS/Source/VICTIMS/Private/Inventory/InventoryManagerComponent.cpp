@@ -84,6 +84,11 @@ void UInventoryManagerComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProp
 	DOREPLIFETIME(UInventoryManagerComponent, TotalNumberOfSlots);
 	DOREPLIFETIME(UInventoryManagerComponent, AttributesArray);
 	DOREPLIFETIME(UInventoryManagerComponent, Gold);
+	DOREPLIFETIME(UInventoryManagerComponent, bEquipPistol);
+	DOREPLIFETIME(UInventoryManagerComponent, bEquipShotGun);
+	DOREPLIFETIME(UInventoryManagerComponent, bEquipKnife);
+	DOREPLIFETIME(UInventoryManagerComponent, bEquipAxe);
+	DOREPLIFETIME(UInventoryManagerComponent, bEquipRifle);
 }
 
 void UInventoryManagerComponent::OnRep_UpdateGoldAmount()
@@ -302,14 +307,10 @@ void UInventoryManagerComponent::Client_CloseContainer_Implementation()
 	}
 }
 
-void UInventoryManagerComponent::Client_MoveHotbarSlotItem_Implementation(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar)
-{
-	MoveHotbarSlotItem(FromSlot, ToSlot, IsDraggedFromInventory, IsDraggedFromHotbar);
-}
-
 void UInventoryManagerComponent::Client_UseHotbarSlot_Implementation(const uint8& HotbarSlot)
 {
-	UseHotbarSlot(HotbarSlot);
+	FSlotStructure Slot = GetHotbarSlotItem(HotbarSlot);
+	Server_UseHotbarSlot(HotbarSlot, Slot);
 }
 
 void UInventoryManagerComponent::Client_ClearHotbarSlot_Implementation(const uint8& HotbarSlot)
@@ -736,74 +737,12 @@ void UInventoryManagerComponent::Client_UpdateContainerTooltips_Implementation(c
 	}
 }
 
-void UInventoryManagerComponent::MoveHotbarSlotItem(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar)
+void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot, const FSlotStructure& Slot, const FSlotStructure& Slot2, const bool bEquipping)
 {
-	if (IsDraggedFromInventory)
-	{
-		FSlotStructure SlotStructure = GetInventorySlotItem(FromSlot);
-		FSlotStructure ToSlotItem = GetHotbarSlotItem(ToSlot);
-		bool bEquipped;
-		int temp = 0;
-		for (int i = 0; i < 5; i++)
-		{
-			if (GetHotbarSlotItem(i).ItemStructure.ID == SlotStructure.ItemStructure.ID)
-			{
-				temp = i;
-				bEquipped = true;
-				break;
-			}
-			else if (GetHotbarSlotItem(i).ItemStructure.ID == PlayerInventory->GetInventoryItem(FromSlot).ItemStructure.ID)
-			{
-				temp = i;
-				bEquipped = true;
-				break;
-			}
-		}
-
-		if (bEquipped)
-		{
-			SetHotbarSlotItem(ToSlot, SlotStructure);
-			ClearHotbarSlotItem(temp);
-		}
-		else
-		{
-			SetHotbarSlotItem(ToSlot, SlotStructure);
-		}
-
-	}
-
-	if (IsDraggedFromHotbar)
-	{
-		FSlotStructure FromSlotItem = GetHotbarSlotItem(FromSlot);
-		FSlotStructure ToSlotItem = GetHotbarSlotItem(ToSlot);
-
-		if (ItemIsValid(ToSlotItem))
-		{
-			SetHotbarSlotItem(ToSlot, FromSlotItem);
-			SetHotbarSlotItem(FromSlot, ToSlotItem);
-		}
-		else {
-			if ((bEquipAxe && FromSlotItem.ItemStructure.ID == FName("ID_Axe")) ||
-				(bEquipKnife && FromSlotItem.ItemStructure.ID == FName("ID_Knife")) ||
-				(bEquipPistol && FromSlotItem.ItemStructure.ID == FName("ID_Pistol")) ||
-				(bEquipRifle && FromSlotItem.ItemStructure.ID == FName("ID_Rifle")) ||
-				(bEquipShotGun && FromSlotItem.ItemStructure.ID == FName("ID_ShotGun")))
-			{
-				UnEquipItem(PlayerInventory, FromSlot, PlayerInventory, ToSlot);
-			}
-			SetHotbarSlotItem(ToSlot, FromSlotItem);
-			ClearHotbarSlotItem(FromSlot);
-		}
-	}
-}
-
-void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
-{
-
-	if (bEquipAxe || bEquipKnife || bEquipPistol || bEquipShotGun)
+	if (bEquipping)
 	{
 		// 		FReturnTupleBoolInt Tuple2{};
-		 		TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
+		TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
 		// 		FSlotStructure Slot2 = PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon);
 		// 		for (int i = 0; i < LocalInventoryUI2.Num(); i++)
 		// 		{
@@ -816,51 +755,51 @@ void UInventoryManagerComponent::UseHotbarSlot(const uint8& HotbarSlot)
 		// 		}
 		// 		Tuple2.Index = Tuple2.Index + (uint8)EEquipmentSlot::Count;
 		// 		Server_UnEquipToInventory(HotbarSlot, Tuple2.Index);
-		FSlotStructure Slot2 = PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon);
 		int t = 0;
-		FSlotStructure Slot3 = GetHotbarSlotItem(HotbarSlot);
 		for (int i = 0; i < LocalInventoryUI2.Num(); i++)
 		{
 			if (GetInventorySlotItem(i).ItemStructure.ID == FName("ID_Empty"))
 			{
-			    t = i;	
+				t = i;
 			}
 		}
-		UnEquipItem(PlayerInventory, Slot2.slot, PlayerInventory, t);
-		
+		Server_UseInventoryItem((uint8)EEquipmentSlot::Weapon);
+
 	}
 	else
 	{
-	FReturnTupleBoolInt Tuple{};
-	FSlotStructure Slot = GetHotbarSlotItem(HotbarSlot);
+		FReturnTupleBoolInt Tuple{};
 
-	if (ItemIsValid(Slot))
-	{
-		TArray<USlotLayout*> LocalInventoryUI = MainLayoutUI->Inventory->InventorySlotsArray;
-		for (uint8 i = 0; i < LocalInventoryUI.Num(); i++) {
-			if (Slot.ItemStructure.ID == LocalInventoryUI[i]->SlotStructure.ItemStructure.ID) {
-				Tuple.Success = true;
-				Tuple.Index = i;
-				break;
-			}
-		}
-		if (Tuple.Success)
+		if (ItemIsValid(Slot))
 		{
-//  			if (Slot.ItemStructure.ID == FName("ID_Pistol") || Slot.ItemStructure.ID == FName("ID_ShotGun") ||
-//   				Slot.ItemStructure.ID == FName("ID_Knife") || Slot.ItemStructure.ID == FName("ID_Axe") || Slot.ItemStructure.ID == FName("ID_Rifle"))
-//   			{
-//   				Server_UseHotbarWeapon(Tuple.Index);
-//   			}
-//   			else
-// 	 		{
+			TArray<USlotLayout*> LocalInventoryUI = MainLayoutUI->Inventory->InventorySlotsArray;
+			for (uint8 i = 0; i < LocalInventoryUI.Num(); i++) {
+				if (Slot.ItemStructure.ID == LocalInventoryUI[i]->SlotStructure.ItemStructure.ID) {
+					Tuple.Success = true;
+					Tuple.Index = i;
+					break;
+				}
+			}
+			if (Tuple.Success)
+			{
 				Tuple.Index = Tuple.Index + (uint8)EEquipmentSlot::Count;
 				Server_UseInventoryItem(Tuple.Index);
-			/*}*/
+			}
 		}
-	}
 	}
 }
 
+
+void UInventoryManagerComponent::Server_UseHotbarSlot_Implementation(const uint8& HotbarSlot, const FSlotStructure& HotbarItem)
+{
+	FSlotStructure EquippedItem = PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon);
+	bool bEquipCheck = false;
+	if (bEquipAxe || bEquipKnife || bEquipPistol || bEquipShotGun)
+	{
+		bEquipCheck = true;
+	}
+	Client_UseHotbarItem(HotbarSlot, HotbarItem, EquippedItem, bEquipCheck);
+}
 void UInventoryManagerComponent::ClearHotbarSlotItem(const uint8& HotbarSlot)
 {
 	UHotbar_Slot* Slot = MainLayoutUI->Hotbar->HotbarSlotsArray[HotbarSlot];
@@ -879,6 +818,7 @@ FSlotStructure UInventoryManagerComponent::GetHotbarSlotItem(const uint8& Hotbar
 	TArray<UHotbar_Slot*> HotbarSlotsArray = MainLayoutUI->Hotbar->HotbarSlotsArray;
 	FSlotStructure Slot = HotbarSlotsArray[HotbarSlot]->SlotStructure;
 	return Slot;
+
 }
 
 uint8 UInventoryManagerComponent::GetEquipmentSlotByType(EEquipmentSlot EquipmentSlot)
@@ -1029,6 +969,10 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					bEquipShotGun = false;
 					bEquipKnife = false;
 					bEquipAxe = false;
+					OnRep_EquipShotGun(false);
+					OnRep_EquipKnife(false);
+					OnRep_EquipPistol(true);
+					OnRep_EquipAxe(false);
 
 					FSlotStructure BulletItem;
 					CurrentBullet = GetPlayerRef()->PistolBullets;
@@ -1067,6 +1011,10 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					bEquipShotGun = false;
 					bEquipKnife = false;
 					bEquipAxe = false;
+					OnRep_EquipShotGun(false);
+					OnRep_EquipKnife(false);
+					OnRep_EquipPistol(false);
+					OnRep_EquipAxe(false);
 				}
 				// 				playerReference->UseRifle();
 			}
@@ -1083,6 +1031,10 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					bEquipShotGun = false;
 					bEquipKnife = true;
 					bEquipAxe = false;
+					OnRep_EquipShotGun(false);
+					OnRep_EquipKnife(true);
+					OnRep_EquipPistol(false);
+					OnRep_EquipAxe(false);
 
 					ClientRPC_SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, 0, 0);
 				}
@@ -1105,6 +1057,10 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					bEquipShotGun = false;
 					bEquipKnife = false;
 					bEquipAxe = true;
+					OnRep_EquipShotGun(false);
+					OnRep_EquipKnife(false);
+					OnRep_EquipPistol(false);
+					OnRep_EquipAxe(true);
 
 					ClientRPC_SetWeaponIcon(LocalInventoryItem.ItemStructure.ID, 0, 0);
 				}
@@ -1126,6 +1082,10 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					bEquipShotGun = true;
 					bEquipKnife = false;
 					bEquipAxe = false;
+					OnRep_EquipShotGun(true);
+					OnRep_EquipKnife(false);
+					OnRep_EquipPistol(false);
+					OnRep_EquipAxe(false);
 
 
 					FSlotStructure BulletItem;
@@ -1224,6 +1184,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipPistol = false;
+			OnRep_EquipPistol(false);
 
 			ClientRPC_HideWeaponIcon();
 		}
@@ -1250,6 +1211,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipKnife = false;
+			OnRep_EquipKnife(false);
 
 			ClientRPC_HideWeaponIcon();
 		}
@@ -1263,6 +1225,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipAxe = false;
+			OnRep_EquipAxe(false);
 
 			ClientRPC_HideWeaponIcon();
 		}
@@ -1276,6 +1239,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 			FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 			GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 			bEquipShotGun = false;
+			OnRep_EquipShotGun(false);
 
 			ClientRPC_HideWeaponIcon();
 		}
@@ -1305,6 +1269,250 @@ void UInventoryManagerComponent::RandomizeDropLocation(FSlotStructure LocalSlot,
 	OutTransform = FTransform(FinalRotator, FinalLocation, FinalScale);
 }
 
+void UInventoryManagerComponent::Server_MoveHotbarSlotItem_Implementation(const uint8& FromSlot, const uint8& ToSlot, const TArray<FSlotStructure>& HotbarInventory, const FSlotStructure& InPlayerInventory, const FSlotStructure& InEquipmentInventory)
+{
+	int temp = 0;
+	bool bEquipped;
+	for (uint8 i = 0; i < 5; i++)
+	{
+		if (HotbarInventory[i].ItemStructure.ID == InPlayerInventory.ItemStructure.ID)
+		{
+			temp = i;
+			bEquipped = true;
+			break;
+		}
+		else if (HotbarInventory[i].ItemStructure.ID == InEquipmentInventory.ItemStructure.ID)
+		{
+			temp = i;
+			bEquipped = true;
+			break;
+		}
+	}
+	if (bEquipped)
+	{
+		Client_MoveHotbarSlotItem1(FromSlot, ToSlot, temp, InPlayerInventory, true);
+	}
+	else
+	{
+		Client_MoveHotbarSlotItem1(FromSlot, ToSlot, temp, InPlayerInventory, false);
+	}
+}
+void UInventoryManagerComponent::Client_MoveHotbarSlotItem_Implementation(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar)
+{
+	if (IsDraggedFromInventory)
+	{
+
+		TArray<FSlotStructure> HotbarItems;		
+
+		FSlotStructure PlayerItem = PlayerInventory->GetInventoryItem(FromSlot);
+
+		for (auto temp : MainLayoutUI->Hotbar->HotbarSlotsArray)
+		{
+			HotbarItems.Add(temp->SlotStructure);
+		}
+
+		//for (uint8 i = 0; i < MainLayoutUI->Hotbar->HotbarSlotsArray.Num(); i++)
+		//{
+		//	HotbarItems[i] = GetHotbarSlotItem(i);
+		//}
+
+		FSlotStructure EquippedItem = PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon);
+		//Server_MoveHotbarSlotItem(FromSlot, ToSlot, HotbarItems, PlayerItem, EquippedItem);
+
+		ServerRPC_Test(FromSlot, ToSlot, HotbarItems, EquippedItem);
+
+		// 		FSlotStructure SlotStructure = GetInventorySlotItem(FromSlot);
+		// 		FSlotStructure ToSlotItem = GetHotbarSlotItem(ToSlot);
+		// 
+		// 		bool bEquipped;
+		// 
+		// 		if (bEquipped)
+		// 		{
+		// 			SetHotbarSlotItem(ToSlot, SlotStructure);
+		// 			ClearHotbarSlotItem(temp);
+		// 		}
+		// 		else
+		// 		{
+		// 			SetHotbarSlotItem(ToSlot, SlotStructure);
+		// 		}
+	}
+
+	if (IsDraggedFromHotbar)
+	{
+		FSlotStructure FromSlotItem = GetHotbarSlotItem(FromSlot);
+		FSlotStructure ToSlotItem = GetHotbarSlotItem(ToSlot);
+
+		if (ItemIsValid(ToSlotItem))
+		{
+			SetHotbarSlotItem(ToSlot, FromSlotItem);
+			SetHotbarSlotItem(FromSlot, ToSlotItem);
+
+		}
+		else {
+			if ((bEquipAxe && FromSlotItem.ItemStructure.ID == FName("ID_Axe")) ||
+				(bEquipKnife && FromSlotItem.ItemStructure.ID == FName("ID_Knife")) ||
+				(bEquipPistol && FromSlotItem.ItemStructure.ID == FName("ID_Pistol")) ||
+				(bEquipRifle && FromSlotItem.ItemStructure.ID == FName("ID_Rifle")) ||
+				(bEquipShotGun && FromSlotItem.ItemStructure.ID == FName("ID_ShotGun")))
+			{
+				UnEquipItem(PlayerInventory, FromSlot, PlayerInventory, ToSlot);
+			}
+			SetHotbarSlotItem(ToSlot, FromSlotItem);
+			ClearHotbarSlotItem(FromSlot);
+		}
+	}
+
+}
+void UInventoryManagerComponent::Client_MoveHotbarSlotItem1_Implementation(const uint8& FromSlot, const uint8& ToSlot, const int& Index, const FSlotStructure& Slot, const bool bEquipped)
+{
+	if (bEquipped)
+	{
+		SetHotbarSlotItem(ToSlot, Slot);
+		ClearHotbarSlotItem(Index);
+	}
+	else
+	{
+		SetHotbarSlotItem(ToSlot, Slot);
+	}
+}
+
+void UInventoryManagerComponent::Client_MoveHotbarSlotItem2_Implementation(const uint8& FromSlot, const uint8& ToSlot, const FSlotStructure& FromItem, const FSlotStructure& ToItem)
+{
+	if (ItemIsValid(ToItem))
+	{
+		SetHotbarSlotItem(ToSlot, FromItem);
+		SetHotbarSlotItem(FromSlot, ToItem);
+	}
+	else
+	{
+		if ((bEquipAxe && FromItem.ItemStructure.ID == FName("ID_Axe")) ||
+			(bEquipKnife && FromItem.ItemStructure.ID == FName("ID_Knife")) ||
+			(bEquipPistol && FromItem.ItemStructure.ID == FName("ID_Pistol")) ||
+			(bEquipRifle && FromItem.ItemStructure.ID == FName("ID_Rifle")) ||
+			(bEquipShotGun && FromItem.ItemStructure.ID == FName("ID_ShotGun")))
+		{
+			UnEquipItem(PlayerInventory, FromSlot, PlayerInventory, ToSlot);
+		}
+		SetHotbarSlotItem(ToSlot, FromItem);
+		ClearHotbarSlotItem(FromSlot);
+	}
+}
+
+void UInventoryManagerComponent::MoveHotbarSlotItem(const uint8& FromSlot, const uint8& ToSlot, const bool IsDraggedFromInventory, const bool IsDraggedFromHotbar)
+{
+	if (IsDraggedFromInventory)
+	{
+		FSlotStructure SlotStructure = GetInventorySlotItem(FromSlot);
+		FSlotStructure ToSlotItem = GetHotbarSlotItem(ToSlot);
+
+		bool bEquipped;
+		int temp = 0;
+		for (uint8 i = 0; i < 5; i++)
+		{
+			if (GetHotbarSlotItem(i).ItemStructure.ID == SlotStructure.ItemStructure.ID)
+			{
+				temp = i;
+				bEquipped = true;
+				break;
+			}
+			else if (GetHotbarSlotItem(i).ItemStructure.ID == PlayerInventory->GetInventoryItem(FromSlot).ItemStructure.ID)
+			{
+				temp = i;
+				bEquipped = true;
+				break;
+			}
+		}
+
+		if (bEquipped)
+		{
+			SetHotbarSlotItem(ToSlot, SlotStructure);
+			ClearHotbarSlotItem(temp);
+			Client_MoveHotbarSlotItem1(FromSlot, ToSlot, temp, SlotStructure, true);
+		}
+		else
+		{
+			SetHotbarSlotItem(ToSlot, SlotStructure);
+			Client_MoveHotbarSlotItem1(FromSlot, ToSlot, temp, SlotStructure, false);
+		}
+
+	}
+
+	if (IsDraggedFromHotbar)
+	{
+		FSlotStructure FromSlotItem = GetHotbarSlotItem(FromSlot);
+		FSlotStructure ToSlotItem = GetHotbarSlotItem(ToSlot);
+
+		if (ItemIsValid(ToSlotItem))
+		{
+			SetHotbarSlotItem(ToSlot, FromSlotItem);
+			SetHotbarSlotItem(FromSlot, ToSlotItem);
+			Client_MoveHotbarSlotItem2(FromSlot, ToSlot, FromSlotItem, ToSlotItem);
+
+		}
+		else {
+			if ((bEquipAxe && FromSlotItem.ItemStructure.ID == FName("ID_Axe")) ||
+				(bEquipKnife && FromSlotItem.ItemStructure.ID == FName("ID_Knife")) ||
+				(bEquipPistol && FromSlotItem.ItemStructure.ID == FName("ID_Pistol")) ||
+				(bEquipRifle && FromSlotItem.ItemStructure.ID == FName("ID_Rifle")) ||
+				(bEquipShotGun && FromSlotItem.ItemStructure.ID == FName("ID_ShotGun")))
+			{
+				UnEquipItem(PlayerInventory, FromSlot, PlayerInventory, ToSlot);
+			}
+			SetHotbarSlotItem(ToSlot, FromSlotItem);
+			ClearHotbarSlotItem(FromSlot);
+			Client_MoveHotbarSlotItem2(FromSlot, ToSlot, FromSlotItem, ToSlotItem);
+		}
+	}
+
+}
+
+void UInventoryManagerComponent::ServerRPC_Test_Implementation(const uint8& FromSlot, const uint8& ToSlot, const TArray<FSlotStructure >& arrayTemp,const FSlotStructure& InEquipmentInventory)
+{
+	int temp = 0;
+	bool bEquipped = false;
+	FSlotStructure PlayerItem = PlayerInventory->GetInventoryItem(FromSlot);
+	for (auto arg : arrayTemp)
+	{
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("arg : %s"), *arg.ItemStructure.ID.ToString()));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Compare : %s, %s"), *arg.ItemStructure.ID.ToString(), *PlayerItem.ItemStructure.ID.ToString()));
+
+		if (arg.ItemStructure.ID == PlayerItem.ItemStructure.ID)
+		{
+			bEquipped = true;
+			break;
+		}
+		// 
+		// 		if (arg->SlotStructure.ItemStructure.ID == InEquipmentInventory.ItemStructure.ID)
+		// 		{
+		// 			bEquipped = true;
+		// 			break;
+		// 		}
+
+		temp++;
+	}
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("bEquipped : %s"), bEquipped ? TEXT("TRUE") : TEXT("FALSE")));
+
+	//for (uint8 i = 0; i < 5; i++)
+	//{
+	//	if (arrayTemp[i]->SlotStructure.ItemStructure.ID == InPlayerInventory.ItemStructure.ID)
+	//	{
+	//		temp = i;
+	//		bEquipped = true;
+	//		break;
+	//	}
+	//
+	//	if (arrayTemp[i]->SlotStructure.ItemStructure.ID == InEquipmentInventory.ItemStructure.ID)
+	//	{
+	//		temp = i;
+	//		bEquipped = true;
+	//		break;
+	//	}
+	//}
+
+	Client_MoveHotbarSlotItem1(FromSlot, ToSlot, temp, PlayerItem, bEquipped);
+}
+
 void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 InventorySlot)
 {
 	FSlotStructure LocalSlot = Inventory->GetInventoryItem(InventorySlot);
@@ -1322,9 +1530,9 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 
 			FTimerHandle Timer;
 			GetWorld()->GetTimerManager().ClearTimer(Timer);
-			GetWorld()->GetTimerManager().SetTimer(Timer, [&, WActor](){
+			GetWorld()->GetTimerManager().SetTimer(Timer, [&, WActor]() {
 				WActor->Destroy();
-			}, 10.f, false);
+				}, 10.f, false);
 
 			if (DropSound)
 			{
@@ -1343,6 +1551,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 				bEquipPistol = false;
+				OnRep_EquipPistol(false);
 
 				ClientRPC_HideWeaponIcon();
 			}
@@ -1359,6 +1568,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				bEquipRifle = false;
 
 				ClientRPC_HideWeaponIcon();
+
 			}
 			// 				playerReference->UseRifle();
 		}
@@ -1371,6 +1581,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 				bEquipKnife = false;
+				OnRep_EquipKnife(false);
 
 				ClientRPC_HideWeaponIcon();
 			}
@@ -1384,6 +1595,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 				bEquipAxe = false;
+				OnRep_EquipAxe(false);
 
 				ClientRPC_HideWeaponIcon();
 			}
@@ -1397,6 +1609,8 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 				bEquipShotGun = false;
+				OnRep_EquipShotGun(false);
+
 
 				ClientRPC_HideWeaponIcon();
 			}
@@ -1656,11 +1870,10 @@ void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 			{
 				LocalIndex = i;
 				ReloadCount = 8;
-				UE_LOG(LogTemp, Warning, TEXT("Found Pistol Bullet"));
+// 				UE_LOG(LogTemp, Warning, TEXT("Found Pistol Bullet"));
 				con->bHasBullet = true;
 				ServerRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);	 // ID_PistolBullet 이면 8발
 				break;
-
 			}
 			else if (con->InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID == Bullet && Bullet == FName("ID_ShotGunBullet"))
 			{
@@ -2519,7 +2732,7 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 	}
 	else if (LocalInventoryItem.ItemStructure.ID == FName("ID_ShotGunBullet"))
 	{
-		LocalInventoryItem.Amount = 10; 
+		LocalInventoryItem.Amount = 10;
 	}
 
 	TryToAddItemToInventory(PlayerInventory, LocalInventoryItem, bOutSuccess);	// 플레이어 인벤토리에 아이템 추가
@@ -2529,7 +2742,7 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Perchase Failed"));
+// 		UE_LOG(LogTemp, Warning, TEXT("Perchase Failed"));
 	}
 	Server_UpdateTooltips();
 	AddGold(-LocalInventoryItem.ItemStructure.PriceValue);	//AddGold 사용 -> Amount 를 음수값으로 넣어줌 
@@ -2858,6 +3071,26 @@ void UInventoryManagerComponent::Client_ShowNotification_Implementation(const ui
 	MainLayoutUI->Shop->ShopSlotsArray[InventorySlot]->ShowNotification();
 }
 
+void UInventoryManagerComponent::OnRep_EquipPistol(bool Equiped)
+{
+	bEquipPistol = Equiped;
+}
+
+void UInventoryManagerComponent::OnRep_EquipShotGun(bool Equiped)
+{
+	bEquipShotGun = Equiped;
+}
+
+void UInventoryManagerComponent::OnRep_EquipKnife(bool Equiped)
+{
+	bEquipKnife = Equiped;
+}
+
+void UInventoryManagerComponent::OnRep_EquipAxe(bool Equiped)
+{
+	bEquipAxe = Equiped;
+}
+
 void UInventoryManagerComponent::Client_ClearHotbarWeapon_Implementation(const FSlotStructure& HotbarSlot)
 {
 	bool Success = false;
@@ -2878,15 +3111,20 @@ void UInventoryManagerComponent::Client_ClearHotbarWeapon_Implementation(const F
 			{
 				if (HotbarSlot.ItemStructure.ID == GetHotbarSlotItem(i).ItemStructure.ID)
 				{
-// 					if (GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Rifle") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Pistol")
-// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_ShotGun") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Knife")
-// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Axe"))
-// 					{
-						ClearHotbarSlotItem(i);
-						break;
+					// 					if (GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Rifle") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Pistol")
+					// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_ShotGun") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Knife")
+					// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Axe"))
+					// 					{
+					ClearHotbarSlotItem(i);
+					break;
 					/*}*/
 				}
 			}
 		}
 	}
+}
+
+void UInventoryManagerComponent::Client_UseHotbarItem_Implementation(const uint8& HotbarSlot, const FSlotStructure& Slot, const FSlotStructure& Slot2, const bool bEquipping)
+{
+	UseHotbarSlot(HotbarSlot, Slot, Slot2, bEquipping);
 }
