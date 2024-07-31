@@ -732,6 +732,17 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		// 집 번호 저장
 		saveData->HouseNumber = CharacterReference->AssignedHouse ? CharacterReference->AssignedHouse->HouseNumber : -1;
 
+//=================================================================================================================================================
+//		Save QuickSlot
+
+		saveData->SavedHotbarItemIDs.Reset();
+
+		for (uint8 i = 0; i < 5; i++)
+		{
+			FString TempHotbarID = InventoryManagerComponent->GetHotbarSlotItem(i).ItemStructure.ID.ToString();
+			saveData->SavedHotbarItemIDs.Add(TempHotbarID);
+		}
+
 		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
 
 		NetMulticastRPC_SaveData();
@@ -794,6 +805,23 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			{
 				PlayerState->SetPlayerName(/*SaveGame->PlayerDataStructure.PlayerID*/ID);
 			}
+//===================================================================================================================================
+//			Load QuickSlot 
+
+			for (uint8 i = 0; i < 5; i++)
+			{
+				if (savedData->SavedHotbarItemIDs[i].Contains(TEXT("ID_Empty")))
+				{
+					continue;
+				}
+				FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedHotbarItemIDs[i]));
+
+				if (TempHotbarSlot.ItemStructure.ItemType == EItemType::Undefined)
+				{
+					continue;
+				}
+				InventoryManagerComponent->Client_SetHotbarSlotItem(i, TempHotbarSlot);
+			}
 
 			// 인벤토리 아이템 로드 
 			int itemCount = savedData->SavedItemIDs.Num() - 1;
@@ -815,9 +843,6 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 
 				TempSlot.Amount = savedData->SavedItemAmounts[i];
 
-				//======================================================================================================	
-				// 클라이언트 아이템로드 안되는 중	
-
 				bool bOutSuccess = false;
 
 				//InventoryManagerComponent->AddItem(InventoryManagerComponent->PlayerInventory, i, TempSlot);
@@ -835,14 +860,6 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 					}
 				}
 			}
-
-			//GameModeReference = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>();
-			//// 집 번호 로드 및 할당
-			//if (savedData->HouseNumber >= 0 && savedData->HouseNumber < GameModeReference->Houses.Num())
-			//{
-			//	AShelter* AssignedHouse = GameModeReference->Houses[savedData->HouseNumber];
-			//	CharacterReference->SetAssignedHouse(AssignedHouse);
-			//}
 		}
 		else
 		{

@@ -3,6 +3,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
+#include "FSlotStructure.h"
 #include "TestSaveGame.generated.h"
 
 
@@ -54,6 +55,9 @@ public:
 
 	UPROPERTY()
 	TArray<uint8> SavedItemAmounts;
+
+	UPROPERTY()
+	TArray<FString> SavedHotbarItemIDs;
 
 	UPROPERTY(VisibleAnywhere)
 	int32 HouseNumber;

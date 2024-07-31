@@ -250,6 +250,16 @@ public:
 
 	UFUNCTION(Category = "Manager|Private")
 	void RandomizeDropLocation(FSlotStructure LocalSlot, UClass*& LocalClass, FTransform& OutTransform);
+	
+	UFUNCTION(Category = "UserInterface|Private|Hotbar")
+	void SetHotbarSlotItem(const uint8& ToSlot, FSlotStructure SlotStructure);
+
+	UFUNCTION(Client, Reliable)
+	void Client_SetHotbarSlotItem(const uint8& ToSlot, FSlotStructure SlotStructure);
+
+	UFUNCTION(Category = "UserInterface|Private|Hotbar")
+	FSlotStructure GetHotbarSlotItem(const uint8& HotbarSlot);
+
 protected:
 	UFUNCTION(Client, Reliable)
 	void Client_UpdateInventoryTooltips(const TArray<FSlotStructure>& InPlayerInventory, const TArray<FSlotStructure>& InOtherInventory);
@@ -269,10 +279,6 @@ private:
 	UFUNCTION(Category = "UserInterface|Private|Hotbar")
 	void ClearHotbarSlotItem(const uint8& HotbarSlot);
 
-	UFUNCTION(Category = "UserInterface|Private|Hotbar")
-	void SetHotbarSlotItem(const uint8& ToSlot, FSlotStructure SlotStructure);
-	UFUNCTION(Category = "UserInterface|Private|Hotbar")
-	FSlotStructure GetHotbarSlotItem(const uint8& HotbarSlot);
 
 	UPROPERTY()
 	UDataTable* ItemDB;

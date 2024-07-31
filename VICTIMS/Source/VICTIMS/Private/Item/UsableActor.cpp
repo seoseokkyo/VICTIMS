@@ -59,10 +59,10 @@ bool AUsableActor::OnActorUsed_Implementation(APlayerController* Controller)
 			WasUsed = false;
 		}
 		else {
+
 			WasUsed = true;
 		}
 		OnRep_WasUsed();
-
 		return true;
 	}
 	return false;
