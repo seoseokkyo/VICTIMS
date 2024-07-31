@@ -214,10 +214,9 @@ AShelter* AVICTIMSGameMode::FindUnOwnedHouse()
 
 	if (HasAuthority())
 	{
-
 		for (const auto& house : Houses)
 		{
-			if (house->OwnerPlayerName.IsEmpty())
+			if (house->Ownerplayer == nullptr)
 			{
 				shelter = house;
 				UE_LOG(LogTemp, Warning, TEXT("FindUnOwnedHouse : %s"), *shelter->GetActorNameOrLabel());
@@ -230,19 +229,25 @@ AShelter* AVICTIMSGameMode::FindUnOwnedHouse()
 	return shelter;
 }
 
-void AVICTIMSGameMode::ClearHouseOwnership(FString strPlayerName)
+void AVICTIMSGameMode::ClearHouseOwnership(AVICTIMSPlayerController* PlayerCtrl)
 {
-	for (auto& house : Houses)
+	if (HasAuthority())
 	{
-		if (house->OwnerPlayerName == strPlayerName)
+		for (auto& house : Houses)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Check : Shelter Owner Is %s"), *house->OwnerPlayerName);
+			if (house->Ownerplayer == PlayerCtrl)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Check : Shelter Owner Is %s"), *house->OwnerPlayerName);
 
-			house->Ownerplayer = nullptr;
-			house->OwnerPlayerID = FString();
-			house->OwnerPlayerName = FString();
+				house->Ownerplayer = nullptr;
+				house->OwnerPlayerName = FString();
+				house->OwnerPlayerID = FString();
+				house->OwnerPlayerName = FString();
 
-			UE_LOG(LogTemp, Warning, TEXT("Clear : Shelter Owner Is %s"), *house->OwnerPlayerName);
+				UE_LOG(LogTemp, Warning, TEXT("Clear : Shelter Owner Is %s"), *house->OwnerPlayerName);
+
+				break;
+			}
 		}
 	}
 }
@@ -262,7 +267,7 @@ void AVICTIMSGameMode::Logout(AController* Exiting)
 
 				auto playerCheck = Cast<AVICTIMSCharacter>(victimsPlayerController->GetPawn());
 
-				ClearHouseOwnership(victimsPlayerController->playerName);
+				ClearHouseOwnership(victimsPlayerController);
 				//if (playerCheck != nullptr)
 				//{
 				//	playerCheck->defaultWeapon->BeginDestroy();

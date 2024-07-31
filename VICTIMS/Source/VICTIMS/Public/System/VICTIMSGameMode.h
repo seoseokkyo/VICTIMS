@@ -50,7 +50,7 @@ public:
 	class AShelter* FindUnOwnedHouse();
 
 	UFUNCTION()
-	void ClearHouseOwnership(FString strPlayerName);
+	void ClearHouseOwnership(AVICTIMSPlayerController* PlayerCtrl);
 };
 
 
