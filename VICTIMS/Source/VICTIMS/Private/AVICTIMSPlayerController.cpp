@@ -35,6 +35,11 @@
 #include "Components/EditableText.h"
 #include "Components/AudioComponent.h"
 #include "LoadingWidget.h"
+#include "HPWidget.h"
+#include "CompassWedget.h"
+#include "MiniMapWidget.h"
+#include "Hotbar.h"
+#include "EquippingWeaponWidget.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -959,6 +964,18 @@ void AVICTIMSPlayerController::CloseLayouts()
 	// 	return;
 }
 
+void AVICTIMSPlayerController::HideWidgets()
+{
+	CharacterReference->hpWidget->SetVisibility(ESlateVisibility::Hidden);
+
+	HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Hidden);
+	HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Hidden);
+	HUD_Reference->HUDReference->MainLayout->EquipWeaponWidget->SetVisibility(ESlateVisibility::Hidden);
+	HUD_Reference->HUDReference->MainLayout->Hotbar->SetVisibility(ESlateVisibility::Hidden);
+	HUD_Reference->HUDReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Hidden);
+	HUD_Reference->HUDReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Hidden);
+}
+
 void AVICTIMSPlayerController::ServerRPC_UpdatePlayerList_Implementation()
 {
 	otherPlayers = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>()->GetPlayers();
@@ -1043,6 +1060,8 @@ void AVICTIMSPlayerController::ShowMovingInfo()
 
 void AVICTIMSPlayerController::ClientRPC_ShowLoadingUI_Implementation()
 {
+	HideWidgets();
+
 	if (bp_LoadingWidget)
 	{
 		if (auto gi = Cast<UVictimsGameInstance>(GetGameInstance()))

@@ -17,9 +17,13 @@ void UPlayerDiedWidget::NativeConstruct()
 void UPlayerDiedWidget::OnClickRespawn()
 {
 	auto playerCheck = Cast<AVICTIMSPlayerController>(GetOwningPlayer());
-
+	
 	if (playerCheck)
 	{
+		playerCheck->HideWidgets();
+
+		SetVisibility(ESlateVisibility::Hidden);
+
 		auto gi = Cast<UVictimsGameInstance>(GetGameInstance());
 
 		gi->ServerRPC_RequestRespawn(playerCheck);

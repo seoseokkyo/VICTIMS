@@ -224,10 +224,30 @@ void AVICTIMSCharacter::BeginPlay()
 
 					if (PC->CharacterReference)
 					{
+						if (nullptr == PC->CharacterReference->AssignedHouse)
+						{
+							if (auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>())
+							{
+								PC->CharacterReference->AssignedHouse = gm->FindUnOwnedHouse();
+							}
+						}
+
 						if (PC->CharacterReference->AssignedHouse)
 						{
 							PC->CharacterReference->AssignedHouse->SetPlayerName(strID);
 						}
+						else
+						{
+
+						}
+					}
+
+					if (IsLocallyControlled())
+					{
+						PC->CharacterReference->hpWidget->AddToViewport();
+
+						PC->HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
+						PC->HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
 					}
 
 					MyPlayerController->bNeedToLoad = false;
@@ -358,14 +378,14 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		EnhancedInputComponent->BindAction(RemoveObjectAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRemoveObject);
 		/********/
 		EnhancedInputComponent->BindAction(HousingBuildAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::OnRightMouseButtonPressed);
-		
+
 		EnhancedInputComponent->BindAction(SaveAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::SaveDataNow);
 
 
 		//상호작용 =====================================================================================================================
 		if (MyPlayerController == nullptr)
 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController == nullptr"));
+			// 			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController == nullptr"));
 		}
 		else
 		{
@@ -479,19 +499,19 @@ void AVICTIMSCharacter::DieFunction()
 		if (pc)
 		{
 			stateComp->ServerRPC_SetStatePoint(HP, stateComp->runningStat.MaxHP);  // HP max 로 채워주고 바로 자동 저장
-			PC->SaveData();				
-			
+			PC->SaveData();
+
 			pc->bShowMouseCursor = true;
 			DisableInput(pc);
 		}
 	}
 
 	motionState = ECharacterMotionState::Die;
-	
+
 	Super::DieFunction();
 
 	EnableRagdoll();
-																			
+
 }
 
 
@@ -686,7 +706,7 @@ void AVICTIMSCharacter::OnRep_ShotgunBullets()
 
 void AVICTIMSCharacter::Moneying()
 {
-	if(IsLocallyControlled())
+	if (IsLocallyControlled())
 	{
 		ServerRPC_AddGoldFunction(50);
 	}
@@ -877,7 +897,7 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 							MyPlayerController->SetInputMode(FInputModeGameOnly());
 							MyPlayerController->bShowMouseCursor = false;
 						}
-						if(MyPlayerController->HUD_Reference->IsAnyWidgetVisible())
+						if (MyPlayerController->HUD_Reference->IsAnyWidgetVisible())
 						{
 							MyPlayerController->HUDLayoutReference->MainLayout->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 							MyPlayerController->SetInputMode(FInputModeGameOnly());
@@ -922,17 +942,17 @@ void AVICTIMSCharacter::Server_RemoveObject_Implementation()
 	if (HousingComponent)
 	{
 		HousingComponent->RemoveObject();
-// 		Multicast_RemoveObject();
+		// 		Multicast_RemoveObject();
 	}
 }
 
 
 void AVICTIMSCharacter::Multicast_RemoveObject_Implementation()
 {
-// 	if (HousingComponent)
-// 	{
-// 		HousingComponent->RemoveObject();
-// 	}
+	// 	if (HousingComponent)
+	// 	{
+	// 		HousingComponent->RemoveObject();
+	// 	}
 }
 
 
@@ -1140,7 +1160,7 @@ void AVICTIMSCharacter::Server_GoToOtherHouse_Implementation(const FString& othe
 	//		break;
 	//	}
 	//}
-	
+
 	for (auto player : MyPlayerController->otherPlayers)
 	{
 		if (player->playerName == otherPlayerName)

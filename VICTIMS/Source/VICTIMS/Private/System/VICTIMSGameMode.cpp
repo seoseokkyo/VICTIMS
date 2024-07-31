@@ -52,14 +52,14 @@ void AVICTIMSGameMode::BeginPlay()
 
 	TotalHouses = Houses.Num();
 
-	for (FConstPlayerControllerIterator IT = GetWorld()->GetPlayerControllerIterator(); IT; ++IT)
-	{
-		APlayerController* pc = IT->Get();
-		if (pc != nullptr)
-		{
-			AssignHouseToPlayer(Cast<AVICTIMSPlayerController>(pc));
-		}
-	}
+	//for (FConstPlayerControllerIterator IT = GetWorld()->GetPlayerControllerIterator(); IT; ++IT)
+	//{
+	//	APlayerController* pc = IT->Get();
+	//	if (pc != nullptr)
+	//	{
+	//		AssignHouseToPlayer(Cast<AVICTIMSPlayerController>(pc));
+	//	}
+	//}
 }
 
 void AVICTIMSGameMode::PostLogin(APlayerController* pc)
@@ -72,26 +72,37 @@ void AVICTIMSGameMode::PostLogin(APlayerController* pc)
 		if (NewPlayer)
 		{
 			FString PlayerID = FString::FromInt(NewPlayer->PlayerState->GetPlayerId());
-			UTestSaveGame* LoadedData = NewPlayer->GetSaveDataFromID(PlayerID);
+
+			AVICTIMSCharacter* PlayerCharacter = Cast<AVICTIMSCharacter>(NewPlayer->GetPawn());
+			if (PlayerCharacter)
+			{
+				PlayerCharacter->MyPlayerController = NewPlayer;
+			}
+
+			AssignHouseToPlayer(NewPlayer);
+
+			//UTestSaveGame* LoadedData = NewPlayer->GetSaveDataFromID(PlayerID);
 
 			//if (LoadedData && LoadedData->HouseNumber >= 0 && LoadedData->HouseNumber < Houses.Num())
 
-			if (LoadedData && LoadedData->HouseNumber < Houses.Num())
-			{
-				//AShelter* AssignedHouse = Houses[LoadedData->HouseNumber];
-				AShelter* AssignedHouse = FindUnOwnedHouse();
+			//if (LoadedData && LoadedData->HouseNumber < Houses.Num())
+			//{
+			//	//AShelter* AssignedHouse = Houses[LoadedData->HouseNumber];
+			//	AShelter* AssignedHouse = FindUnOwnedHouse();
 
-				AVICTIMSCharacter* PlayerCharacter = Cast<AVICTIMSCharacter>(NewPlayer->GetPawn());
-				if (PlayerCharacter)
-				{
-					PlayerCharacter->MyPlayerController = NewPlayer;
-					PlayerCharacter->SetAssignedHouse(AssignedHouse);
-				}
-			}
-			else
-			{
-				AssignHouseToPlayer(NewPlayer);
-			}
+			//	AVICTIMSCharacter* PlayerCharacter = Cast<AVICTIMSCharacter>(NewPlayer->GetPawn());
+			//	if (PlayerCharacter)
+			//	{
+			//		PlayerCharacter->MyPlayerController = NewPlayer;
+			//		PlayerCharacter->SetAssignedHouse(AssignedHouse);
+
+			//		AssignHouseToPlayer(NewPlayer);
+			//	}
+			//}
+			//else
+			//{
+
+			//}
 		}
 	}
 }
@@ -119,48 +130,51 @@ void AVICTIMSGameMode::AssignHouseToPlayer(AVICTIMSPlayerController* NewPlayer)
 			return;
 		}
 
-		if (NextHouseIndex < TotalHouses)
+		//AVICTIMSCharacter* PlayerCharacter = Cast<AVICTIMSCharacter>(NewPlayer->GetPawn());
+//FString PlayerID = NewPlayer->PlayerState->GetPlayerId();
+		int32 PlayerIDInt = NewPlayer->PlayerState->GetPlayerId();
+		FString PlayerID = FString::FromInt(PlayerIDInt);
+
+		//AShelter* AssignedHouse = Houses[NextHouseIndex];
+
+		AShelter* AssignedHouse = FindUnOwnedHouse();
+
+		if (AssignedHouse == nullptr)
 		{
-			//AVICTIMSCharacter* PlayerCharacter = Cast<AVICTIMSCharacter>(NewPlayer->GetPawn());
-			//FString PlayerID = NewPlayer->PlayerState->GetPlayerId();
-			int32 PlayerIDInt = NewPlayer->PlayerState->GetPlayerId();
-			FString PlayerID = FString::FromInt(PlayerIDInt);
+			UE_LOG(LogTemp, Warning, TEXT("AssignHouseToPlayer: AssignedHouse is null"));
 
-			//AShelter* AssignedHouse = Houses[NextHouseIndex];
-			
-			AShelter* AssignedHouse = FindUnOwnedHouse();
-
-			if (AssignedHouse == nullptr)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("AssignHouseToPlayer: AssignedHouse is null"));
-				return;
-			}
-
-			AssignedHouse->Ownerplayer = NewPlayer;
-			AssignedHouse->OwnerPlayerID = PlayerID;
-
-			if (PlayerCharacter)
-			{
-				PlayerCharacter->SetAssignedHouse(AssignedHouse);
-			}
-
-			if (GEngine)
-			{
-				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Player %d assigned to House %d"), PlayerIDInt, NextHouseIndex));
-			}
-
-			if (auto savedData = NewPlayer->GetSaveDataFromID(PlayerID))
-			{
-				savedData->HouseNumber = NextHouseIndex;
-				NewPlayer->SaveData();
-			}
-			else
-			{
-				UE_LOG(LogTemp, Warning, TEXT("AssignHouseToPlayer: NewPlayer->SavedData is null"));
-			}
-
-			NextHouseIndex++;
+			AssignedHouse = Houses[0];
 		}
+
+		AssignedHouse->Ownerplayer = NewPlayer;
+		AssignedHouse->OwnerPlayerID = PlayerID;
+
+		if (PlayerCharacter)
+		{
+			PlayerCharacter->SetAssignedHouse(AssignedHouse);
+		}
+
+		//if (GEngine)
+		//{
+		//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Player %d assigned to House %d"), PlayerIDInt, NextHouseIndex));
+		//}
+
+		//if (auto savedData = NewPlayer->GetSaveDataFromID(PlayerID))
+		//{
+		//	savedData->HouseNumber = NextHouseIndex;
+		//	NewPlayer->SaveData();
+		//}
+		//else
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("AssignHouseToPlayer: NewPlayer->SavedData is null"));
+		//}
+
+		//NextHouseIndex++;
+
+		//if (NextHouseIndex < TotalHouses)
+		//{
+
+		//}
 	}
 }
 
@@ -198,14 +212,18 @@ AShelter* AVICTIMSGameMode::FindUnOwnedHouse()
 {
 	AShelter* shelter = nullptr;
 
-	for (const auto& house : Houses)
+	if (HasAuthority())
 	{
-		if (house->OwnerPlayerName.IsEmpty())
-		{
-			shelter = house;
-			UE_LOG(LogTemp, Warning, TEXT("FindUnOwnedHouse"), *shelter->GetActorNameOrLabel());
 
-			break;
+		for (const auto& house : Houses)
+		{
+			if (house->OwnerPlayerName.IsEmpty())
+			{
+				shelter = house;
+				UE_LOG(LogTemp, Warning, TEXT("FindUnOwnedHouse : %s"), *shelter->GetActorNameOrLabel());
+
+				break;
+			}
 		}
 	}
 

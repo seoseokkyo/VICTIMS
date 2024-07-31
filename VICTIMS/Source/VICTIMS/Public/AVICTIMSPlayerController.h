@@ -309,4 +309,7 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_ShowLoadingUI();
+
+	UFUNCTION()
+	void HideWidgets();
 };
