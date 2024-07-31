@@ -8,6 +8,8 @@
 
 void ULoadingWidget::SetBackGroundImage(ELoadingWidgetBackGround type)
 {
+	InitText();
+
 	BackGroundImage->SetBrushFromTexture(backgroundImages[(int)type], true);
 }
 
@@ -19,12 +21,8 @@ void ULoadingWidget::OnChangedWidgetState(ESlateVisibility InVisibility)
 	}
 }
 
-void ULoadingWidget::NativeConstruct()
+void ULoadingWidget::InitText()
 {
-	Super::NativeConstruct();
-
-	OnVisibilityChanged.AddDynamic(this, &ULoadingWidget::OnChangedWidgetState);
-
 	if (toolTipStrings.Num() > 0)
 	{
 		toolTipStrings.Reset();
@@ -34,4 +32,19 @@ void ULoadingWidget::NativeConstruct()
 	toolTipStrings.AddUnique("Look out for others");
 	toolTipStrings.AddUnique("Do Not Eat Egg");
 
+
+	FString toolTipStr = toolTipStrings[FMath::RandRange(0, toolTipStrings.Num() - 1)];
+
+	toolTipStr = toolTipStr.IsEmpty() ? toolTipStrings[FMath::RandRange(0, toolTipStrings.Num() - 1)] : toolTipStr;
+
+	ToolTipString->SetText(FText::FromString(toolTipStr));
+}
+
+void ULoadingWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	OnVisibilityChanged.AddDynamic(this, &ULoadingWidget::OnChangedWidgetState);
+
+	InitText();
 }

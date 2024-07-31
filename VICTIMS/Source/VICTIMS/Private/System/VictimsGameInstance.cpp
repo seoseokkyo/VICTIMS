@@ -109,6 +109,9 @@ void UVictimsGameInstance::OnStart()
 	{
 		LoadingWidget = CreateWidget<ULoadingWidget>(this, bp_LoadingWidget);
 
+		int iRand = FMath::RandRange(0, (int)ELoadingWidgetBackGround::Artboard_3);
+		LoadingWidget->SetBackGroundImage((ELoadingWidgetBackGround)iRand);
+
 		LoadingWidget->AddToViewport();
 	}
 

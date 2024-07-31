@@ -43,7 +43,7 @@ void UInstantProcSocket::InitializeSocket()
 
 void UInstantProcSocket::SendDataToServer()
 {
-//     FString Message = FString::Printf(TEXT("InstantProcSocket_Completed_Port_%d"), InstantProcPortNum);
+    FString Message = FString::Printf(TEXT("InstantProcSocket_Completed_Port_%d"), InstantProcPortNum);
     SendData(Message);
 
     // 서버로부터 응답 받기

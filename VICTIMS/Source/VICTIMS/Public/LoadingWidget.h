@@ -47,6 +47,9 @@ public:
 	UFUNCTION()
 	void OnChangedWidgetState(ESlateVisibility InVisibility);
 
+	UFUNCTION()
+	void InitText();
+
 protected:
 
 	UFUNCTION()
