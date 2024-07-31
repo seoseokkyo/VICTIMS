@@ -103,6 +103,22 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_RequestRespawn(AVICTIMSPlayerController* playerControllerPTR, const FString& addressValue);
 
+	// Loading
+	UPROPERTY(EditAnyWhere)
+	TSubclassOf<class ULoadingWidget> bp_LoadingWidget;
+
+	UPROPERTY()
+	class ULoadingWidget* LoadingWidget;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_ShowLoadingUI(ULoadingWidget* playerLoadingWidget);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_ShowLoadingUI(ULoadingWidget* playerLoadingWidget,const int& type);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_HideLoadingUI();
+
 private:
 
 	UPROPERTY(Replicated)

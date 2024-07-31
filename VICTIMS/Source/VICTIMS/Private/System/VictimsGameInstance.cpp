@@ -11,6 +11,7 @@
 #include "TestSaveGame.h"
 #include "AVICTIMSPlayerController.h"
 #include "Net/UnrealNetwork.h"
+#include "LoadingWidget.h"
 
 FCharacterStat UVictimsGameInstance::GetCharacterDataTable(const FString& rowName)
 {
@@ -103,6 +104,14 @@ void UVictimsGameInstance::OnStart()
 
 	FString mainAddressCheck;
 	FString ServerTypeCheck;
+
+	if (bp_LoadingWidget)
+	{
+		LoadingWidget = CreateWidget<ULoadingWidget>(this, bp_LoadingWidget);
+
+		LoadingWidget->AddToViewport();
+	}
+
 	if (FParse::Value(FCommandLine::Get(), TEXT("serverType="), ServerTypeCheck))
 	{
 		serverType = ServerTypeCheck;
@@ -214,13 +223,13 @@ void UVictimsGameInstance::ShutDown()
 		PC->SaveData();
 	}
 
-	
+
 
 	FTimerHandle Timer;
-	GetWorld()->GetTimerManager().SetTimer(Timer, [&](){
-	
-	Super::Shutdown();
-	},0.5f, false);
+	GetWorld()->GetTimerManager().SetTimer(Timer, [&]() {
+
+		Super::Shutdown();
+		}, 0.5f, false);
 }
 
 bool UVictimsGameInstance::DedicateServerCheck()
@@ -235,7 +244,7 @@ void UVictimsGameInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UVictimsGameInstance, bIsDedicateServer);
-	DOREPLIFETIME(UVictimsGameInstance, mainAddress);	
+	DOREPLIFETIME(UVictimsGameInstance, mainAddress);
 }
 
 void UVictimsGameInstance::ServerRPC_RequestRespawn_Implementation(AVICTIMSPlayerController* playerControllerPTR)
@@ -274,11 +283,65 @@ void UVictimsGameInstance::NetMulticastRPC_UpdateMainAddressValue_Implementation
 }
 
 void UVictimsGameInstance::ServerRPC_DedicateServerCheck_Implementation()
-{	
+{
 	NetMulticastRPC_DedicateServerCheck_Implementation(IsRunningDedicatedServer());
 }
 
 void UVictimsGameInstance::NetMulticastRPC_DedicateServerCheck_Implementation(bool bCheck)
 {
 	bIsDedicateServer = bCheck;
+}
+
+void UVictimsGameInstance::ServerRPC_ShowLoadingUI_Implementation(ULoadingWidget* playerLoadingWidget)
+{
+	int iImageType = 0;
+
+	if (serverType == "MainServer")
+	{
+		iImageType = FMath::RandRange(0, 1);
+
+		UE_LOG(LogTemp, Warning, TEXT("LoadingWidget Was SetBackGroundImage %d"), iImageType);
+	}
+	else if (serverType == "InstanceServer")
+	{
+		iImageType = 2;
+
+		UE_LOG(LogTemp, Warning, TEXT("LoadingWidget Was SetBackGroundImage 2"));
+	}
+
+	ClientRPC_ShowLoadingUI(playerLoadingWidget, iImageType);
+}
+
+void UVictimsGameInstance::ClientRPC_ShowLoadingUI_Implementation(ULoadingWidget* playerLoadingWidget, const int& type)
+{
+	if (LoadingWidget)
+	{
+		LoadingWidget->Destruct();
+	}
+
+	LoadingWidget = playerLoadingWidget;
+
+	if (LoadingWidget)
+	{
+		LoadingWidget->SetBackGroundImage((ELoadingWidgetBackGround)type);
+		if (false == LoadingWidget->AddToPlayerScreen())
+		{
+			LoadingWidget->AddToViewport();
+		}
+	}
+}
+
+void UVictimsGameInstance::ClientRPC_HideLoadingUI_Implementation()
+{
+	if (LoadingWidget)
+	{
+		//LoadingWidget->RemoveFromParent();
+		LoadingWidget->SetVisibility(ESlateVisibility::Hidden);
+
+		LoadingWidget->RemoveFromParent();
+
+		LoadingWidget->Destruct();
+
+		UE_LOG(LogTemp, Warning, TEXT("LoadingWidget Was Hidden"));
+	}
 }

@@ -299,4 +299,14 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	bool bWidgetBlocked;
+
+	// Loading
+	UPROPERTY(EditAnyWhere)
+	TSubclassOf<class ULoadingWidget> bp_LoadingWidget;
+
+	UPROPERTY()
+	class ULoadingWidget* LoadingWidget;
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_ShowLoadingUI();
 };

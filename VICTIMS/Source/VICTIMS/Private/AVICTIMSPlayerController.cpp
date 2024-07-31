@@ -34,6 +34,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Components/EditableText.h"
 #include "Components/AudioComponent.h"
+#include "LoadingWidget.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -89,7 +90,7 @@ void AVICTIMSPlayerController::BeginPlay()
 					SetInputMode(FInputModeUIOnly());
 					EnableUIMode();
 					bShowMouseCursor = true;
-					
+
 					if (BGM)
 					{
 						BGMComp = UGameplayStatics::CreateSound2D(GetWorld(), BGM);
@@ -111,6 +112,15 @@ void AVICTIMSPlayerController::BeginPlay()
 				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
+	}
+
+	if (auto gi = Cast<UVictimsGameInstance>(GetGameInstance()))
+	{
+		FTimerHandle timer;
+		GetWorldTimerManager().SetTimer(timer, [&, gi]()
+			{
+				gi->ClientRPC_HideLoadingUI();
+			}, 2.0f, false);
 	}
 }
 
@@ -190,21 +200,21 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 		}
 	}
 
-// UI/Game 모드 확인용 디버그 메세지 출력 주석처리
-// 	int viewModeCheck = GetCurrentViewMode(this);
-// 
-// 	if (viewModeCheck == 0)
-// 	{
-// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
-// 	}
-// 	else if (viewModeCheck == 1)
-// 	{
-// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
-// 	}
-// 	else if (viewModeCheck == 2)
-// 	{
-// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
-// 	}
+	// UI/Game 모드 확인용 디버그 메세지 출력 주석처리
+	// 	int viewModeCheck = GetCurrentViewMode(this);
+	// 
+	// 	if (viewModeCheck == 0)
+	// 	{
+	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
+	// 	}
+	// 	else if (viewModeCheck == 1)
+	// 	{
+	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
+	// 	}
+	// 	else if (viewModeCheck == 2)
+	// 	{
+	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
+	// 	}
 
 }
 
@@ -260,7 +270,7 @@ bool AVICTIMSPlayerController::IsContainerOpen()
 
 void AVICTIMSPlayerController::ToggleInventory()
 {
-// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
+	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -271,7 +281,7 @@ void AVICTIMSPlayerController::ToggleInventory()
 
 void AVICTIMSPlayerController::ToggleProfile()
 {
-// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
+	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -307,7 +317,7 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 
 void AVICTIMSPlayerController::ToggleContainer()
 {
-// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
+	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -322,7 +332,7 @@ bool AVICTIMSPlayerController::IsShopOpen()
 }
 void AVICTIMSPlayerController::ToggleShop()
 {
-// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
+	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
 
 	if (IsValid(HUD_Reference))
 	{
@@ -355,7 +365,7 @@ UUserWidget* AVICTIMSPlayerController::GenerateInteractWidget(FText Text)
 {
 	if (HUD_Reference == nullptr)
 	{
-// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
+		// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
 
 		return nullptr;
 	}
@@ -369,7 +379,7 @@ UUserWidget* AVICTIMSPlayerController::CreateInteractWidget(FName Name)
 {
 	if (HUD_Reference == nullptr)
 	{
-// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
+		// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("HUD_Reference : %p"), HUD_Reference));
 
 		return nullptr;
 	}
@@ -453,7 +463,7 @@ void AVICTIMSPlayerController::UseHotbarSlot5()
 
 void AVICTIMSPlayerController::Interact()
 {
-// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Interact Pressed"));
+	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("Interact Pressed"));
 
 	if (CharacterReference == nullptr)
 	{
@@ -480,7 +490,7 @@ void AVICTIMSPlayerController::Interact()
 			return;
 		}
 	}
-	else if(CharacterReference->CurrentDoorComponent)
+	else if (CharacterReference->CurrentDoorComponent)
 	{
 		if (CharacterReference->HousingComponent->IsBuildModeOn)
 		{
@@ -492,12 +502,12 @@ void AVICTIMSPlayerController::Interact()
 			// 맵 변경(나가기)이 아니라 위젯 띄워주기
 			// CharacterReference->SetActorLocation(FVector(1850, 821, 169));
 			ShowMovingInfo();
-			
+
 		}
 		//return;
 	}
 	else {
-// 		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"));
+		// 		UE_LOG(LogTemp, Warning, TEXT("Character Reference is null"));
 	}
 }
 
@@ -514,6 +524,8 @@ void AVICTIMSPlayerController::OnActorUsed(AActor* Actor1)
 
 void AVICTIMSPlayerController::RequestClientTravel(const FString& URL, const FString& Options)
 {
+	ClientRPC_ShowLoadingUI();
+
 	SaveData();
 
 	ServerRPC_RequestClientTravel(URL, Options);
@@ -528,7 +540,7 @@ void AVICTIMSPlayerController::ClientRPC_RequestClientTravel_Implementation(cons
 {
 	FString testOptions = FString::Printf(TEXT("TestName=%s &"), *playerName);
 
-	UGameplayStatics::OpenLevel(this, FName(*URL), true, testOptions);	
+	UGameplayStatics::OpenLevel(this, FName(*URL), true, testOptions);
 }
 
 void AVICTIMSPlayerController::UI_MoveContainerItem_Implementation(const uint8& FromInventorySlot, const uint8& ToInventorySlot)
@@ -603,7 +615,7 @@ void AVICTIMSPlayerController::SavePersonalID(FString ID)
 {
 	ServerRPC_SavePersonalID(ID);
 
-// 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Chached Name : %s"), *PlayerID));
+	// 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Chached Name : %s"), *PlayerID));
 }
 
 void AVICTIMSPlayerController::ServerRPC_SavePersonalID_Implementation(const FString& ID)
@@ -639,14 +651,14 @@ void AVICTIMSPlayerController::CreateSaveData(FString ID)
 		}
 	}
 	else
-	{		
+	{
 		SaveData();
 
 		CharacterReference = Cast<AVICTIMSCharacter>(GetPawn());
 		if (CharacterReference)
 		{
 			CharacterReference->SavePersonalID(ID);
-// 			UE_LOG(LogTemp, Warning, TEXT("Move :: CreateSaveData: PersonalID set to %s"), *ID);
+			// 			UE_LOG(LogTemp, Warning, TEXT("Move :: CreateSaveData: PersonalID set to %s"), *ID);
 		}
 		if (PlayerState)
 		{
@@ -721,7 +733,7 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 	}
 	else
 	{
-// 		UE_LOG(LogTemp, Warning, TEXT("LoadGameFromSlot:%s | Was Failed"), *ID);
+		// 		UE_LOG(LogTemp, Warning, TEXT("LoadGameFromSlot:%s | Was Failed"), *ID);
 	}
 }
 
@@ -768,11 +780,11 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			}
 			else
 			{
-// 				UKismetSystemLibrary::PrintString(GetWorld(), TEXT("savedData->SavedHP Was Zero"));
+				// 				UKismetSystemLibrary::PrintString(GetWorld(), TEXT("savedData->SavedHP Was Zero"));
 			}
 
 			InventoryManagerComponent->AddGold(savedData->SavedGold);	// Gold 로드
-			
+
 			if (PlayerState)
 			{
 				PlayerState->SetPlayerName(/*SaveGame->PlayerDataStructure.PlayerID*/ID);
@@ -829,7 +841,7 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 		}
 		else
 		{
-// 			UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed333333333___Controller"));
+			// 			UE_LOG(LogTemp, Warning, TEXT("Load Player Data ---------- Failed333333333___Controller"));
 		}
 
 		NetMulticastRPC_LoadData(true);
@@ -852,7 +864,7 @@ void AVICTIMSPlayerController::NetMulticastRPC_LoadData_Implementation(bool bSuc
 				if (IDInValidWidget)
 				{
 					IDInValidWidget->AddToViewport();
-// 					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
+					// 					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
 					IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
 
 					FTimerHandle Time;
@@ -886,7 +898,7 @@ void AVICTIMSPlayerController::ServerRPC_SetUseUIState_Implementation(bool bUse)
 {
 	bUseUIMode = bUse;
 
-// 	UE_LOG(LogTemp, Warning, TEXT("bUseUIMode : %s"), bUseUIMode ? TEXT("TRUE") : TEXT("FALSE"));
+	// 	UE_LOG(LogTemp, Warning, TEXT("bUseUIMode : %s"), bUseUIMode ? TEXT("TRUE") : TEXT("FALSE"));
 
 	ClientRPC_SetUseUIState(bUseUIMode);
 }
@@ -954,7 +966,7 @@ void AVICTIMSPlayerController::ServerRPC_UpdatePlayerList_Implementation()
 	otherPlayerNames.Reset();
 	for (auto player : otherPlayers)
 	{
-		otherPlayerNames.Add(player->playerName);		
+		otherPlayerNames.Add(player->playerName);
 	}
 
 	ClientRPC_UpdatePlayerList(otherPlayers);
@@ -1025,6 +1037,21 @@ void AVICTIMSPlayerController::ShowMovingInfo()
 			HUDLayoutReference->MainLayout->MovingInfo->SetVisibility(ESlateVisibility::Hidden);
 			bIsShowUI = false;
 			DisableUIMode();
+		}
+	}
+}
+
+void AVICTIMSPlayerController::ClientRPC_ShowLoadingUI_Implementation()
+{
+	if (bp_LoadingWidget)
+	{
+		if (auto gi = Cast<UVictimsGameInstance>(GetGameInstance()))
+		{
+			LoadingWidget = CreateWidget<ULoadingWidget>(gi, bp_LoadingWidget);
+
+			gi->ServerRPC_ShowLoadingUI(LoadingWidget);
+
+			//LoadingWidget->AddToViewport();
 		}
 	}
 }
