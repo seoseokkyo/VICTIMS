@@ -365,7 +365,7 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 		//상호작용 =====================================================================================================================
 		if (MyPlayerController == nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController == nullptr"));
+// 			UE_LOG(LogTemp, Warning, TEXT("MyPlayerController == nullptr"));
 		}
 		else
 		{

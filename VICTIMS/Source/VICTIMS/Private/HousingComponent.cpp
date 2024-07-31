@@ -56,7 +56,7 @@ void UHousingComponent::BeginPlay()
 		// 데이터 테이블에서 행 이름 가져오기
 		/*TArray<FName> */RowNames = DB_Housing->GetRowNames();
 
-		UE_LOG(LogTemp, Warning, TEXT("Number of rows in the data table: %d"), RowNames.Num());
+// 		UE_LOG(LogTemp, Warning, TEXT("Number of rows in the data table: %d"), RowNames.Num());
 
 
 		for (const FName& RowName : RowNames)
@@ -67,15 +67,15 @@ void UHousingComponent::BeginPlay()
 			// 행 데이터 Buildables 배열에 추가
 			if (RowData)
 			{
-				UE_LOG(LogTemp, Warning, TEXT("Found row: %s"), *RowName.ToString());
+// 				UE_LOG(LogTemp, Warning, TEXT("Found row: %s"), *RowName.ToString());
 				Buildables.Add(*RowData);
 			}
 		}
-		UE_LOG(LogTemp, Warning, TEXT("Number of buildables added: %d"), Buildables.Num());
+// 		UE_LOG(LogTemp, Warning, TEXT("Number of buildables added: %d"), Buildables.Num());
 	}
 	else
 	{
-		UE_LOG(LogTemp, Error, TEXT("DB_Housing is null"));
+// 		UE_LOG(LogTemp, Error, TEXT("DB_Housing is null"));
 	}
 	if (DB_Item)
 	{

@@ -71,7 +71,7 @@ void AVICTIMSPlayerController::BeginPlay()
 		if (FParse::Value(*Options, TEXT("TestName="), ParsedValue))
 		{
 			ParsedValue.RemoveFromEnd("=");
-			UE_LOG(LogTemp, Warning, TEXT("Name Value: %s"), *ParsedValue);
+// 			UE_LOG(LogTemp, Warning, TEXT("Name Value: %s"), *ParsedValue);
 		}
 
 		playerName = ParsedValue;

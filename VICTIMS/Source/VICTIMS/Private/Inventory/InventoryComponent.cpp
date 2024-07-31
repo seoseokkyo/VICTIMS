@@ -19,7 +19,7 @@ void UInventoryComponent::BeginPlay()
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("UDataTable not Loaded"))
+// 		UE_LOG(LogTemp, Warning, TEXT("UDataTable not Loaded"))
 	}
 }
 

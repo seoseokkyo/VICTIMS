@@ -1473,8 +1473,8 @@ void UInventoryManagerComponent::ServerRPC_Test_Implementation(const uint8& From
 	FSlotStructure PlayerItem = PlayerInventory->GetInventoryItem(FromSlot);
 	for (auto arg : arrayTemp)
 	{
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("arg : %s"), *arg.ItemStructure.ID.ToString()));
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Compare : %s, %s"), *arg.ItemStructure.ID.ToString(), *PlayerItem.ItemStructure.ID.ToString()));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("arg : %s"), *arg.ItemStructure.ID.ToString()));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Compare : %s, %s"), *arg.ItemStructure.ID.ToString(), *PlayerItem.ItemStructure.ID.ToString()));
 
 		if (arg.ItemStructure.ID == PlayerItem.ItemStructure.ID)
 		{
@@ -2742,7 +2742,7 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Perchase Failed"));
+// 		UE_LOG(LogTemp, Warning, TEXT("Perchase Failed"));
 	}
 	Server_UpdateTooltips();
 	AddGold(-LocalInventoryItem.ItemStructure.PriceValue);	//AddGold 사용 -> Amount 를 음수값으로 넣어줌 

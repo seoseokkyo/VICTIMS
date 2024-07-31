@@ -70,11 +70,11 @@ void UMovingInfoWidget::ServerRPC_FindPlayers_Implementation()
 	{
 		auto players = gameMode->GetPlayers();
 
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("players Num : %d"), players.Num()));
+// 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("players Num : %d"), players.Num()));
 
 		for (auto player : players)
 		{
-			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("player Ptr : %p"), player));
+// 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("player Ptr : %p"), player));
 			ClientRPC_CreateButtons(player->playerName);
 		}
 	}
