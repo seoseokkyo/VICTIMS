@@ -837,7 +837,7 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 				//InventoryManagerComponent->AddItem(InventoryManagerComponent->PlayerInventory, i, TempSlot);
 
 				InventoryManagerComponent->TryToAddItemToInventory(InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
-				ClientRPC_LoadHotbar(ID, TempSlot);
+				ClientRPC_LoadHotbar(ID, TempSlot, savedData->SavedHotbarItemIDs);
 
 				// 장비중인 아이템 로드 
 				if (TempSlot.ItemStructure.ItemType == EItemType::Equipment)
@@ -901,8 +901,8 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 }
 void AVICTIMSPlayerController::ServerRPC_LoadHotbarData_Implementation(const FString& ID, const uint8& Index, const FSlotStructure& HotbarItems)
 {
-	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
-	int itemCount = savedData->SavedItemIDs.Num() - 1;
+	// 	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+	// 	int itemCount = savedData->SavedItemIDs.Num() - 1;
 	// 	int startPoint = (int)EEquipmentSlot::Count;
 	// 	 for (uint8 i = 0; i < 5; i++)
 	// 	 {
@@ -929,7 +929,7 @@ void AVICTIMSPlayerController::ServerRPC_LoadHotbarData_Implementation(const FSt
 	// 
 	// 			if (TempHotbarSlot.ItemStructure.ID == TempInventorySlotItem.ItemStructure.ID)
 	// 			{
-	InventoryManagerComponent->Client_SetHotbarSlotItem(Index, HotbarItems);
+		InventoryManagerComponent->Client_SetHotbarSlotItem(Index, HotbarItems);
 	// 			}
 	// 		}
 	// 	 }
@@ -1022,18 +1022,19 @@ void AVICTIMSPlayerController::ServerRPC_SendHotbarData_Implementation(const FSt
 	UGameplayStatics::SaveGameToSlot(savedData, ID, 0);
 }
 
-void AVICTIMSPlayerController::ClientRPC_LoadHotbar_Implementation(const FString& ID, const FSlotStructure& ComparedItem)
+void AVICTIMSPlayerController::ClientRPC_LoadHotbar_Implementation(const FString& ID, const FSlotStructure& ComparedItem, const TArray<FString>& savedHotbarItemNames)
 {
-	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
-	int itemCount = savedData->SavedItemIDs.Num() - 1;
-	int startPoint = (int)EEquipmentSlot::Count;
+// 	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+/* 	int itemCount = InventoryManagerComponent->PlayerInventory->Inventory.Num();*/
+// 	int startPoint = (int)EEquipmentSlot::Count;
+
 	for (uint8 i = 0; i < 5; i++)
 	{
-		if (savedData->SavedHotbarItemIDs[i].Contains(TEXT("ID_Empty")))
+		if (savedHotbarItemNames[i].Contains(TEXT("ID_Empty")))
 		{
 			continue;
 		}
-		FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedHotbarItemIDs[i]));
+		FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedHotbarItemNames[i]));
 
 		if (TempHotbarSlot.ItemStructure.ItemType == EItemType::Undefined)
 		{
