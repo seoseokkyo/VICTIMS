@@ -9,6 +9,11 @@ ALootActor::ALootActor()
 	C_CanStoreItems = false;
 }
 
+bool ALootActor::IsEmptyLootActor()
+{
+	return (InventoryItems.Num() == 0) ? true : false;
+}
+
 void ALootActor::BeginPlay()
 {
 	Action = FText::FromString("Check");
@@ -48,6 +53,8 @@ bool ALootActor::InitializeInventory()
 		InventoryItems = GetRandomLootItems();
 
 		LoadInventoryItems(InventoryItems.Num(), InventoryItems);
+
+		IsUsable = true;
 
 		return true;
 	}

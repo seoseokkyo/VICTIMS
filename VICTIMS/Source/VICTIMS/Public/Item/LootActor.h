@@ -41,6 +41,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDataTable* BP_LootDB;
 
+	bool IsEmptyLootActor();
+
 protected:
 	virtual void BeginPlay() override;
 
