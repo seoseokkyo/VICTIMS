@@ -116,6 +116,8 @@ void ANormalZombieController::Tick(float deltaTime)
 	{
 		float distance = FVector::Dist(myLoc, targetActor->GetActorLocation());
 
+		temp->GetCharacterMovement()->MaxWalkSpeed = 400;
+
 		if (currentAttackDelayTime >= attackDelayTime)
 		{
 			if (distance < 100)
