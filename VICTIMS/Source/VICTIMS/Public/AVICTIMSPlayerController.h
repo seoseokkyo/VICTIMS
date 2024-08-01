@@ -213,9 +213,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_LoadData(const FString& ID);		// 데이터 저장 
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Client, Reliable)
 	void NetMulticastRPC_LoadData(bool bSuccess);		// 데이터 저장 
-
 	UPROPERTY()
 	UTestIDWidget* TestIDWidget;
 
@@ -234,6 +233,18 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_SetUseUIState(bool bUse);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_SaveHotbar(const FString& ID);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SendHotbarData(const FString& ID, const FString& HotbarItems);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_LoadHotbar(const FString& ID, const FSlotStructure& ComparedItem);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_LoadHotbarData(const FString& ID, const uint8& Index, const FSlotStructure& HotbarItems);
 
 	UFUNCTION()
 	void CloseTestIDWidget();
