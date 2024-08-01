@@ -12,6 +12,7 @@
 #include "Shelter.h"
 #include "TestSaveGame.h"
 #include "Net/UnrealNetwork.h"
+#include "VictimsGameInstance.h"
 
 AVICTIMSGameMode::AVICTIMSGameMode()
 {
@@ -249,6 +250,14 @@ void AVICTIMSGameMode::ClearHouseOwnership(AVICTIMSPlayerController* PlayerCtrl)
 				break;
 			}
 		}
+	}
+}
+
+void AVICTIMSGameMode::ServerRPC_HomeTownCheck_Implementation(AVICTIMSPlayerController* PlayerCtrl)
+{
+	if (auto gi = Cast<UVictimsGameInstance>(GetGameInstance()))
+	{
+		gi->HomeTownCheck(PlayerCtrl);
 	}
 }
 

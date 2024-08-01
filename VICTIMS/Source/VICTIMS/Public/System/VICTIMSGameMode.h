@@ -51,6 +51,9 @@ public:
 
 	UFUNCTION()
 	void ClearHouseOwnership(AVICTIMSPlayerController* PlayerCtrl);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_HomeTownCheck(AVICTIMSPlayerController* PlayerCtrl);
 };
 
 

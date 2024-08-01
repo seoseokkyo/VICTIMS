@@ -119,6 +119,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_HideLoadingUI();
 
+	UFUNCTION()
+	void HomeTownCheck(AVICTIMSPlayerController* playerControllerPTR);
+
 private:
 
 	UPROPERTY(Replicated)

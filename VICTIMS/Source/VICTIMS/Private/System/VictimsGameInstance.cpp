@@ -348,3 +348,15 @@ void UVictimsGameInstance::ClientRPC_HideLoadingUI_Implementation()
 		UE_LOG(LogTemp, Warning, TEXT("LoadingWidget Was Hidden"));
 	}
 }
+
+void UVictimsGameInstance::HomeTownCheck(AVICTIMSPlayerController* playerControllerPTR)
+{
+	if (serverType == "MainServer")
+	{
+		playerControllerPTR->GetPawn()->Tags.Add(TEXT("Team:HomeTown"));
+	}
+	else if (serverType == "InstanceServer")
+	{
+		UE_LOG(LogTemp, Warning, TEXT("VicTims Will Die"));
+	}
+}
