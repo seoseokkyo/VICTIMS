@@ -100,26 +100,26 @@ void UTestIDWidget::OnClickedContinueButton()
 					}
 				}
 
-				if (IsIDValid)
-				{
-
-					PC->CloseTestIDWidget();
-
-					PC->CharacterReference->hpWidget->AddToViewport();
-
-					PC->HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
-					PC->HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
-
-					if (PC->BGMComp)
-					{
-						PC->BGMComp->Stop();
-					}
-				}
-				else
-				{
-					// 				UE_LOG(LogTemp, Warning, TEXT("Continue Failed"));
-					return;
-				}
+// 				if (IsIDValid)
+// 				{
+// 
+// 					PC->CloseTestIDWidget();
+// 
+// 					PC->CharacterReference->hpWidget->AddToViewport();
+// 
+// 					PC->HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
+// 					PC->HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
+// 
+// 					if (PC->BGMComp)
+// 					{
+// 						PC->BGMComp->Stop();
+// 					}
+// 				}
+// 				else
+// 				{
+// 					// 				UE_LOG(LogTemp, Warning, TEXT("Continue Failed"));
+// 					return;
+// 				}
 			}
 		}
 	}

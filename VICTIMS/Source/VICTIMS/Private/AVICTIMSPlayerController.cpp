@@ -732,19 +732,16 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		// 집 번호 저장
 		saveData->HouseNumber = CharacterReference->AssignedHouse ? CharacterReference->AssignedHouse->HouseNumber : -1;
 
-//=================================================================================================================================================
+//=====================================================================================================================================
 //		Save QuickSlot
 
 		saveData->SavedHotbarItemIDs.Reset();
-
 		for (uint8 i = 0; i < 5; i++)
 		{
 			FString TempHotbarID = InventoryManagerComponent->GetHotbarSlotItem(i).ItemStructure.ID.ToString();
 			saveData->SavedHotbarItemIDs.Add(TempHotbarID);
 		}
-
 		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
-
 		NetMulticastRPC_SaveData();
 	}
 	else
@@ -805,23 +802,6 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			{
 				PlayerState->SetPlayerName(/*SaveGame->PlayerDataStructure.PlayerID*/ID);
 			}
-//===================================================================================================================================
-//			Load QuickSlot 
-
-			for (uint8 i = 0; i < 5; i++)
-			{
-				if (savedData->SavedHotbarItemIDs[i].Contains(TEXT("ID_Empty")))
-				{
-					continue;
-				}
-				FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedHotbarItemIDs[i]));
-
-				if (TempHotbarSlot.ItemStructure.ItemType == EItemType::Undefined)
-				{
-					continue;
-				}
-				InventoryManagerComponent->Client_SetHotbarSlotItem(i, TempHotbarSlot);
-			}
 
 			// 인벤토리 아이템 로드 
 			int itemCount = savedData->SavedItemIDs.Num() - 1;
@@ -860,6 +840,42 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 					}
 				}
 			}
+//===================================================================================================================================
+//			Load QuickSlot 
+
+			for (uint8 i = 0; i < 5; i++)
+			{
+				if (savedData->SavedHotbarItemIDs[i].Contains(TEXT("ID_Empty")))
+				{
+					continue;
+				}
+				FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedHotbarItemIDs[i]));
+
+				if (TempHotbarSlot.ItemStructure.ItemType == EItemType::Undefined)
+				{
+					continue;
+				}
+
+				for (int j = 0; j < itemCount; j++)
+				{
+					if (savedData->SavedItemIDs[j].Contains(TEXT("ID_Empty")))
+					{
+						continue;
+					}
+
+					FSlotStructure TempInventorySlotItem = InventoryManagerComponent->PlayerInventory->GetInventoryItem(j);
+
+					if (TempInventorySlotItem.ItemStructure.ItemType == EItemType::Undefined)
+					{
+						continue;
+					}
+
+					if (TempHotbarSlot.ItemStructure.ID == TempInventorySlotItem.ItemStructure.ID)
+					{
+						InventoryManagerComponent->Client_SetHotbarSlotItem(i, TempInventorySlotItem);
+					}
+				}
+			}
 		}
 		else
 		{
@@ -876,17 +892,28 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 
 void AVICTIMSPlayerController::NetMulticastRPC_LoadData_Implementation(bool bSuccess)
 {
-	if (IsLocalController())
-	{
+// 	if (IsLocalController())
+// 	{
 		if (TestIDWidget)
 		{
 			if (bSuccess)
 			{
 				TestIDWidget->IsIDValid = true;
+				CloseTestIDWidget();
+			
+				CharacterReference->hpWidget->AddToViewport();
+
+				HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
+				HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
+
+				if (BGMComp)
+				{
+					BGMComp->Stop();
+				}
 				if (IDInValidWidget)
 				{
 					IDInValidWidget->AddToViewport();
-					// 					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
+//  					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
 					IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
 
 					FTimerHandle Time;
@@ -895,6 +922,7 @@ void AVICTIMSPlayerController::NetMulticastRPC_LoadData_Implementation(bool bSuc
 						IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
 						}, 0.5f, false);
 				}
+
 			}
 			else
 			{
@@ -913,7 +941,7 @@ void AVICTIMSPlayerController::NetMulticastRPC_LoadData_Implementation(bool bSuc
 				}
 			}
 		}
-	}
+// 	}
 }
 
 void AVICTIMSPlayerController::ServerRPC_SetUseUIState_Implementation(bool bUse)

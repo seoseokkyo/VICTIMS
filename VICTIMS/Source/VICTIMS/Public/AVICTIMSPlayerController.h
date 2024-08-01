@@ -213,9 +213,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_LoadData(const FString& ID);		// 데이터 저장 
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(Client, Reliable)
 	void NetMulticastRPC_LoadData(bool bSuccess);		// 데이터 저장 
-
 	UPROPERTY()
 	UTestIDWidget* TestIDWidget;
 
