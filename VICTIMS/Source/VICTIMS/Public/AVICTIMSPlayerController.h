@@ -241,7 +241,7 @@ public:
 	void ServerRPC_SendHotbarData(const FString& ID, const FString& HotbarItems);
 
 	UFUNCTION(Client, Reliable)
-	void ClientRPC_LoadHotbar(const FString& ID, const FSlotStructure& ComparedItem);
+	void ClientRPC_LoadHotbar(const FString& ID, const FSlotStructure& ComparedItem, const TArray<FString>& savedHotbarItemNames);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_LoadHotbarData(const FString& ID, const uint8& Index, const FSlotStructure& HotbarItems);
