@@ -78,7 +78,7 @@ void AVICTIMSPlayerController::BeginPlay()
 		if (FParse::Value(*Options, TEXT("TestName="), ParsedValue))
 		{
 			ParsedValue.RemoveFromEnd("=");
-// 			UE_LOG(LogTemp, Warning, TEXT("Name Value: %s"), *ParsedValue);
+			// 			UE_LOG(LogTemp, Warning, TEXT("Name Value: %s"), *ParsedValue);
 		}
 
 		playerName = ParsedValue;
@@ -201,6 +201,11 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			InventoryManagerComponent->InitializePlayerAttributes();
 
 			CharacterReference->EnableInput(this);
+
+			if (InventoryManagerComponent->Gold == 0)
+			{
+				InventoryManagerComponent->AddGold(200);
+			}
 
 			bInventoryInitialized = true;
 		}
@@ -735,17 +740,17 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		saveData->HouseNumber = CharacterReference->AssignedHouse ? CharacterReference->AssignedHouse->HouseNumber : -1;
 
 		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
-//=====================================================================================================================================
-//		Save QuickSlot
+		//=====================================================================================================================================
+		//		Save QuickSlot
 		ClientRPC_SaveHotbar(ID);
-// 
-// 		saveData->SavedHotbarItemIDs.Reset();
-// 		for (uint8 i = 0; i < 5; i++)
-// 		{
-// 			FString TempHotbarID = InventoryManagerComponent->GetHotbarSlotItem(i).ItemStructure.ID.ToString();
-// 			saveData->SavedHotbarItemIDs.Add(TempHotbarID);
-// 		}
-// 		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
+		// 
+		// 		saveData->SavedHotbarItemIDs.Reset();
+		// 		for (uint8 i = 0; i < 5; i++)
+		// 		{
+		// 			FString TempHotbarID = InventoryManagerComponent->GetHotbarSlotItem(i).ItemStructure.ID.ToString();
+		// 			saveData->SavedHotbarItemIDs.Add(TempHotbarID);
+		// 		}
+		// 		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
 		NetMulticastRPC_SaveData();
 	}
 	else
@@ -846,41 +851,41 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 				}
 			}
 
-//===================================================================================================================================
-//			Load QuickSlot 
-// 			for (uint8 i = 0; i < 5; i++)
-// 			{
-// 				if (savedData->SavedHotbarItemIDs[i].Contains(TEXT("ID_Empty")))
-// 				{
-// 					continue;
-// 				}
-// 				FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedHotbarItemIDs[i]));
-// 
-// 				if (TempHotbarSlot.ItemStructure.ItemType == EItemType::Undefined)
-// 				{
-// 					continue;
-// 				}
-// 
-// 				for (int j = 0; j < itemCount; j++)
-// 				{
-// 					if (savedData->SavedItemIDs[j].Contains(TEXT("ID_Empty")))
-// 					{
-// 						continue;
-// 					}
-// 
-// 					FSlotStructure TempInventorySlotItem = InventoryManagerComponent->PlayerInventory->GetInventoryItem(j);
-// 
-// 					if (TempInventorySlotItem.ItemStructure.ItemType == EItemType::Undefined)
-// 					{
-// 						continue;
-// 					}
-// 
-// 					if (TempHotbarSlot.ItemStructure.ID == TempInventorySlotItem.ItemStructure.ID)
-// 					{
-// 						InventoryManagerComponent->Client_SetHotbarSlotItem(i, TempInventorySlotItem);
-// 					}
-// 				}
-// 			}
+			//===================================================================================================================================
+			//			Load QuickSlot 
+			// 			for (uint8 i = 0; i < 5; i++)
+			// 			{
+			// 				if (savedData->SavedHotbarItemIDs[i].Contains(TEXT("ID_Empty")))
+			// 				{
+			// 					continue;
+			// 				}
+			// 				FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedHotbarItemIDs[i]));
+			// 
+			// 				if (TempHotbarSlot.ItemStructure.ItemType == EItemType::Undefined)
+			// 				{
+			// 					continue;
+			// 				}
+			// 
+			// 				for (int j = 0; j < itemCount; j++)
+			// 				{
+			// 					if (savedData->SavedItemIDs[j].Contains(TEXT("ID_Empty")))
+			// 					{
+			// 						continue;
+			// 					}
+			// 
+			// 					FSlotStructure TempInventorySlotItem = InventoryManagerComponent->PlayerInventory->GetInventoryItem(j);
+			// 
+			// 					if (TempInventorySlotItem.ItemStructure.ItemType == EItemType::Undefined)
+			// 					{
+			// 						continue;
+			// 					}
+			// 
+			// 					if (TempHotbarSlot.ItemStructure.ID == TempInventorySlotItem.ItemStructure.ID)
+			// 					{
+			// 						InventoryManagerComponent->Client_SetHotbarSlotItem(i, TempInventorySlotItem);
+			// 					}
+			// 				}
+			// 			}
 		}
 		else
 		{
@@ -898,89 +903,89 @@ void AVICTIMSPlayerController::ServerRPC_LoadHotbarData_Implementation(const FSt
 {
 	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
 	int itemCount = savedData->SavedItemIDs.Num() - 1;
-// 	int startPoint = (int)EEquipmentSlot::Count;
-// 	 for (uint8 i = 0; i < 5; i++)
-// 	 {
-// 		if (savedData->SavedHotbarItemIDs[i].Contains(TEXT("ID_Empty")))
-// 		{
-// 			continue;
-// 		}
-// 		FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedHotbarItemIDs[i]));
-// 		if (TempHotbarSlot.ItemStructure.ItemType == EItemType::Undefined)
-// 		{
-// 			continue;
-// 		}
-// 		for (int j = 0; j < itemCount; j++)
-// 		{
-// 			if (savedData->SavedItemIDs[j].Contains(TEXT("ID_Empty")))
-// 			{
-// 				continue;
-// 			}
-// 			FSlotStructure TempInventorySlotItem = InventoryManagerComponent->PlayerInventory->GetInventoryItem(j);
-// 			if (TempInventorySlotItem.ItemStructure.ItemType == EItemType::Undefined)
-// 			{
-// 				continue;
-// 			}
-// 
-// 			if (TempHotbarSlot.ItemStructure.ID == TempInventorySlotItem.ItemStructure.ID)
-// 			{
-				InventoryManagerComponent->Client_SetHotbarSlotItem(Index, HotbarItems);
-// 			}
-// 		}
-// 	 }
+	// 	int startPoint = (int)EEquipmentSlot::Count;
+	// 	 for (uint8 i = 0; i < 5; i++)
+	// 	 {
+	// 		if (savedData->SavedHotbarItemIDs[i].Contains(TEXT("ID_Empty")))
+	// 		{
+	// 			continue;
+	// 		}
+	// 		FSlotStructure TempHotbarSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedHotbarItemIDs[i]));
+	// 		if (TempHotbarSlot.ItemStructure.ItemType == EItemType::Undefined)
+	// 		{
+	// 			continue;
+	// 		}
+	// 		for (int j = 0; j < itemCount; j++)
+	// 		{
+	// 			if (savedData->SavedItemIDs[j].Contains(TEXT("ID_Empty")))
+	// 			{
+	// 				continue;
+	// 			}
+	// 			FSlotStructure TempInventorySlotItem = InventoryManagerComponent->PlayerInventory->GetInventoryItem(j);
+	// 			if (TempInventorySlotItem.ItemStructure.ItemType == EItemType::Undefined)
+	// 			{
+	// 				continue;
+	// 			}
+	// 
+	// 			if (TempHotbarSlot.ItemStructure.ID == TempInventorySlotItem.ItemStructure.ID)
+	// 			{
+	InventoryManagerComponent->Client_SetHotbarSlotItem(Index, HotbarItems);
+	// 			}
+	// 		}
+	// 	 }
 }
 void AVICTIMSPlayerController::NetMulticastRPC_LoadData_Implementation(bool bSuccess)
 {
-// 	if (IsLocalController())
-// 	{
-		if (TestIDWidget)
+	// 	if (IsLocalController())
+	// 	{
+	if (TestIDWidget)
+	{
+		if (bSuccess)
 		{
-			if (bSuccess)
+			TestIDWidget->IsIDValid = true;
+			CloseTestIDWidget();
+
+			CharacterReference->hpWidget->AddToViewport();
+
+			HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
+			HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
+
+			if (BGMComp)
 			{
-				TestIDWidget->IsIDValid = true;
-				CloseTestIDWidget();
-			
-				CharacterReference->hpWidget->AddToViewport();
-
-				HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
-				HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
-
-				if (BGMComp)
-				{
-					BGMComp->Stop();
-				}
-				if (IDInValidWidget)
-				{
-					IDInValidWidget->AddToViewport();
-//  					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
-					IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
-
-					FTimerHandle Time;
-					GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
-
-						IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
-						}, 0.5f, false);
-				}
-
+				BGMComp->Stop();
 			}
-			else
+			if (IDInValidWidget)
 			{
-				TestIDWidget->IsIDValid = false;
-				if (IDInValidWidget)
-				{
-					IDInValidWidget->AddToViewport();
-					IDInValidWidget->ValidInformText->SetText(FText::FromString("ID IS NOT EXIST"));
-					IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
+				IDInValidWidget->AddToViewport();
+				//  					IDInValidWidget->ValidInformText->SetText(FText::FromString("Data Load Success"));
+				IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
 
-					FTimerHandle Time;
-					GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+				FTimerHandle Time;
+				GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
 
-						IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
-						}, 0.5f, false);
-				}
+					IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+					}, 0.5f, false);
+			}
+
+		}
+		else
+		{
+			TestIDWidget->IsIDValid = false;
+			if (IDInValidWidget)
+			{
+				IDInValidWidget->AddToViewport();
+				IDInValidWidget->ValidInformText->SetText(FText::FromString("ID IS NOT EXIST"));
+				IDInValidWidget->SetVisibility(ESlateVisibility::Visible);
+
+				FTimerHandle Time;
+				GetWorld()->GetTimerManager().SetTimer(Time, [&]() {
+
+					IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+					}, 0.5f, false);
 			}
 		}
-// 	}
+	}
+	// 	}
 }
 
 void AVICTIMSPlayerController::ServerRPC_SetUseUIState_Implementation(bool bUse)
@@ -999,15 +1004,15 @@ void AVICTIMSPlayerController::ClientRPC_SetUseUIState_Implementation(bool bUse)
 
 void AVICTIMSPlayerController::ClientRPC_SaveHotbar_Implementation(const FString& ID)
 {
-// 	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
-// 	savedData->SavedHotbarItemIDs.Reset();
+	// 	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+	// 	savedData->SavedHotbarItemIDs.Reset();
 	for (uint8 i = 0; i < 5; i++)
 	{
 		FString TempHotbarID = InventoryManagerComponent->GetHotbarSlotItem(i).ItemStructure.ID.ToString();
 		ServerRPC_SendHotbarData(ID, TempHotbarID);
-// 		savedData->SavedHotbarItemIDs.Add(TempHotbarID);
+		// 		savedData->SavedHotbarItemIDs.Add(TempHotbarID);
 	}
-// 	UGameplayStatics::SaveGameToSlot(savedData, ID, 0);
+	// 	UGameplayStatics::SaveGameToSlot(savedData, ID, 0);
 }
 
 void AVICTIMSPlayerController::ServerRPC_SendHotbarData_Implementation(const FString& ID, const FString& HotbarItems)
@@ -1034,27 +1039,27 @@ void AVICTIMSPlayerController::ClientRPC_LoadHotbar_Implementation(const FString
 		{
 			continue;
 		}
-// 
-// 		for (int j = 0; j < itemCount; j++)
-// 		{
-// 			if (savedData->SavedItemIDs[j].Contains(TEXT("ID_Empty")))
-// 			{
-// 				continue;
-// 			}
-// 
-// 			FSlotStructure TempInventorySlotItem = InventoryManagerComponent->PlayerInventory->GetInventoryItem(j);
-// 
-// 			if (TempInventorySlotItem.ItemStructure.ItemType == EItemType::Undefined)
-// 			{
-// 				continue;
-// 			}
+		// 
+		// 		for (int j = 0; j < itemCount; j++)
+		// 		{
+		// 			if (savedData->SavedItemIDs[j].Contains(TEXT("ID_Empty")))
+		// 			{
+		// 				continue;
+		// 			}
+		// 
+		// 			FSlotStructure TempInventorySlotItem = InventoryManagerComponent->PlayerInventory->GetInventoryItem(j);
+		// 
+		// 			if (TempInventorySlotItem.ItemStructure.ItemType == EItemType::Undefined)
+		// 			{
+		// 				continue;
+		// 			}
 
-			if (TempHotbarSlot.ItemStructure.ID == ComparedItem.ItemStructure.ID)
-			{	
-// 				ServerRPC_LoadHotbarData(ID, i, TempInventorySlotItem);
-				InventoryManagerComponent->Client_SetHotbarSlotItem(i, ComparedItem);
-				break;
-			}
+		if (TempHotbarSlot.ItemStructure.ID == ComparedItem.ItemStructure.ID)
+		{
+			// 				ServerRPC_LoadHotbarData(ID, i, TempInventorySlotItem);
+			InventoryManagerComponent->Client_SetHotbarSlotItem(i, ComparedItem);
+			break;
+		}
 		/*}*/
 	}
 }
