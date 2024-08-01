@@ -202,11 +202,6 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 
 			CharacterReference->EnableInput(this);
 
-			if (InventoryManagerComponent->Gold == 0)
-			{
-				InventoryManagerComponent->AddGold(200);
-			}
-
 			bInventoryInitialized = true;
 		}
 	}
@@ -803,6 +798,11 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			else
 			{
 				// 				UKismetSystemLibrary::PrintString(GetWorld(), TEXT("savedData->SavedHP Was Zero"));
+			}
+
+			if (savedData->SavedGold == 0)
+			{
+				savedData->SavedGold = 200;
 			}
 
 			InventoryManagerComponent->AddGold(savedData->SavedGold);	// Gold ·Îµå
