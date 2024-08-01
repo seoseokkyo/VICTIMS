@@ -238,6 +238,9 @@ public:
 	UFUNCTION(Category = "Manager|Private|Inventory")
 	void DropItem(UInventoryComponent* Inventory, uint8 InventorySlot);
 
+	UFUNCTION(Client, Reliable)
+	void Client_DropBullet(const FSlotStructure& DroppedItem);
+
 	
 	UFUNCTION(Category = "Manager|Private|Inventory")
 	void AddGold(int32 Amount);
