@@ -354,6 +354,8 @@ void UVictimsGameInstance::HomeTownCheck(AVICTIMSPlayerController* playerControl
 	if (serverType == "MainServer")
 	{
 		playerControllerPTR->GetPawn()->Tags.Add(TEXT("Team:HomeTown"));
+
+		playerControllerPTR->ClientRPC_AddTag(TEXT("Team:HomeTown"));
 	}
 	else if (serverType == "InstanceServer")
 	{

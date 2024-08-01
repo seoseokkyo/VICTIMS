@@ -964,6 +964,11 @@ void AVICTIMSPlayerController::CloseLayouts()
 	// 	return;
 }
 
+void AVICTIMSPlayerController::ClientRPC_AddTag_Implementation(const FName& newTag)
+{
+	GetPawn()->Tags.Add(newTag);
+}
+
 void AVICTIMSPlayerController::HideWidgets()
 {
 	CharacterReference->hpWidget->SetVisibility(ESlateVisibility::Hidden);

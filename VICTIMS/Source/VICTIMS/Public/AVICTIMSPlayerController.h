@@ -310,6 +310,9 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_ShowLoadingUI();
 
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_AddTag(const FName& newTag);
+
 	UFUNCTION()
 	void HideWidgets();
 };

@@ -212,6 +212,8 @@ void AVICTIMSCharacter::BeginPlay()
 
 				if (PC)
 				{
+					
+
 					FString strID = MyPlayerController->playerName;
 
 					if (PC->CharacterReference)
@@ -229,6 +231,8 @@ void AVICTIMSCharacter::BeginPlay()
 							if (auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>())
 							{
 								PC->CharacterReference->AssignedHouse = gm->FindUnOwnedHouse();
+
+								gm->ServerRPC_HomeTownCheck(PC);
 							}
 						}
 

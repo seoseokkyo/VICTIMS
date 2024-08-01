@@ -13,6 +13,7 @@
 #include <Net/UnrealNetwork.h>
 #include "VICTIMSCharacter.h"
 #include <Kismet/GameplayStatics.h>
+#include "AVICTIMSPlayerController.h"
 
 // Sets default values
 ACharacterBase::ACharacterBase()
@@ -69,6 +70,30 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 		return 0.0f;
 	}
 
+	bool bSameTeam = false;
+
+	if (TeamCheck(Cast<ACharacterBase>(DamageCauser)))
+	{
+		bSameTeam = true;
+	}
+
+	if (auto playerCheck = Cast<AVICTIMSPlayerController>(EventInstigator))
+	{
+		if (auto charCheck = playerCheck->GetPawn())
+		{
+			if (TeamCheck(Cast<ACharacterBase>(charCheck)))
+			{
+				bSameTeam = true;
+			}
+		}
+	}
+
+	if (bSameTeam)
+	{
+		return 0.0f;
+	}
+
+
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
 	stateComp->NetMulticastRPC_SetStatePoint(HP, temp);
 
@@ -76,7 +101,7 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	{
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s is Dead By %s"), *this->GetActorNameOrLabel(), *DamageCauser->GetActorNameOrLabel()), true, true, FLinearColor::Red, 10.0f);
 
-		if (bIsDead==false)
+		if (bIsDead == false)
 		{
 			bIsDead = true;
 			//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("%s is Dead By %s"), *this->GetActorNameOrLabel(), *DamageCauser->GetActorNameOrLabel()), true, true, FLinearColor::Red, 1000.0f);
@@ -88,13 +113,13 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 				Attacker->NetMulticastRPC_KillWidget(this);
 				//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("WidgetOn")), true, true, FLinearColor::Red, 10.0f);
 			}
-			
+
 		}
 	}
 
 	if (HitSounds.Num() > 0)
-	{		
-		int selected = FMath::RandRange(0, HitSounds.Num()-1);
+	{
+		int selected = FMath::RandRange(0, HitSounds.Num() - 1);
 
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSounds[selected], GetActorLocation());
 	}
@@ -403,6 +428,49 @@ void ACharacterBase::DieFunction()
 
 	bDead = true;
 
+}
+
+bool ACharacterBase::TeamCheck(ACharacterBase* targetActor)
+{
+	if (targetActor == nullptr)
+	{
+		return false;
+	}
+
+	// Enemy : Enemy Check
+	FString ownerTeamTag;
+	FString hitActorTeamTag;
+
+	bool bOwnerTagFind = false;
+	for (auto tag : Tags)
+	{
+		if (tag.ToString().Contains("Team"))
+		{
+			ownerTeamTag = tag.ToString();
+			bOwnerTagFind = true;
+			break;
+		}
+	}
+
+	bool bHitActorTagFind = false;
+	for (auto tag : targetActor->Tags)
+	{
+		if (tag.ToString().Contains("Team"))
+		{
+			hitActorTeamTag = tag.ToString();
+			bHitActorTagFind = true;
+			break;
+		}
+	}
+
+	if (bOwnerTagFind && bHitActorTagFind && (ownerTeamTag == hitActorTeamTag))
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void ACharacterBase::ServerRPC_ToIdle_Implementation()

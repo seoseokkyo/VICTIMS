@@ -138,4 +138,7 @@ public:
 	void NetMulticastRPC_ToIdle(ECharacterMotionState state);
 
 	FEndAttackEvent OnEndAttackEvent;
+
+	UFUNCTION()
+	bool TeamCheck(ACharacterBase* targetActor);
 };

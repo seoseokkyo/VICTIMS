@@ -82,6 +82,8 @@ void AVICTIMSGameMode::PostLogin(APlayerController* pc)
 
 			AssignHouseToPlayer(NewPlayer);
 
+			ServerRPC_HomeTownCheck(NewPlayer);
+
 			//UTestSaveGame* LoadedData = NewPlayer->GetSaveDataFromID(PlayerID);
 
 			//if (LoadedData && LoadedData->HouseNumber >= 0 && LoadedData->HouseNumber < Houses.Num())
