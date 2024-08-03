@@ -12,6 +12,7 @@
 #include "AVICTIMSPlayerController.h"
 #include "Net/UnrealNetwork.h"
 #include "LoadingWidget.h"
+#include "VictimsBlueprintFunctionLibrary.h"
 
 FCharacterStat UVictimsGameInstance::GetCharacterDataTable(const FString& rowName)
 {
@@ -270,9 +271,19 @@ void UVictimsGameInstance::ClientRPC_RequestRespawn_Implementation(AVICTIMSPlaye
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("URL : %s"), *strURL));
 	UE_LOG(LogTemp, Warning, TEXT("URL : %s"), *strURL);
 
-	strURL = TEXT("192.168.0.34:8101");
+	FString addrTemp;
 
-	playerControllerPTR->RequestClientTravel(strURL, FString());
+	FString ProjectFilePath = FPaths::GetProjectFilePath();
+	FString ProjectDirectory = FPaths::GetPath(ProjectFilePath);
+
+	ProjectDirectory += TEXT("/Saved/TargetAddressString.txt");
+
+	UVictimsBlueprintFunctionLibrary::ReadStringFromFile(ProjectDirectory, addrTemp);
+
+	addrTemp += ":8101";
+	//strURL = TEXT("192.168.0.34:8101");
+
+	playerControllerPTR->RequestClientTravel(addrTemp, FString());
 }
 
 void UVictimsGameInstance::ServerRPC_UpdateMainAddressValue_Implementation()

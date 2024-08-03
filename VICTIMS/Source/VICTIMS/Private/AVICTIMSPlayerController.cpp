@@ -768,10 +768,7 @@ void AVICTIMSPlayerController::NetMulticastRPC_SaveData_Implementation()
 
 void AVICTIMSPlayerController::LoadData(FString ID)
 {
-	if (InventoryManagerComponent->Gold == 0)
-	{
-		ServerRPC_LoadData(ID);
-	}
+	ServerRPC_LoadData(ID);
 }
 
 void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& ID)
@@ -798,11 +795,6 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			else
 			{
 				// 				UKismetSystemLibrary::PrintString(GetWorld(), TEXT("savedData->SavedHP Was Zero"));
-			}
-
-			if (savedData->SavedGold == 0)
-			{
-				savedData->SavedGold = 200;
 			}
 
 			InventoryManagerComponent->AddGold(savedData->SavedGold);	// Gold ·Îµå

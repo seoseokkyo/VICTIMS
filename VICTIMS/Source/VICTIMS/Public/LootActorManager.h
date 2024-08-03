@@ -33,6 +33,7 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 		
+	float ownerCheckTimer = 0.0f;
 
 	UPROPERTY(VisibleAnyWhere)
 	TArray<FLootActorStruct> lootActors;

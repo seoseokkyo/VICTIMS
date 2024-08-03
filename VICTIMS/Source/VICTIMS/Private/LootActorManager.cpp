@@ -22,13 +22,19 @@ void ALootActorManager::BeginPlay()
 
     if (HasAuthority())
     {
-        TArray<AActor*> FoundActors;
-        UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALootActor::StaticClass(), FoundActors);
+        FTimerHandle TimerHandle;
+        GetWorld()->GetTimerManager().SetTimer(TimerHandle, [&](){
 
-        for (AActor* Actor : FoundActors)
-        {
-            lootActors.Add({ Cast<ALootActor>(Actor), 0.0f });
-        }
+            TArray<AActor*> FoundActors;
+            UGameplayStatics::GetAllActorsOfClass(GetWorld(), ALootActor::StaticClass(), FoundActors);
+
+            lootActors.Reset();
+            for (AActor* Actor : FoundActors)
+            {
+                lootActors.Add({ Cast<ALootActor>(Actor), 0.0f });
+            }
+
+        }, 8.0f, false);
     }
 }
 
@@ -37,9 +43,18 @@ void ALootActorManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-    if (GetOwner() == nullptr)
+    if (ownerCheckTimer > 5)
     {
-        SetOwner(GetWorld()->GetFirstPlayerController());
+        ownerCheckTimer = 0.0f;
+
+        if (GetOwner() == nullptr)
+        {
+            SetOwner(GetWorld()->GetFirstPlayerController());
+        }
+    }
+    else
+    {
+        ownerCheckTimer += DeltaTime;
     }
 
     if (HasAuthority())

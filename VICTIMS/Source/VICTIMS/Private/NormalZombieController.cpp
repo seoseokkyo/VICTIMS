@@ -54,7 +54,9 @@ void ANormalZombieController::BeginPlay()
 
 	SetupPerceptionSystem();
 
-	onceMovingLimitTime = FMath::RandRange(1, 10);
+	onceMovingLimitTime = FMath::RandRange(1, 3);
+
+	bSightOn = false;
 }
 
 void ANormalZombieController::Tick(float deltaTime)
@@ -93,7 +95,7 @@ void ANormalZombieController::Tick(float deltaTime)
 			temp->motionState = ECharacterMotionState::Idle;
 			currentMovingTime = 0.0f;
 
-			onceMovingLimitTime = FMath::RandRange(1, 4);
+			onceMovingLimitTime = FMath::RandRange(1, 3);
 
 			bMoveStart = false;
 			bMoveAtLocation = false;
@@ -135,7 +137,7 @@ void ANormalZombieController::Tick(float deltaTime)
 	}
 	else
 	{
-		if (GetNoiseDetect() >= 500)
+		if (GetNoiseDetect() >= 800)
 		{
 			temp->GetCharacterMovement()->MaxWalkSpeed = 280;
 
@@ -147,7 +149,7 @@ void ANormalZombieController::Tick(float deltaTime)
 
 			bNoiseDetect = true;
 		}
-		else if (GetNoiseDetect() >= 300)
+		else if (GetNoiseDetect() >= 100)
 		{
 			temp->GetCharacterMovement()->MaxWalkSpeed = 80;
 
@@ -397,18 +399,43 @@ void ANormalZombieController::OnTargetDetected(AActor* _Actor, FAIStimulus const
 	}
 	else if (Stimulus.Type.Name == FName("Default__AISense_Hearing"))
 	{
-		// 1000보다 먼 거리에서 난 100보다 작은 소리는 무시
-		if (Stimulus.Strength < 100)
+		if (false == Stimulus.IsValid())
 		{
-			if (FVector::Dist(targetActor->GetActorLocation(), GetPawn()->GetActorLocation()) > 1000)
+			return;
+		}
+
+		// 1000보다 먼 거리에서 난 20보다 작은 소리는 무시
+		if (Stimulus.Strength < 20)
+		{
+			if (Stimulus.StimulusLocation == FVector::ZeroVector || GetPawn()->GetActorLocation() == FVector::ZeroVector)
+			{
+				return;
+			}
+
+			if (FVector::Dist(Stimulus.StimulusLocation, GetPawn()->GetActorLocation()) > 1000.0f)
 			{
 				return;
 			}
 		}
+		else if (Stimulus.Strength < 100)
+		{
+			if (FVector::Dist(Stimulus.StimulusLocation, GetPawn()->GetActorLocation()) > 1500.0f)
+			{
+				return;
+			}
 
-		SetNoiseDetect(GetNoiseDetect() + Stimulus.Strength);
+			SetNoiseDetect(GetNoiseDetect() + Stimulus.Strength);
 
-		SetTargetLocation(Stimulus.StimulusLocation);
+			SetTargetLocation(Stimulus.StimulusLocation);
+		}
+		else
+		{
+			//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Dist : %f"), FVector::Dist(Stimulus.StimulusLocation, GetPawn()->GetActorLocation())));
+
+			SetNoiseDetect(GetNoiseDetect() + Stimulus.Strength);
+
+			SetTargetLocation(Stimulus.StimulusLocation);
+		}
 
 		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Stimulus.Strength : %f"), Stimulus.Strength));
 		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("GetNoiseDetect : %f"), GetNoiseDetect()));

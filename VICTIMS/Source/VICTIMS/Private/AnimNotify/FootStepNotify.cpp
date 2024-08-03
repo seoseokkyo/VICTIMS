@@ -12,7 +12,7 @@ void UFootStepNotify::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase
 			auto characterCheck = Cast<AVICTIMSCharacter>(MeshComp->GetOwner());
 			if (characterCheck)
 			{
-				float currentSpeed = characterCheck->GetCharacterMovement()->Velocity.Size() * 0.1;
+				float currentSpeed = characterCheck->GetCharacterMovement()->Velocity.Size() * 0.08;
 				UAISense_Hearing::ReportNoiseEvent(GetWorld(), MeshComp->GetComponentLocation(), currentSpeed, MeshComp->GetOwner(), 1000);
 			}
 			else

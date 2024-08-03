@@ -212,7 +212,7 @@ void AVICTIMSCharacter::BeginPlay()
 
 				if (PC)
 				{
-					
+
 
 					FString strID = MyPlayerController->playerName;
 
@@ -252,9 +252,26 @@ void AVICTIMSCharacter::BeginPlay()
 
 						PC->HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
 						PC->HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
+
+						if (MyPlayerController->InventoryManagerComponent->Gold <= 20)
+						{
+							ServerRPC_AddGoldFunction(200);
+						}
 					}
 
 					MyPlayerController->bNeedToLoad = false;
+
+
+				}
+			}
+			else
+			{
+				if (IsLocallyControlled())
+				{
+					if (MyPlayerController->InventoryManagerComponent->Gold <= 20)
+					{
+						ServerRPC_AddGoldFunction(200);
+					}
 				}
 			}
 		}
@@ -472,20 +489,26 @@ void AVICTIMSCharacter::DieFunction()
 		{
 			PC->InventoryManagerComponent->DropItem(PC->InventoryManagerComponent->PlayerInventory, i);
 		}
-		for (int i = 0; i < PC->InventoryManagerComponent->Gold; i++)
+
+		//PC->InventoryManagerComponent->DropMoney();
+
+		
+		FSlotStructure LocalSlot = PC->InventoryManagerComponent->PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
+		UClass* LocalClass = nullptr;
+		FTransform OutTransform;
+		PC->InventoryManagerComponent->RandomizeDropLocation(LocalSlot, LocalClass, OutTransform);
+		AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransform);
+		if (WActor)
 		{
-			FSlotStructure LocalSlot = PC->InventoryManagerComponent->PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
-			UClass* LocalClass = nullptr;
-			FTransform OutTransform;
-			PC->InventoryManagerComponent->RandomizeDropLocation(LocalSlot, LocalClass, OutTransform);
-			AWorldActor* WActor = GetWorld()->SpawnActor<AWorldActor>(LocalClass, OutTransform);
-			if (WActor)
-			{
-				WActor->StaticMesh->SetSimulatePhysics(true);
-				WActor->Amount = 1;
-				PC->InventoryManagerComponent->AddGold(-1);
-			}
+			WActor->StaticMesh->SetSimulatePhysics(true);
+			WActor->Amount = PC->InventoryManagerComponent->Gold;
+			PC->InventoryManagerComponent->AddGold(PC->InventoryManagerComponent->Gold);
 		}
+
+		//for (int i = 0; i < PC->InventoryManagerComponent->Gold; i++)
+		//{
+		//
+		//}
 	}
 
 	if (IsLocallyControlled())
