@@ -86,17 +86,17 @@ void UVictimsGameInstance::ConnectToServerAndMoveToNewLevel_Implementation(APlay
 	//PlayerController->ClientTravel(URL, type);
 
 	// 여기서 클라이언트 소켓의 응답을 대기를 해야 하는데........ 흠
-	FTimerHandle timer;
-	clientTravelTimers.Add(timer);
-	int currentIndex = clientTravelTimers.Num() - 1;
+	//FTimerHandle timer;
+	//clientTravelTimers.Add(timer);
+	//int currentIndex = clientTravelTimers.Num() - 1;
+	//
+	//InstantServerArray.Add(newServerInst);
+	//
+	//GetWorld()->GetTimerManager().SetTimer(clientTravelTimers[currentIndex], [&, currentIndex]() {
 
-	InstantServerArray.Add(newServerInst);
+		//TryToClientTravel(currentIndex);
 
-	GetWorld()->GetTimerManager().SetTimer(clientTravelTimers[currentIndex], [&, currentIndex]() {
-
-		TryToClientTravel(currentIndex);
-
-		}, 1.0f, true);
+		//}, 1.0f, true);
 }
 
 void UVictimsGameInstance::OnStart()
@@ -125,13 +125,13 @@ void UVictimsGameInstance::OnStart()
 			// 메인 서버 로직
 			UE_LOG(LogTemp, Warning, TEXT("This is the Main Server"));
 
-			mySocket = NewObject<UServerProcSocket>(GetWorld(), UServerProcSocket::StaticClass());
+			//mySocket = NewObject<UServerProcSocket>(GetWorld(), UServerProcSocket::StaticClass());
 
 			InstantServerArray.Reset();
 		}
 		else if (serverType == "InstanceServer")
 		{
-			mySocket = NewObject<UInstantProcSocket>(GetWorld(), UInstantProcSocket::StaticClass());
+			//mySocket = NewObject<UInstantProcSocket>(GetWorld(), UInstantProcSocket::StaticClass());
 
 			// 새로운 서버 인스턴스 로직
 			UE_LOG(LogTemp, Warning, TEXT("This is an Instance Server"));
@@ -159,17 +159,17 @@ void UVictimsGameInstance::OnStart()
 	{
 		if (serverType == "MainServer")
 		{
-			Cast<UServerProcSocket>(mySocket)->InitializeSocket();
+			//Cast<UServerProcSocket>(mySocket)->InitializeSocket();
 		}
 		else if (serverType == "InstanceServer")
 		{
 			int32 portNum = FCString::Atoi(*serverPort);
 			int32 instNum = portNum - 8001;
 
-			Cast<UInstantProcSocket>(mySocket)->SetInstantProcNumber(instNum);
-			Cast<UInstantProcSocket>(mySocket)->SetInstantProcPortNum(portNum);
+			//Cast<UInstantProcSocket>(mySocket)->SetInstantProcNumber(instNum);
+			//Cast<UInstantProcSocket>(mySocket)->SetInstantProcPortNum(portNum);
 
-			Cast<UInstantProcSocket>(mySocket)->InitializeSocket();
+			//Cast<UInstantProcSocket>(mySocket)->InitializeSocket();
 
 			UE_LOG(LogTemp, Warning, TEXT("This is an Instance Server Numer : %d"), instNum);
 			UE_LOG(LogTemp, Warning, TEXT("This is an Instance Server Port : %d"), portNum);
@@ -183,26 +183,26 @@ void UVictimsGameInstance::TryToClientTravel(int waitIndex)
 {
 	if (serverType == "MainServer")
 	{
-		auto serverSocketCheck = Cast<UServerProcSocket>(mySocket);
-		if (serverSocketCheck)
-		{
-			if (serverSocketCheck->ClientSockets.Num() > 0)
-			{
-				auto clientSocketCheck = serverSocketCheck->ClientSockets[waitIndex];
-
-				if (clientSocketCheck)
-				{
-					if (clientSocketCheck->GetConnectionState() == SCS_Connected)
-					{
-						clientSocketCheck->GetPortNo();
-
-						UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("clientSocketCheck:%d"), clientSocketCheck->GetPortNo()));
-
-						//InstantServerArray[waitIndex].clients[waitIndex]->ClientTravel();
-					}
-				}
-			}
-		}
+		//auto serverSocketCheck = Cast<UServerProcSocket>(mySocket);
+		//if (serverSocketCheck)
+		//{
+		//	if (serverSocketCheck->ClientSockets.Num() > 0)
+		//	{
+		//		auto clientSocketCheck = serverSocketCheck->ClientSockets[waitIndex];
+		//
+		//		if (clientSocketCheck)
+		//		{
+		//			if (clientSocketCheck->GetConnectionState() == SCS_Connected)
+		//			{
+		//				clientSocketCheck->GetPortNo();
+		//
+		//				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("clientSocketCheck:%d"), clientSocketCheck->GetPortNo()));
+		//
+		//				//InstantServerArray[waitIndex].clients[waitIndex]->ClientTravel();
+		//			}
+		//		}
+		//	}
+		//}
 	}
 }
 

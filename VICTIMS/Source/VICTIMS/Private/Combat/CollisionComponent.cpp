@@ -21,6 +21,8 @@ UCollisionComponent::UCollisionComponent()
 	collisionObjectTypes.Reset();
 	collisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
 	collisionObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
+
+	bCollisionEnabled = false;
 }
 
 
@@ -34,6 +36,8 @@ void UCollisionComponent::BeginPlay()
 	{
 		ownerChar=OwnerCharRef;
 	}
+
+	bCollisionEnabled = false;
 }
 
 
@@ -70,6 +74,11 @@ void UCollisionComponent::ClearHitActor()
 
 void UCollisionComponent::CollisionTrace()
 {
+	if (nullptr == collisionMeshComponent)
+	{
+		return;
+	}
+
 	FVector startSocketLocation = collisionMeshComponent->GetSocketLocation(startSocketName);
 	FVector endSocketLocation = collisionMeshComponent->GetSocketLocation(endSocketName);
 

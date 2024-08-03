@@ -160,6 +160,12 @@ void ABaseWeapon::OnHitCollisionComponent(FHitResult lastHitStruct)
 	FString hitActorTeamTag;
 
 	bool bOwnerTagFind = false;
+
+	if (false == IsValid(GetOwner()))
+	{
+		return;
+	}
+
 	for (auto tag : GetOwner()->Tags)
 	{
 		if (tag.ToString().Contains("Team"))

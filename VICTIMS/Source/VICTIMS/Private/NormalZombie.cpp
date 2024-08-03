@@ -57,6 +57,8 @@ void ANormalZombie::BeginPlay()
 	combatComponent_Additional->bCombatEnable = true;
 
 	OnEndAttackEvent.BindUFunction(this, FName("EndAttackEvent"));
+
+	stateComp->ServerRPC_EnableReady(true);
 }
 
 void ANormalZombie::Tick(float DeltaTime)
@@ -96,6 +98,11 @@ void ANormalZombie::Tick(float DeltaTime)
 
 void ANormalZombie::DieFunction()
 {
+	if (bDead)
+	{
+		return;
+	}
+
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.2);
 
 	Super::DieFunction();
@@ -125,12 +132,21 @@ void ANormalZombie::ServerRPC_DieFunction_Implementation()
 
 	GetController<ANormalZombieController>()->SetFocus(nullptr);
 
-	FTimerHandle hnd;
-	GetWorldTimerManager().SetTimer(hnd, [&]() {
-
-		EnableRagdoll();
-
-		}, 2.0f, false);
+	if (combatComponent)
+	{
+		if (combatComponent->mainWeapon)
+		{
+			combatComponent->mainWeapon->Destroy();
+		}
+	}
+	
+	if (combatComponent_Additional)
+	{
+		if (combatComponent_Additional->mainWeapon)
+		{
+			combatComponent_Additional->mainWeapon->Destroy();
+		}
+	}
 
 	NetMulticastRPC_DieFunction();
 }
@@ -141,7 +157,10 @@ void ANormalZombie::NetMulticastRPC_DieFunction_Implementation()
 	FTimerHandle hnd;
 	GetWorldTimerManager().SetTimer(hnd, [&]() {
 
-		EnableRagdoll();
+		if (IsValid(this))
+		{
+			EnableRagdoll();
+		}
 		//GetController<ANormalZombieController>()->UnPossess();
 
 		}, 2.0f, false);
@@ -203,7 +222,17 @@ void ANormalZombie::PrintInfo()
 void ANormalZombie::EndAttackEvent(float delayTime)
 {
 	FTimerHandle handler;
-	GetWorldTimerManager().SetTimer(handler, [&]() {
+	GetWorldTimerManager().SetTimer(handler, [&]() {		
+		
+		if (false == handler.IsValid())
+		{
+			return;	
+		}
+
+		if (false == IsValid(this))
+		{
+			return;
+		}
 
 		combatComponent->bAttacking = false;
 		combatComponent->bAttackSaved = false;

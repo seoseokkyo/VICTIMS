@@ -49,7 +49,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Initialization")
 	TEnumAsByte<EDrawDebugTrace::Type> drawDebugType;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Initialization")
 	bool bCollisionEnabled = false;
+
 	TArray<AActor*>		alreadyHitActors;
 	TArray<AActor*>		actorsToIgnore;
 	FHitResult			lastHitStruct;

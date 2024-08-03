@@ -45,6 +45,23 @@ void UStateComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	// ...
 }
 
+void UStateComponent::OnRep_bEnableReady(bool bEnable)
+{
+	bEnableReady = bEnable;
+}
+
+void UStateComponent::ClientRPC_EnableReady_Implementation(bool bEnable)
+{
+	bEnableReady = bEnable;
+}
+
+void UStateComponent::ServerRPC_EnableReady_Implementation(bool bEnable)
+{
+	bEnableReady = bEnable;
+	OnRep_bEnableReady(bEnable);
+	ClientRPC_EnableReady(bEnable);
+}
+
 void UStateComponent::InitStat()
 {
 	if (GetOwner() == nullptr)
@@ -91,6 +108,11 @@ float UStateComponent::AddStatePoint(EStateType stateType, float value)
 {
 	float temp = 0.0f;
 
+	if (false == bEnableReady)
+	{
+		return 0.0f;
+	}
+
 	switch (stateType)
 	{
 	case HP:
@@ -122,6 +144,11 @@ float UStateComponent::AddStatePoint(EStateType stateType, float value)
 
 void UStateComponent::ServerRPC_SetStatePoint_Implementation(EStateType stateType, float value)
 {
+	if (false == bEnableReady)
+	{
+		return;
+	}
+
 	switch (stateType)
 	{
 	case HP:
@@ -140,6 +167,11 @@ void UStateComponent::ServerRPC_SetStatePoint_Implementation(EStateType stateTyp
 
 void UStateComponent::NetMulticastRPC_SetStatePoint_Implementation(EStateType stateType, float value)
 {
+	if (false == bEnableReady)
+	{
+		return;
+	}
+
 	switch (stateType)
 	{
 	case HP:
@@ -179,5 +211,6 @@ void UStateComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutL
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UStateComponent, runningStat);
+	DOREPLIFETIME(UStateComponent, bEnableReady);
 }
 

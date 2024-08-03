@@ -4,7 +4,8 @@
 #include "TravelActor.h"
 #include "VictimsGameInstance.h"
 #include "AVICTIMSPlayerController.h"
-
+#include "VICTIMSCharacter.h"
+#include "StateComponent.h"
 
 // Sets default values
 ATravelActor::ATravelActor()
@@ -41,6 +42,8 @@ void ATravelActor::ServerRPC_TravelRequest_Implementation(APlayerController* Con
 
 		if (auto playerctrl = Cast<AVICTIMSPlayerController>(Controller))
 		{
+			playerctrl->CharacterReference->stateComp->ServerRPC_EnableReady(false);
+
 			playerctrl->RequestClientTravel(URL, FString());
 		}
 	}

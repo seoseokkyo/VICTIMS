@@ -92,6 +92,18 @@ private:
 
 public:
 
+	UPROPERTY(ReplicatedUsing = "OnRep_bEnableReady")
+	bool bEnableReady = false;
+
+	UFUNCTION(meta = (OverrideNativeName = "OnRep_bEnableReady"))
+	void OnRep_bEnableReady(bool bEnable);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_EnableReady(bool bEnable);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_EnableReady(bool bEnable);
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	FCharacterStat stat;
 

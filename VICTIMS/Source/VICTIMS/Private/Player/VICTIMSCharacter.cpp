@@ -277,6 +277,8 @@ void AVICTIMSCharacter::BeginPlay()
 		}
 		//>>
 
+		stateComp->ServerRPC_EnableReady(true);
+
 		}, 0.5f, false);
 }
 
@@ -492,7 +494,7 @@ void AVICTIMSCharacter::DieFunction()
 
 		//PC->InventoryManagerComponent->DropMoney();
 
-		
+
 		FSlotStructure LocalSlot = PC->InventoryManagerComponent->PlayerInventory->GetItemFromItemDB(FName("ID_Coin"));
 		UClass* LocalClass = nullptr;
 		FTransform OutTransform;
@@ -526,6 +528,9 @@ void AVICTIMSCharacter::DieFunction()
 		if (pc)
 		{
 			stateComp->ServerRPC_SetStatePoint(HP, stateComp->runningStat.MaxHP);  // HP max 로 채워주고 바로 자동 저장
+
+			stateComp->ServerRPC_EnableReady(false);
+
 			PC->SaveData();
 
 			pc->bShowMouseCursor = true;
@@ -907,7 +912,11 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 					if (AUsableActor* UsableActor = Cast<AUsableActor>(OtherActor))
 					{
 						IUsableActorInterface::Execute_EndOutlineFocus(UsableActor);
-						UsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+
+						if (UsableActor->InteractUserWidget)
+						{
+							UsableActor->InteractUserWidget->SetVisibility(ESlateVisibility::Hidden);
+						}
 
 						UsableActorsInsideRange.Remove(UsableActor);
 

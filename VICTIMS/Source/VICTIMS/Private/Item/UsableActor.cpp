@@ -70,8 +70,12 @@ bool AUsableActor::OnActorUsed_Implementation(APlayerController* Controller)
 
 bool AUsableActor::EndOutlineFocus_Implementation()
 {
-	StaticMesh->SetRenderCustomDepth(false);
-	StaticMesh->SetCustomDepthStencilValue(0);
+	if (StaticMesh)
+	{
+		StaticMesh->SetRenderCustomDepth(false);
+		StaticMesh->SetCustomDepthStencilValue(0);
+	}
+
 	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	if (PC)
 	{
@@ -83,14 +87,17 @@ bool AUsableActor::EndOutlineFocus_Implementation()
 
 bool AUsableActor::BeginOutlineFocus_Implementation()
 {
-	StaticMesh->SetRenderCustomDepth(true);
-	StaticMesh->SetCustomDepthStencilValue(2);
+	if (StaticMesh)
+	{
+		StaticMesh->SetRenderCustomDepth(true);
+		StaticMesh->SetCustomDepthStencilValue(2);
+	}
+
 	AVICTIMSPlayerController* PC = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	if (PC)
 	{
 		PC->HUD_Reference->HUDReference->MainLayout->Interact->SetVisibility(ESlateVisibility::Visible);
 	}
-
 
 	return true;
 }
