@@ -100,6 +100,20 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_UseHotbarWeapon(const uint8& HotbarSlot);
 
+ 	UFUNCTION(Server,Reliable)
+ 	void Server_CheckHotbarWeapon(const FSlotStructure& DroppingItem, AVICTIMSCharacter* ref);
+ 
+	UFUNCTION(Server, Reliable)
+	void Server_CheckPistolBullet(const TArray<FSlotStructure>& Items);
+
+	UFUNCTION(Client, Reliable)
+	void Client_CheckPistolBullet(const uint8& NewPistolBullet);
+
+	UFUNCTION(Server, Reliable)
+	void Server_CheckShotgunBullet(const TArray<FSlotStructure>& Items);
+
+	UFUNCTION(Client, Reliable)
+	void Client_CheckShotgunBullet(const uint8& NewShotGunBullet);
 
 	UFUNCTION(Server, Reliable)
 	void Server_UseContainerItem(const uint8& InventorySlot);
