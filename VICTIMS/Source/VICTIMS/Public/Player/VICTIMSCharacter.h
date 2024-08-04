@@ -365,9 +365,6 @@ public:
 
 	UCollisionComponent* collisionComponent;
 
-	
-
-
 	UFUNCTION(BlueprintImplementableEvent)
 	void AddDamage(ACharacterBase* DamagedChar);
 

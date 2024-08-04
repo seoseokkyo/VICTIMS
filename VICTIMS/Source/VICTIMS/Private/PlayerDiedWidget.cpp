@@ -34,3 +34,15 @@ void UPlayerDiedWidget::OnClickQuitGame()
 {
 	UKismetSystemLibrary::QuitGame(GetWorld(), GetOwningPlayer(), EQuitPreference::Quit, true);
 }
+
+void UPlayerDiedWidget::DelayedRespawnEnable()
+{
+	RespawnButton->SetIsEnabled(false);
+
+	FTimerHandle timerhnd;
+	GetWorld()->GetTimerManager().SetTimer(timerhnd, [&]() {
+
+		RespawnButton->SetIsEnabled(true);
+
+	}, 3.0f, false);
+}

@@ -56,6 +56,9 @@ void UTestIDWidget::OnClickedSignInButton()
 				{
 					PC->BGMComp->Stop();
 				}
+
+				PC->ChatManagerEnable(strID);
+
 			}
 			else
 			{
@@ -100,6 +103,8 @@ void UTestIDWidget::OnClickedContinueButton()
 					}
 				}
 
+				PC->ChatManagerEnable(strID);
+
 // 				if (IsIDValid)
 // 				{
 // 
@@ -135,4 +140,6 @@ void UTestIDWidget::OnClickedQuitButton()
 	{
 		UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
 	}
+
+	UKismetSystemLibrary::QuitGame(GetWorld(), GetOwningPlayer(), EQuitPreference::Quit, true);
 }
