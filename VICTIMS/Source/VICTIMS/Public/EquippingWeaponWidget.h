@@ -62,7 +62,7 @@ public:
 	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void ClientRPC_UpdateMaxBullet(int32 Bullets);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void ShowNotification();
 
 };
