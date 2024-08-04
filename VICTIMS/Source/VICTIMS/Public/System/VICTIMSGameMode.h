@@ -54,6 +54,12 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_HomeTownCheck(AVICTIMSPlayerController* PlayerCtrl);
+
+	UFUNCTION()
+	void SaveBuildComps(AVICTIMSPlayerController* PlayerCtrl);
+
+	UFUNCTION()
+	void RestoreBuildComps(AVICTIMSPlayerController* PlayerCtrl);
 };
 
 

@@ -183,13 +183,13 @@ private:
 
 public:
 
-
 	UPROPERTY()
 	FString PlayerID;						
 
 	//UPROPERTY()
 	//class UTestSaveGame* SavedData;
 
+	UPROPERTY(Replicated)
 	bool bNeedToLoad = false;
 
 	UFUNCTION()
@@ -215,6 +215,19 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void NetMulticastRPC_LoadData(bool bSuccess);		// 데이터 저장 
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_RestoreBuildComps();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SearchBuildComps();
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_SetBuildCompsData(const TArray<struct FBuildSaveDataStruct>& _buildCompsData);
+
+	UPROPERTY()
+	TArray<struct FBuildSaveDataStruct> buildCompsData;
+
 	UPROPERTY()
 	UTestIDWidget* TestIDWidget;
 

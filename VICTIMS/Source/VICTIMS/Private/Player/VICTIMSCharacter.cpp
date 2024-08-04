@@ -139,6 +139,7 @@ void AVICTIMSCharacter::BeginPlay()
 				SetOwner(MyPlayerController);
 			}
 		}
+
 	}
 
 	InteractionField->OnComponentBeginOverlap.AddDynamic(this, &AVICTIMSCharacter::OnBeginOverlap);
@@ -233,6 +234,8 @@ void AVICTIMSCharacter::BeginPlay()
 								PC->CharacterReference->AssignedHouse = gm->FindUnOwnedHouse();
 
 								gm->ServerRPC_HomeTownCheck(PC);
+
+								gm->RestoreBuildComps(PC);
 							}
 						}
 
@@ -252,7 +255,9 @@ void AVICTIMSCharacter::BeginPlay()
 
 						PC->HUD_Reference->HUDReference->MainLayout->CompassWidget->SetVisibility(ESlateVisibility::Visible);
 						PC->HUD_Reference->HUDReference->MainLayout->MiniMapWidget->SetVisibility(ESlateVisibility::Visible);
-
+					}
+					else
+					{
 						if (MyPlayerController->InventoryManagerComponent->Gold <= 20)
 						{
 							ServerRPC_AddGoldFunction(200);
@@ -261,12 +266,11 @@ void AVICTIMSCharacter::BeginPlay()
 
 					MyPlayerController->bNeedToLoad = false;
 
-
 				}
 			}
 			else
 			{
-				if (IsLocallyControlled())
+				if (false == IsLocallyControlled())
 				{
 					if (MyPlayerController->InventoryManagerComponent->Gold <= 20)
 					{
@@ -278,6 +282,7 @@ void AVICTIMSCharacter::BeginPlay()
 		//>>
 
 		stateComp->ServerRPC_EnableReady(true);
+
 
 		}, 0.5f, false);
 }
@@ -1117,6 +1122,14 @@ void AVICTIMSCharacter::LoadHousingData(FName playerName)
 void AVICTIMSCharacter::KillWidgetOn(ACharacterBase* DiedChar)
 {
 	ServerRPC_KillWidget_Implementation(DiedChar);
+}
+
+void AVICTIMSCharacter::SpawnByID(FTransform buildTransform, int32 ID)
+{
+	if (HousingComponent)
+	{
+		Server_SpawnBuild(HousingComponent, false, nullptr, buildTransform, HousingComponent->Buildables, ID);
+	}
 }
 
 void AVICTIMSCharacter::ServerRPC_KillWidget_Implementation(ACharacterBase* DiedChar)

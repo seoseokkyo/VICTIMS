@@ -21,6 +21,8 @@
 #include "InventoryComponent.h"
 #include "EquipmentComponent.h"
 
+#include "BuildSaveData.h"
+
 UHousingComponent::UHousingComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
@@ -467,7 +469,7 @@ void UHousingComponent::SpawnBuild(bool Moving, AActor* Movable, const FTransfor
 
 			AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Buildable.Actor, Transform, SpawnParams);
 			// Å×½ºÆ®
-			//SpawnedActor->Tags.Add(FName(*PlayerRef->MyPlayerController->playerName));
+			SpawnedActor->Tags.Add(TEXT("PlayerBuild"));
 
 			// UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("UHousingComponent :: SpawnBuild :: SpawnedActor : %p"), SpawnedActor));
 

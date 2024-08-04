@@ -38,6 +38,8 @@ struct FBuildablesStructs : public FTableRowBase
     }
 };
 
+
+
  UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class VICTIMS_API UHousingComponent : public UActorComponent
 {

@@ -16,7 +16,7 @@ class VICTIMS_API AShelter : public APackedLevelParent
 	
 public:
 
-	//AShelter();
+	AShelter();
 
 protected:
 	virtual void BeginPlay() override;
@@ -39,6 +39,27 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Shelter")
 	FVector OriginPos;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
+	UDataTable* DB_Housing;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
+	UDataTable* DB_Item;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
+	TArray<FName> RowNames;
+
+	UPROPERTY()
+	TArray<FName> ItemRowNames;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Build")
+	TArray<struct FBuildablesStructs> Buildables;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Shelter")
+	class USceneComponent* OriginPosComponent;
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite, Category = "Shelter")
+	class UBoxComponent* SearchRegion;
+
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_SetOriginPos(FVector houseLocation);
 
@@ -52,4 +73,12 @@ public:
 	void NetMulticastRPC_SetPlayerName(const FString& ID);
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(BlueprintCallable)
+	TArray<struct FBuildSaveDataStruct> SearchBuildItem();
+
+	UFUNCTION(BlueprintCallable)
+	void DestroyBuildItem();
+
+
 };

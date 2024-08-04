@@ -7,12 +7,14 @@
 #include "VICTIMSCharacter.h"
 #include "BaseWeapon.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
+#include <Kismet/GameplayStatics.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include "GameFramework/PlayerState.h"
 #include "Shelter.h"
 #include "TestSaveGame.h"
 #include "Net/UnrealNetwork.h"
 #include "VictimsGameInstance.h"
+#include "BuildSaveData.h"
 
 AVICTIMSGameMode::AVICTIMSGameMode()
 {
@@ -242,6 +244,8 @@ void AVICTIMSGameMode::ClearHouseOwnership(AVICTIMSPlayerController* PlayerCtrl)
 			{
 				UE_LOG(LogTemp, Warning, TEXT("Check : Shelter Owner Is %s"), *house->OwnerPlayerName);
 
+				house->DestroyBuildItem();
+
 				house->Ownerplayer = nullptr;
 				house->OwnerPlayerName = FString();
 				house->OwnerPlayerID = FString();
@@ -250,6 +254,79 @@ void AVICTIMSGameMode::ClearHouseOwnership(AVICTIMSPlayerController* PlayerCtrl)
 				UE_LOG(LogTemp, Warning, TEXT("Clear : Shelter Owner Is %s"), *house->OwnerPlayerName);
 
 				break;
+			}
+		}
+	}
+}
+
+void AVICTIMSGameMode::SaveBuildComps(AVICTIMSPlayerController* PlayerCtrl)
+{
+	if (HasAuthority() && nullptr != PlayerCtrl)
+	{
+		if (PlayerCtrl->CharacterReference)
+		{
+			if (PlayerCtrl->CharacterReference->AssignedHouse)
+			{
+				PlayerCtrl->CharacterReference->AssignedHouse->SetOwner(PlayerCtrl);
+
+
+				PlayerCtrl->ServerRPC_SearchBuildComps();
+
+				auto compDatas = PlayerCtrl->buildCompsData;
+				auto CheckDatas = PlayerCtrl->CharacterReference->AssignedHouse->SearchBuildItem();
+
+				if (CheckDatas.Num() > compDatas.Num())
+				{
+					compDatas = CheckDatas;
+				}
+
+				FString strBuildSaveFileName = PlayerCtrl->playerName + TEXT("_Build");
+
+				auto saveData = Cast<UBuildSaveData>(UGameplayStatics::CreateSaveGameObject(UBuildSaveData::StaticClass()));
+
+				for (auto data : compDatas)
+				{
+					saveData->buildDatas.Add(data);
+
+					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Name : %s"), *data.ID_Name.ToString()));
+				}
+
+				UGameplayStatics::SaveGameToSlot(saveData, strBuildSaveFileName, 0);
+			}
+		}
+	}
+}
+
+void AVICTIMSGameMode::RestoreBuildComps(AVICTIMSPlayerController* PlayerCtrl)
+{
+	if (HasAuthority() && nullptr != PlayerCtrl)
+	{
+		if (PlayerCtrl->CharacterReference)
+		{
+			if (PlayerCtrl->CharacterReference->AssignedHouse)
+			{
+				FString strBuildSaveFileName = PlayerCtrl->playerName + TEXT("_Build");
+
+				auto savedData = Cast<UBuildSaveData>(UGameplayStatics::LoadGameFromSlot(strBuildSaveFileName, 0));
+
+				if (savedData)
+				{
+					if (PlayerCtrl->CharacterReference->AssignedHouse->OriginPos != FVector::ZeroVector)
+					{
+						FVector originLoc = PlayerCtrl->CharacterReference->AssignedHouse->OriginPos;
+
+						for (auto data : savedData->buildDatas)
+						{
+							FTransform buildTransform = FTransform(data.rotation, data.location, FVector(1,1,1));
+
+
+							FVector calcedLoc = originLoc - buildTransform.GetLocation();
+							buildTransform.SetLocation(calcedLoc);
+
+							PlayerCtrl->CharacterReference->SpawnByID(buildTransform, data.ID_Num);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -277,6 +354,8 @@ void AVICTIMSGameMode::Logout(AController* Exiting)
 				UE_LOG(LogTemp, Warning, TEXT("Player %s has logged out"), *victimsPlayerController->GetActorNameOrLabel());
 
 				auto playerCheck = Cast<AVICTIMSCharacter>(victimsPlayerController->GetPawn());
+
+				//SaveBuildComps(victimsPlayerController);
 
 				ClearHouseOwnership(victimsPlayerController);
 				//if (playerCheck != nullptr)

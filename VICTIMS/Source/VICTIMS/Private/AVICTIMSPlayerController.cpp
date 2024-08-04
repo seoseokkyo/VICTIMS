@@ -41,6 +41,7 @@
 #include "Hotbar.h"
 #include "EquippingWeaponWidget.h"
 #include "UI/Hotbar_Slot.h"
+#include "BuildSaveData.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -747,6 +748,11 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		// 		}
 		// 		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
 		NetMulticastRPC_SaveData();
+
+		if (auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>())
+		{
+			gm->SaveBuildComps(this);
+		}
 	}
 	else
 	{
@@ -769,6 +775,33 @@ void AVICTIMSPlayerController::NetMulticastRPC_SaveData_Implementation()
 void AVICTIMSPlayerController::LoadData(FString ID)
 {
 	ServerRPC_LoadData(ID);
+
+	ServerRPC_RestoreBuildComps();
+}
+
+void AVICTIMSPlayerController::ClientRPC_SetBuildCompsData_Implementation(const TArray<FBuildSaveDataStruct>& _buildCompsData)
+{
+	buildCompsData = _buildCompsData;
+}
+
+void AVICTIMSPlayerController::ServerRPC_SearchBuildComps_Implementation()
+{
+	if (CharacterReference)
+	{
+		if (CharacterReference->AssignedHouse)
+		{
+			buildCompsData = CharacterReference->AssignedHouse->SearchBuildItem();
+			ClientRPC_SetBuildCompsData(buildCompsData);
+		}
+	}
+}
+
+void AVICTIMSPlayerController::ServerRPC_RestoreBuildComps_Implementation()
+{
+	if (auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>())
+	{
+		gm->RestoreBuildComps(this);
+	}
 }
 
 void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& ID)
@@ -921,7 +954,7 @@ void AVICTIMSPlayerController::ServerRPC_LoadHotbarData_Implementation(const FSt
 	// 
 	// 			if (TempHotbarSlot.ItemStructure.ID == TempInventorySlotItem.ItemStructure.ID)
 	// 			{
-		InventoryManagerComponent->Client_SetHotbarSlotItem(Index, HotbarItems);
+	InventoryManagerComponent->Client_SetHotbarSlotItem(Index, HotbarItems);
 	// 			}
 	// 		}
 	// 	 }
@@ -1016,9 +1049,9 @@ void AVICTIMSPlayerController::ServerRPC_SendHotbarData_Implementation(const FSt
 
 void AVICTIMSPlayerController::ClientRPC_LoadHotbar_Implementation(const FString& ID, const FSlotStructure& ComparedItem, const TArray<FString>& savedHotbarItemNames)
 {
-// 	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
-/* 	int itemCount = InventoryManagerComponent->PlayerInventory->Inventory.Num();*/
-// 	int startPoint = (int)EEquipmentSlot::Count;
+	// 	auto savedData = Cast<UTestSaveGame>(UGameplayStatics::LoadGameFromSlot(ID, 0));
+	/* 	int itemCount = InventoryManagerComponent->PlayerInventory->Inventory.Num();*/
+	// 	int startPoint = (int)EEquipmentSlot::Count;
 
 	for (uint8 i = 0; i < 5; i++)
 	{
@@ -1076,6 +1109,7 @@ void AVICTIMSPlayerController::GetLifetimeReplicatedProps(TArray<FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AVICTIMSPlayerController, bUseUIMode);
+	DOREPLIFETIME(AVICTIMSPlayerController, bNeedToLoad);
 }
 
 void AVICTIMSPlayerController::CloseLayouts()

@@ -383,5 +383,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	class USoundBase* KillSound;
+
+
+	UFUNCTION()
+	void SpawnByID(FTransform buildTransform, int32 ID);
 };
 
