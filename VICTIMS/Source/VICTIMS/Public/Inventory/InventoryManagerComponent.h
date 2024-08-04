@@ -107,13 +107,13 @@ public:
 	void Client_CheckHotbarWeapon(const FSlotStructure& Slots);
  
 	UFUNCTION(Server, Reliable)
-	void Server_CheckPistolBullet(const FSlotStructure& Slots);
+	void Server_CheckPistolBullet();
 
 	UFUNCTION(Client, Reliable)
 	void Client_CheckPistolBullet(const uint8& NewPistolBullet);
 
 	UFUNCTION(Server, Reliable)
-	void Server_CheckShotgunBullet(const TArray<FSlotStructure>& Items);
+	void Server_CheckShotgunBullet();
 
 	UFUNCTION(Client, Reliable)
 	void Client_CheckShotgunBullet(const uint8& NewShotGunBullet);
