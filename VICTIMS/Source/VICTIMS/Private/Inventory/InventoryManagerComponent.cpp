@@ -1856,18 +1856,23 @@ void UInventoryManagerComponent::ServerRPC_UseBulletItem_Implementation(FName Bu
 	{
 		uint8 AmountToRemove = count;
 		bool WasFullAmountRemoved = false;
+		bBulletSuccess = false;
 		uint8 AmountRemoved = 0;
 		RemoveFromItemAmount(InventoryItem, count, WasFullAmountRemoved, AmountRemoved);
 		if (WasFullAmountRemoved)
 		{
 			InventoryItem = GetEmptySlot(EEquipmentSlot::Undefined);
 			con->bHasBullet = true;
+			bBulletSuccess = true;
 			RemoveItem(PlayerInventory, Slot);
 		}
 		else
 		{
 			AddItem(PlayerInventory, Slot, InventoryItem);
 			con->bHasBullet = true;
+			bBulletSuccess = true;
+
+
 		}
 
 		ClientRPC_UseBulletItem(InventoryItem.Amount, count);
@@ -1875,6 +1880,7 @@ void UInventoryManagerComponent::ServerRPC_UseBulletItem_Implementation(FName Bu
 	else
 	{
 		con->bHasBullet = false;
+		bBulletSuccess = false;
 	}
 }
 
@@ -1904,6 +1910,7 @@ void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 	if (AVICTIMSPlayerController* con = Cast<AVICTIMSPlayerController>(GetOwner()))
 	{
 		con->bHasBullet = false;
+		bBulletSuccess = false;
 		// 플레이어 인벤토리 갖고있는 아이템 만큼 반복문 돌려서 총알아이템 있는지 확인
 		for (uint8 i = 0; i < con->InventoryManagerComponent->PlayerInventory->Inventory.Num(); i++)
 		{
@@ -1913,6 +1920,7 @@ void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 				ReloadCount = 8;
 // 				UE_LOG(LogTemp, Warning, TEXT("Found Pistol Bullet"));
 				con->bHasBullet = true;
+				bBulletSuccess = true;
 				ServerRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);	 // ID_PistolBullet 이면 8발
 				break;
 			}
@@ -1921,6 +1929,7 @@ void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 				LocalIndex = i;
 				ReloadCount = 2;
 				con->bHasBullet = true;
+				bBulletSuccess = true;
 				// 				UE_LOG(LogTemp, Warning, TEXT("Found ShotGun Bullet"));
 				ServerRPC_UseBulletItem(Bullet, ReloadCount, LocalIndex);    // ID_ShotGunBullet 이면 2발 
 				break;
@@ -1928,13 +1937,14 @@ void UInventoryManagerComponent::UseBulletItem(FName Bullet)
 			else
 			{
 				con->bHasBullet = false;
+				bBulletSuccess = false;
 			}
 		}
-
-		if (con->bHasBullet == false)
-		{
-			ClientRPC_BulletNotification();
-		}
+// 
+// 		if (con->bHasBullet == false)
+// 		{
+// 			ClientRPC_BulletNotification();
+// 		}
 	}
 	else
 	{
@@ -2799,13 +2809,14 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 {
 	FSlotStructure LocalInventorySlot = PlayerInventory->GetInventoryItem(InventorySlot);
+	FSlotStructure EquippingInventorySlot = PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon);
 	int32 TotalPriceValue = LocalInventorySlot.ItemStructure.PriceValue * LocalInventorySlot.Amount;
 	if (IsValid(CurrentShop))
 	{
 		bool bCanShopItems = IInventoryInterface::Execute_GetCanShopItems(CurrentShop);
 		if (bCanShopItems)
 		{
-			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Pistol")))
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Pistol")) && InventorySlot == (uint8)EEquipmentSlot::Weapon)
 			{
 				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
 				{
@@ -2818,7 +2829,7 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 					ClientRPC_HideWeaponIcon();
 				}
 			}
-			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Knife")))
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Knife")) && InventorySlot == (uint8)EEquipmentSlot::Weapon)
 			{
 				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 				{
@@ -2831,7 +2842,7 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 					ClientRPC_HideWeaponIcon();
 				}
 			}
-			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Axe")))
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Axe")) && InventorySlot == (uint8)EEquipmentSlot::Weapon)
 			{
 				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 				{
@@ -2844,7 +2855,7 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 					ClientRPC_HideWeaponIcon();
 				}
 			}
-			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_ShotGun")))
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_ShotGun")) && InventorySlot == (uint8)EEquipmentSlot::Weapon)
 			{
 				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 				{
@@ -2858,9 +2869,28 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 				}
 			}
 
+			if (LocalInventorySlot.ItemStructure.ID == FName("ID_PistolBullet") || LocalInventorySlot.ItemStructure.ID == FName("ID_ShotGunBullet"))
+			{
 
-			AddGold(TotalPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
-			RemoveItem(PlayerInventory, InventorySlot);
+				uint8 BulletPriceValue = 0;
+				if (LocalInventorySlot.ItemStructure.ID == FName("ID_PistolBullet"))
+				{
+					BulletPriceValue = 20;
+				}
+
+				else if (LocalInventorySlot.ItemStructure.ID == FName("ID_ShotGunBullet"))
+				{
+					BulletPriceValue = 25;
+				}
+
+				AddGold(BulletPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
+				RemoveItem(PlayerInventory, InventorySlot);
+			}
+			else
+			{
+				AddGold(TotalPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
+				RemoveItem(PlayerInventory, InventorySlot);
+			}
 		}
 	}
 	Server_UpdateTooltips();

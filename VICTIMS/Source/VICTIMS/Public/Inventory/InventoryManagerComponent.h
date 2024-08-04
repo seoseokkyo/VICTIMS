@@ -64,7 +64,10 @@ public:
 	UPROPERTY()
 	int32 CurrentBullet;
 
-	UFUNCTION(Client, Reliable)
+	UPROPERTY(BlueprintReadWrite)
+	bool bBulletSuccess;
+
+	UFUNCTION(Client, Reliable, BlueprintCallable)
 	void ClientRPC_BulletNotification();
 
 	// Called every frame
