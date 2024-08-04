@@ -1116,27 +1116,27 @@ void AVICTIMSPlayerController::CloseLayouts()
 {
 	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Inventory->GetVisibility())
 	{
-		HUDLayoutReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Collapsed);
+		HUDLayoutReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
 	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Shop->GetVisibility())
 	{
-		HUDLayoutReference->MainLayout->Shop->SetVisibility(ESlateVisibility::Collapsed);
+		HUDLayoutReference->MainLayout->Shop->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
 	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Profile->GetVisibility())
 	{
-		HUDLayoutReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Collapsed);
+		HUDLayoutReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
 	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->Container->GetVisibility())
 	{
-		HUDLayoutReference->MainLayout->Container->SetVisibility(ESlateVisibility::Collapsed);
+		HUDLayoutReference->MainLayout->Container->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
 	if (ESlateVisibility::Visible == HUDLayoutReference->MainLayout->DropMoneyLayout->GetVisibility())
 	{
-		HUDLayoutReference->MainLayout->DropMoneyLayout->SetVisibility(ESlateVisibility::Collapsed);
+		HUDLayoutReference->MainLayout->DropMoneyLayout->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
 	// 	return;
