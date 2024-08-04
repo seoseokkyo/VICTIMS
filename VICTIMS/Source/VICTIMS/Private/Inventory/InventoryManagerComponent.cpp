@@ -2799,13 +2799,14 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 {
 	FSlotStructure LocalInventorySlot = PlayerInventory->GetInventoryItem(InventorySlot);
+	FSlotStructure EquippingInventorySlot = PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon);
 	int32 TotalPriceValue = LocalInventorySlot.ItemStructure.PriceValue * LocalInventorySlot.Amount;
 	if (IsValid(CurrentShop))
 	{
 		bool bCanShopItems = IInventoryInterface::Execute_GetCanShopItems(CurrentShop);
 		if (bCanShopItems)
 		{
-			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Pistol")))
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Pistol")) && InventorySlot == (uint8)EEquipmentSlot::Weapon)
 			{
 				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
 				{
@@ -2818,7 +2819,7 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 					ClientRPC_HideWeaponIcon();
 				}
 			}
-			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Knife")))
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Knife")) && InventorySlot == (uint8)EEquipmentSlot::Weapon)
 			{
 				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 				{
@@ -2831,7 +2832,7 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 					ClientRPC_HideWeaponIcon();
 				}
 			}
-			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Axe")))
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Axe")) && InventorySlot == (uint8)EEquipmentSlot::Weapon)
 			{
 				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 				{
@@ -2844,7 +2845,7 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 					ClientRPC_HideWeaponIcon();
 				}
 			}
-			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_ShotGun")))
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_ShotGun")) && InventorySlot == (uint8)EEquipmentSlot::Weapon)
 			{
 				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 				{
@@ -2857,8 +2858,6 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 					ClientRPC_HideWeaponIcon();
 				}
 			}
-
-
 			AddGold(TotalPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
 			RemoveItem(PlayerInventory, InventorySlot);
 		}
