@@ -101,10 +101,13 @@ public:
 	void Client_UseHotbarWeapon(const uint8& HotbarSlot);
 
  	UFUNCTION(Server,Reliable)
- 	void Server_CheckHotbarWeapon(const FSlotStructure& DroppingItem, AVICTIMSCharacter* ref);
+ 	void Server_CheckHotbarWeapon(const FSlotStructure& DroppingItem);
+
+	UFUNCTION(Client, Reliable)
+	void Client_CheckHotbarWeapon(const FSlotStructure& Slots);
  
 	UFUNCTION(Server, Reliable)
-	void Server_CheckPistolBullet(const TArray<FSlotStructure>& Items);
+	void Server_CheckPistolBullet(const FSlotStructure& Slots);
 
 	UFUNCTION(Client, Reliable)
 	void Client_CheckPistolBullet(const uint8& NewPistolBullet);
