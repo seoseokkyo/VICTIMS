@@ -43,8 +43,30 @@ void ABlackBoard::Tick(float DeltaTime)
 
 }
 
+void ABlackBoard::SetBoardState(bool busy)
+{
+	bBoardIsBusy = busy;
+	ServerRPC_SetBoardState(bBoardIsBusy);
+}
+
+void ABlackBoard::ServerRPC_SetBoardState_Implementation(bool busy)
+{
+	bBoardIsBusy = busy;
+	ClientRPC_SetBoardState(bBoardIsBusy);
+}
+
+void ABlackBoard::ClientRPC_SetBoardState_Implementation(bool busy)
+{
+	bBoardIsBusy = busy;
+}
+
 bool ABlackBoard::OnActorUsed_Implementation(APlayerController* Controller)
 {
+	if (bBoardIsBusy)
+	{
+		return true;
+	}
+
 	useingPlayer = Cast<AVICTIMSPlayerController>(Controller);
 
 	if (nullptr != useingPlayer)
@@ -69,6 +91,8 @@ bool ABlackBoard::OnActorUsed_Implementation(APlayerController* Controller)
 		
 		if (ViewCamera)
 		{
+			SetBoardState(true);
+
 			useingPlayer->ServerRPC_SetUseUIState(true);
 
 			ServerRPC_TravelRequest(useingPlayer);

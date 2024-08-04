@@ -42,6 +42,7 @@
 #include "EquippingWeaponWidget.h"
 #include "UI/Hotbar_Slot.h"
 #include "BuildSaveData.h"
+#include "SeqPlayWidget.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {

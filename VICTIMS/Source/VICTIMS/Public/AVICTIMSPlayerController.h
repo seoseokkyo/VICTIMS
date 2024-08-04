@@ -15,6 +15,7 @@ class UEquipmentComponent;
 class UInventoryManagerComponent;
 class UInteractiveText_Entry;
 class UTestIDWidget;
+class USeqPlayWidget;
 
 
 DECLARE_DELEGATE_OneParam(FOnChangedPlayerList, TArray<FString>);
@@ -288,6 +289,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Test")
 	TSubclassOf<class UMovingInfoWidget> MovingInfoWidgetClass;
 
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
+	TSubclassOf<USeqPlayWidget> bp_SeqplayWidget;
+
 	UPROPERTY()
 	UMovingInfoWidget* MovingInfoWidget;
 //=========================================================================================================================
@@ -342,4 +346,5 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ChatManagerEnable(const FString& chatPlayerName);
+
 };

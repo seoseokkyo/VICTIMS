@@ -30,6 +30,18 @@ public:
 
 public:
 
+	UPROPERTY()
+	bool bBoardIsBusy = false;
+
+	UFUNCTION(BlueprintCallable)
+	void SetBoardState(bool busy);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetBoardState(bool busy);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_SetBoardState(bool busy);
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UCameraComponent* ViewCamera;	
 

@@ -24,6 +24,8 @@ void UPlayerDiedWidget::OnClickRespawn()
 
 		SetVisibility(ESlateVisibility::Hidden);
 
+		
+
 		auto gi = Cast<UVictimsGameInstance>(GetGameInstance());
 
 		gi->ServerRPC_RequestRespawn(playerCheck);

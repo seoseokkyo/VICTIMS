@@ -8,7 +8,7 @@ public class VICTIMS : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "NavigationSystem", "PhysicsCore", "UMG", "Slate", "SlateCore", "HTTP", "Json", "JsonUtilities", "Networking", "Sockets" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AIModule", "NavigationSystem", "PhysicsCore", "UMG", "Slate", "SlateCore", "HTTP", "Json", "JsonUtilities", "Networking", "Sockets", "MediaAssets" });
 
         PublicIncludePaths.AddRange(new string[] {
                 "VICTIMS/Public",
