@@ -285,7 +285,7 @@ void ACharacterBase::EnableRagdoll()
 {
 	if (GetCharacterMovement())
 	{
-		GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
+		//GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_None, 0);
 
 		if (GetCapsuleComponent())
 		{
