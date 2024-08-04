@@ -1177,6 +1177,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 
 		AddItem(ToInventory, ToInventorySlot, LocalInventoryItem);
 		RemoveItem(FromInventory, FromInventorySlot);
+
 	}
 	/*}*/
 
@@ -1532,58 +1533,21 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 			WActor->StaticMesh->SetSimulatePhysics(true);
 			WActor->Amount = LocalSlot.Amount;
 
-			if (LocalSlot.ItemStructure.ID == FName("ID_PistolBullet") ||
-				LocalSlot.ItemStructure.ID == FName("ID_ShotGunBullet"))
-			{
-				Client_DropBullet(LocalSlot);
-			}
-// 			uint8 bulletAmount =0;
-// 			FSlotStructure Slot = MainLayoutUI->Profile->EquipmentSlotsArray[(uint8)EEquipmentSlot::Weapon]->SlotStructure;
-// 			if (LocalSlot.ItemStructure.ID == FName("ID_PistolBullet") && Slot.ItemStructure.ID == FName("ID_Pistol"))
-// 			{
-// 				if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController()))
-// 				{
-// 					for (int i = 0; i < MainLayoutUI->Inventory->InventorySlotsArray.Num(); i++)
-// 					{	
-// 						if (PlayerInventory->GetInventoryItem(i).ItemStructure.ID == FName("ID_PistolBullet"))
-// 						{
-// 							bulletAmount += PlayerInventory->GetInventoryItem(i).Amount;
-// 						}
-// 					}
-// 					bulletAmount -= WActor->Amount;
-// 					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(bulletAmount);
-// 				}
-// 			}
-// 			if (LocalSlot.ItemStructure.ID == FName("ID_ShotGunBullet") && Slot.ItemStructure.ID == FName("ID_ShotGun"))
-// 			{
-// 				if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController()))
-// 				{
-// 					for (int i = 0; i < MainLayoutUI->Inventory->InventorySlotsArray.Num(); i++)
-// 					{
-// 						if (PlayerInventory->GetInventoryItem(i).ItemStructure.ID == FName("ID_ShotGunBullet"))
-// 						{
-// 							bulletAmount += PlayerInventory->GetInventoryItem(i).Amount;
-// 						}
-// 					}
-// 					bulletAmount -= WActor->Amount;
-// 					pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(bulletAmount);
-// 				}
-// 			}
 
 			FTimerHandle Timer;
 			GetWorld()->GetTimerManager().ClearTimer(Timer);
-			GetWorld()->GetTimerManager().SetTimer(Timer, [&, WActor]() {
+			GetWorld()->GetTimerManager().SetTimer(Timer, [&, WActor]() 
+			{
 				WActor->Destroy();
-				}, 10.f, false);
+			}, 10.f, false);
 
 			if (DropSound)
 			{
 				UGameplayStatics::PlaySoundAtLocation(GetWorld(), DropSound, WActor->GetActorLocation());
 			}
 		}
+		
 
-		RemoveItem(Inventory, InventorySlot);
-		Client_CheckHotbarSlots(LocalSlot);
 
 		if (LocalSlot.ItemStructure.ID == (FName("ID_Pistol")) && bEquipPistol == true)
 		{
@@ -1594,10 +1558,9 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
 				bEquipPistol = false;
 				OnRep_EquipPistol(false);
-
 				ClientRPC_HideWeaponIcon();
+				Client_CheckHotbarWeapon(LocalSlot);
 			}
-			// 				playerReference->UsePistol();
 		}
 		//=======================================================================================================NO USE
 		if (LocalSlot.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
@@ -1610,6 +1573,7 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				bEquipRifle = false;
 
 				ClientRPC_HideWeaponIcon();
+				Client_CheckHotbarWeapon(LocalSlot);
 
 			}
 			// 				playerReference->UseRifle();
@@ -1626,6 +1590,8 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				OnRep_EquipKnife(false);
 
 				ClientRPC_HideWeaponIcon();
+				Client_CheckHotbarWeapon(LocalSlot);
+
 			}
 			// 				playerReference->UseKnife();
 		}
@@ -1640,6 +1606,8 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 				OnRep_EquipAxe(false);
 
 				ClientRPC_HideWeaponIcon();
+				Client_CheckHotbarWeapon(LocalSlot);
+
 			}
 			// 				playerReference->UseAxe();
 		}
@@ -1655,21 +1623,27 @@ void UInventoryManagerComponent::DropItem(UInventoryComponent* Inventory, uint8 
 
 
 				ClientRPC_HideWeaponIcon();
+				Client_CheckHotbarWeapon(LocalSlot);
+
 			}
 			// 				playerReference->UsePistol();
+			
+
+
+			if (InventorySlot < (uint8)EEquipmentSlot::Count)
+			{
+				UpdateEquippedStats();
+			}
+	
+			RemoveItem(Inventory, InventorySlot);
+			Client_CheckHotbarSlots(LocalSlot);
 		}
-
-
-		if (InventorySlot < (uint8)EEquipmentSlot::Count)
+	
+		else
 		{
-			UpdateEquippedStats();
+			RemoveItem(Inventory, InventorySlot);
+			Client_CheckHotbarSlots(LocalSlot);
 		}
-	}
-
-	else
-	{
-		RemoveItem(Inventory, InventorySlot);
-		Client_CheckHotbarSlots(LocalSlot);
 	}
 }
 
@@ -1679,32 +1653,23 @@ void UInventoryManagerComponent::Client_DropBullet_Implementation(const FSlotStr
 	FSlotStructure Slot = MainLayoutUI->Profile->EquipmentSlotsArray[(uint8)EEquipmentSlot::Weapon]->SlotStructure;
 	if (DroppedItem.ItemStructure.ID == FName("ID_PistolBullet") && Slot.ItemStructure.ID == FName("ID_Pistol"))
 	{
-		if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController()))
-		{
-			for (int i = 0; i < MainLayoutUI->Inventory->InventorySlotsArray.Num(); i++)
-			{
-				if (PlayerInventory->GetInventoryItem(i).ItemStructure.ID == FName("ID_PistolBullet"))
-				{
-					bulletAmount += PlayerInventory->GetInventoryItem(i).Amount;
-				}
-			}
-			bulletAmount -= DroppedItem.Amount;
-			pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(bulletAmount);
-		}
+// 		TArray<FSlotStructure> InventoryItems; 
+// 		for (int i = 0; i < MainLayoutUI->Inventory->InventorySlotsArray.Num(); i++)
+// 		{
+// 			InventoryItems.Add(PlayerInventory->GetInventoryItem(i));
+// 		}
+
+		Server_CheckPistolBullet();
 	}
 	if (DroppedItem.ItemStructure.ID == FName("ID_ShotGunBullet") && Slot.ItemStructure.ID == FName("ID_ShotGun"))
 	{
-		if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController()))
-		{
-			for (int i = 0; i < MainLayoutUI->Inventory->InventorySlotsArray.Num(); i++)
-			{
-				if (PlayerInventory->GetInventoryItem(i).ItemStructure.ID == FName("ID_ShotGunBullet"))
-				{
-					bulletAmount += PlayerInventory->GetInventoryItem(i).Amount;
-				}
-			}
-			pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(bulletAmount);
-		}
+// 		TArray<FSlotStructure> InventoryItems;
+// 		for (int i = 0; i < MainLayoutUI->Inventory->InventorySlotsArray.Num(); i++)
+// 		{
+// 			InventoryItems.Add(PlayerInventory->GetInventoryItem(i));
+// 		}
+
+		Server_CheckShotgunBullet();
 	}
 }
 
@@ -1782,7 +1747,6 @@ void UInventoryManagerComponent::MoveItem(UInventoryComponent* FromInventory, ui
 void UInventoryManagerComponent::RemoveItem(UInventoryComponent* Inventory, uint8 InventorySlot)
 {
 	Inventory->ClearInventoryItem(InventorySlot);
-
 	if (PlayerInventory == Inventory)
 	{
 		Client_ClearInventorySlotItem(InventorySlot);
@@ -2254,14 +2218,15 @@ void UInventoryManagerComponent::SetInventorySlotItem(const FSlotStructure& Cont
 		}
 
 		SlotLayout->UpdateSlot(ContentToAdd);
-		FSlotStructure Slot = MainLayoutUI->Profile->EquipmentSlotsArray[(uint8)EEquipmentSlot::Weapon]->SlotStructure;
-		if (Slot.ItemStructure.ID == FName("ID_Pistol") ||
-			Slot.ItemStructure.ID == FName("ID_ShotGun"))
+
+		if (ContentToAdd.ItemStructure.ID == FName("ID_PistolBullet"))
 		{
-			if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController()))
-			{
-				pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(ContentToAdd.Amount);
-			}
+			Server_CheckPistolBullet();
+		}
+	
+		else if (ContentToAdd.ItemStructure.ID == FName("ID_ShotGunBullet"))
+		{
+			Server_CheckShotgunBullet();
 		}
 	}
 }
@@ -2303,6 +2268,9 @@ void UInventoryManagerComponent::ClearInventorySlotItem(uint8 InventorySlot)
 		SlotLayout->UpdateSlot(LocalSlot);
 
 		MainLayoutUI->Inventory->UpdateGoldAmount();
+
+		Server_CheckPistolBullet();
+		Server_CheckShotgunBullet();
 	}
 }
 
@@ -2809,7 +2777,8 @@ void UInventoryManagerComponent::PerchaseShopItem(const uint8& InventorySlot)
 	{
 		LocalInventoryItem.Amount = 24;
 	}
-	else if (LocalInventoryItem.ItemStructure.ID == FName("ID_ShotGunBullet"))
+	
+	if (LocalInventoryItem.ItemStructure.ID == FName("ID_ShotGunBullet"))
 	{
 		LocalInventoryItem.Amount = 10;
 	}
@@ -2836,11 +2805,76 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 		bool bCanShopItems = IInventoryInterface::Execute_GetCanShopItems(CurrentShop);
 		if (bCanShopItems)
 		{
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Pistol")))
+			{
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectPistol")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipPistol = false;
+					OnRep_EquipPistol(false);
+
+					ClientRPC_HideWeaponIcon();
+				}
+			}
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Knife")))
+			{
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipKnife = false;
+					OnRep_EquipKnife(false);
+
+					ClientRPC_HideWeaponIcon();
+				}
+			}
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_Axe")))
+			{
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipAxe = false;
+					OnRep_EquipAxe(false);
+
+					ClientRPC_HideWeaponIcon();
+				}
+			}
+			if (LocalInventorySlot.ItemStructure.ID == (FName("ID_ShotGun")))
+			{
+				if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
+				{
+					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
+					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
+					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+					bEquipShotGun = false;
+					OnRep_EquipShotGun(false);
+
+					ClientRPC_HideWeaponIcon();
+				}
+			}
+
+
 			AddGold(TotalPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
 			RemoveItem(PlayerInventory, InventorySlot);
 		}
 	}
 	Server_UpdateTooltips();
+
+	if (LocalInventorySlot.ItemStructure.ID != FName("ID_Rifle") && LocalInventorySlot.ItemStructure.ID != FName("ID_Pistol")
+		&& LocalInventorySlot.ItemStructure.ID != FName("ID_ShotGun") && LocalInventorySlot.ItemStructure.ID != FName("ID_Knife")
+		&& LocalInventorySlot.ItemStructure.ID != FName("ID_Axe"))
+	{
+		Client_CheckHotbarSlots(LocalInventorySlot);
+	}
+	else
+	{
+		Client_CheckHotbarWeapon(LocalInventorySlot);
+	}
 }
 
 void UInventoryManagerComponent::ClearShopSlots()
@@ -3307,13 +3341,8 @@ void UInventoryManagerComponent::Client_ClearHotbarWeapon_Implementation(const F
 			{
 				if (HotbarSlot.ItemStructure.ID == GetHotbarSlotItem(i).ItemStructure.ID)
 				{
-					// 					if (GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Rifle") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Pistol")
-					// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_ShotGun") && GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Knife")
-					// 						&& GetHotbarSlotItem(i).ItemStructure.ID != FName("ID_Axe"))
-					// 					{
 					ClearHotbarSlotItem(i);
 					break;
-					/*}*/
 				}
 			}
 		}
@@ -3323,4 +3352,106 @@ void UInventoryManagerComponent::Client_ClearHotbarWeapon_Implementation(const F
 void UInventoryManagerComponent::Client_UseHotbarItem_Implementation(const uint8& HotbarSlot, const FSlotStructure& Slot, const FSlotStructure& Slot2, const bool bEquipping)
 {
 	UseHotbarSlot(HotbarSlot, Slot, Slot2, bEquipping);
+}
+
+void UInventoryManagerComponent::Server_CheckPistolBullet_Implementation()
+{	
+	if(PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon).ItemStructure.ID == FName("ID_Pistol"))
+	{
+		uint8 PistolBulletCount = 0;
+		TArray<FSlotStructure> InventoryItems;
+
+		for (uint8 i = 0; i < 16; i++)
+		{
+			InventoryItems.Add(PlayerInventory->GetInventoryItem(i));	// 클라이언트 여기 값 안담기는 중 
+		}
+
+		for (uint8 i = 0; i < InventoryItems.Num(); i++)
+		{
+			if (InventoryItems[i].ItemStructure.ID == FName("ID_PistolBullet"))
+			{
+				PistolBulletCount += InventoryItems[i].Amount;
+			}
+		}
+		Client_CheckPistolBullet(PistolBulletCount);
+	}
+}
+
+void UInventoryManagerComponent::Server_CheckShotgunBullet_Implementation()
+{
+	if (PlayerInventory->GetInventoryItem((uint8)EEquipmentSlot::Weapon).ItemStructure.ID == FName("ID_ShotGun"))
+	{
+
+		uint8 ShotGunBulletCount = 0;
+		TArray<FSlotStructure> InventoryItems;
+		for (uint8 i = 0; i < 16; i++)
+		{
+			InventoryItems.Add(PlayerInventory->GetInventoryItem(i));	// 클라이언트 여기 값 안담기는 중 
+		}
+
+		for (uint8 i = 0; i < InventoryItems.Num(); i++)
+		{
+			if (InventoryItems[i].ItemStructure.ID == FName("ID_ShotGunBullet"))
+			{
+				ShotGunBulletCount += InventoryItems[i].Amount;
+			}
+		}
+
+		Client_CheckShotgunBullet(ShotGunBulletCount);
+	}
+}
+
+void UInventoryManagerComponent::Client_CheckPistolBullet_Implementation(const uint8& NewPistolBullet)
+{
+	if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController()))
+	{
+		pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(NewPistolBullet);
+	}
+}
+
+void UInventoryManagerComponent::Client_CheckShotgunBullet_Implementation(const uint8& NewShotGunBullet)
+{
+	if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetPlayerRef()->GetController()))
+	{
+		pc->HUDLayoutReference->MainLayout->EquipWeaponWidget->UpdateMaxBullet(NewShotGunBullet);
+	}
+}
+
+void UInventoryManagerComponent::Server_CheckHotbarWeapon_Implementation(const FSlotStructure& DroppingItem)
+{
+	for (int i = 0; i < 5; i++)
+	{
+		if (GetHotbarSlotItem(i).ItemStructure.ID == DroppingItem.ItemStructure.ID)
+		{
+			Client_ClearHotbarSlot(i);
+		}
+	}
+}
+
+void UInventoryManagerComponent::Client_CheckHotbarWeapon_Implementation(const FSlotStructure& Slots)
+{
+	bool Success = false;
+	TArray<USlotLayout*> LocalInventoryUI2 = MainLayoutUI->Inventory->InventorySlotsArray;
+	for (uint8 i = 0; i < LocalInventoryUI2.Num(); i++)
+	{
+		if (Slots.ItemStructure.ID == LocalInventoryUI2[i]->SlotStructure.ItemStructure.ID)
+		{
+			Success = true;
+			break;
+		}
+	}
+	if (!Success)
+	{
+		TArray<UHotbar_Slot*> Hotbar = MainLayoutUI->Hotbar->HotbarSlotsArray;
+
+		for (uint8 i = 0; i < Hotbar.Num(); i++) {
+			{
+				if (Slots.ItemStructure.ID == GetHotbarSlotItem(i).ItemStructure.ID)
+				{
+					ClearHotbarSlotItem(i);
+					break;
+				}
+			}
+		}
+	}
 }
