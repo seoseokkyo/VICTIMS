@@ -2858,8 +2858,29 @@ void UInventoryManagerComponent::SellItem(const uint8& InventorySlot)
 					ClientRPC_HideWeaponIcon();
 				}
 			}
-			AddGold(TotalPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
-			RemoveItem(PlayerInventory, InventorySlot);
+
+			if (LocalInventorySlot.ItemStructure.ID == FName("ID_PistolBullet") || LocalInventorySlot.ItemStructure.ID == FName("ID_ShotGunBullet"))
+			{
+
+				uint8 BulletPriceValue = 0;
+				if (LocalInventorySlot.ItemStructure.ID == FName("ID_PistolBullet"))
+				{
+					BulletPriceValue = 20;
+				}
+
+				else if (LocalInventorySlot.ItemStructure.ID == FName("ID_ShotGunBullet"))
+				{
+					BulletPriceValue = 25;
+				}
+
+				AddGold(BulletPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
+				RemoveItem(PlayerInventory, InventorySlot);
+			}
+			else
+			{
+				AddGold(TotalPriceValue);	// 아이템 개수 * 개당 판매가 만큼 플레이어 골드 추가
+				RemoveItem(PlayerInventory, InventorySlot);
+			}
 		}
 	}
 	Server_UpdateTooltips();
