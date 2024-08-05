@@ -15,11 +15,17 @@ void UTabMenuWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	QuitGameButton->OnClicked.AddDynamic(this, &UTabMenuWidget::OnClickQuitGameButton);
+	QuitGameButton->IsFocusable = false;
 	SaveButton->OnClicked.AddDynamic(this, &UTabMenuWidget::OnClickSaveButton);
+	SaveButton->IsFocusable = false;
 	CloseMenuButton->OnClicked.AddDynamic(this, &UTabMenuWidget::OnClickCloseMenuButton);
+	CloseMenuButton->IsFocusable  = false;
 	SettingButton->OnClicked.AddDynamic(this, &UTabMenuWidget::OnClickSettingButton);
+	SettingButton->IsFocusable = false;
 	ConfirmButton->OnClicked.AddDynamic(this, &UTabMenuWidget::OnClickConfirmButton);
+	ConfirmButton->IsFocusable = false;
 	CancleButton->OnClicked.AddDynamic(this, &UTabMenuWidget::OnClickCancleButton);
+	CancleButton->IsFocusable = false;
 	EditMouseSensivility->OnValueChanged.AddDynamic(this, &UTabMenuWidget::OnMouseSensivilityChanged);
 	EditMouseSensivility->SetValue(FCString::Atof(*MouseSensivility->GetText().ToString()));
 
