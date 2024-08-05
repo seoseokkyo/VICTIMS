@@ -44,6 +44,7 @@
 #include "BuildSaveData.h"
 #include "TabMenuWidget.h"
 #include "Components/Border.h"
+#include "Components/Slider.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -369,12 +370,14 @@ void AVICTIMSPlayerController::ToggleMenu()
 		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
 		DisableUIMode();
 		bShowMouseCursor = false;
+		bIsShowUI = false;
 	}
 	else
 	{
 		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Visible);
 		EnableUIMode();
 		bShowMouseCursor = true;
+		bIsShowUI = true;
 	}
 }
 
@@ -739,12 +742,7 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		saveData->SavedItemIDs.Reset();
 		saveData->SavedItemAmounts.Reset();
 		saveData->SavedHotbarItemIDs.Reset();
-
-		//감도저장
-		if (CharacterReference)
-		{
-			saveData->SavedMouseSensivility = CharacterReference->MouseSensivility;
-		}
+		
 
 		int startPoint = (int)EEquipmentSlot::Count;
 
@@ -858,9 +856,6 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			{
 				PlayerState->SetPlayerName(/*SaveGame->PlayerDataStructure.PlayerID*/ID);
 			}
-
-			// 감도 로드
-			CharacterReference->MouseSensivility = savedData->SavedMouseSensivility;
 
 			// 인벤토리 아이템 로드 
 			int itemCount = savedData->SavedItemIDs.Num() - 1;
@@ -1167,6 +1162,7 @@ void AVICTIMSPlayerController::CloseLayouts()
 	if (ESlateVisibility::Visible == TabMenu->MainBorder->GetVisibility())
 	{
 		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
+		bIsShowUI = false;
 	}
 		// 	return;
 }
