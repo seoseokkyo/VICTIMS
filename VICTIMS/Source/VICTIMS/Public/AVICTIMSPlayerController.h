@@ -81,6 +81,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UHUDLayout* HUDLayoutReference;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	class UMediaSoundComponent* MediaSoundComponent;
+
 	UFUNCTION()
 	void SetupHUDReferences();
 	

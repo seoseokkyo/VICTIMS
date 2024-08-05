@@ -43,6 +43,7 @@
 #include "UI/Hotbar_Slot.h"
 #include "BuildSaveData.h"
 #include "SeqPlayWidget.h"
+#include "MediaSoundComponent.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -50,6 +51,8 @@ AVICTIMSPlayerController::AVICTIMSPlayerController()
 	InventoryManagerComponent->SetIsReplicated(true);
 
 	PlayerInventoryComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
+
+	MediaSoundComponent = CreateDefaultSubobject<UMediaSoundComponent>(TEXT("MediaSoundComponent"));
 
 	//che
 	//partycomponent = CreateDefaultSubobject<UPartyComponent>(TEXT("PartyComponent"));

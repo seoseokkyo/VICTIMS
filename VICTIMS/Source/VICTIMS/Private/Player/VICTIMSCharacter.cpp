@@ -538,7 +538,7 @@ void AVICTIMSCharacter::DieFunction()
 
 			stateComp->ServerRPC_EnableReady(false);
 
-			PC->SaveData();
+			//PC->SaveData();
 
 
 			PC->bShowMouseCursor = true;

@@ -91,7 +91,7 @@ TArray<FBuildSaveDataStruct> AShelter::SearchBuildItem()
 	TArray<FOverlapResult> OverlapResults;
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
-	QueryParams.bDebugQuery = true;
+	//QueryParams.bDebugQuery = true;
 
 	bool bOverlap = GetWorld()->OverlapMultiByChannel(
 		OverlapResults,
@@ -146,7 +146,7 @@ void AShelter::DestroyBuildItem()
 	TArray<FOverlapResult> OverlapResults;
 	FCollisionQueryParams QueryParams;
 	QueryParams.AddIgnoredActor(this);
-	QueryParams.bDebugQuery = true;
+	//QueryParams.bDebugQuery = true;
 
 	bool bOverlap = GetWorld()->OverlapMultiByChannel(
 		OverlapResults,

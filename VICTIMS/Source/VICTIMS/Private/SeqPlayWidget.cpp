@@ -12,6 +12,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MediaPlaylist.h"
 #include "MediaSource.h"
+#include "AVICTIMSPlayerController.h"
 
 void USeqPlayWidget::NativeConstruct()
 {
@@ -48,13 +49,22 @@ void USeqPlayWidget::NativeConstruct()
 	//		}
 	//	}
 	//
-	//	MediaSoundComponent = NewObject<UMediaSoundComponent>(this);
-	//	if (MediaSoundComponent)
-	//	{
-	//		MediaSoundComponent->SetMediaPlayer(MediaPlayer);
-	//		MediaSoundComponent->RegisterComponent();
-	//
-	//	}
+
+	if (MediaSoundComponent == nullptr)
+	{
+		//MediaSoundComponent = NewObject<UMediaSoundComponent>(this);
+		if (auto pc = Cast<AVICTIMSPlayerController>(GetOwningPlayer()))
+		{
+			MediaSoundComponent = pc->MediaSoundComponent;
+		}
+	}
+
+	if (MediaSoundComponent)
+	{
+		MediaSoundComponent->SetMediaPlayer(MediaPlayer);
+		MediaSoundComponent->RegisterComponent();
+	}
+
 	//
 	//	MediaPlayer->OnEndReached.AddDynamic(this, &USeqPlayWidget::OnMediaEndReached);
 	//}
