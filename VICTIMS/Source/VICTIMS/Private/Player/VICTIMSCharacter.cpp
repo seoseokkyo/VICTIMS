@@ -523,15 +523,17 @@ void AVICTIMSCharacter::DieFunction()
 	{
 		DiedWidget = CreateWidget<UPlayerDiedWidget>(GetWorld(), DiedWidget_bp);
 		DiedWidget->AddToViewport(0);
+		DiedWidget->DelayedRespawnEnable();
+
 		FollowCamera->PostProcessSettings.ColorSaturation = FVector4(0, 0, 0, 1);
 		if (DiedWidget->DeadSound)
 		{
 			UGameplayStatics::PlaySound2D(GetWorld(), DiedWidget->DeadSound);
 		}
 
-		auto pc = Cast<APlayerController>(Controller);
+		//auto pc = Cast<APlayerController>(Controller);
 
-		if (pc)
+		if (PC)
 		{
 			stateComp->ServerRPC_SetStatePoint(HP, stateComp->runningStat.MaxHP);  // HP max 로 채워주고 바로 자동 저장
 
@@ -539,8 +541,12 @@ void AVICTIMSCharacter::DieFunction()
 
 			PC->SaveData();
 
-			pc->bShowMouseCursor = true;
-			DisableInput(pc);
+
+			PC->bShowMouseCursor = true;
+			PC->bIsShowUI = true;
+			PC->EnableUIMode();
+			PC->SetInputMode(FInputModeUIOnly());
+			DisableInput(PC);
 		}
 	}
 

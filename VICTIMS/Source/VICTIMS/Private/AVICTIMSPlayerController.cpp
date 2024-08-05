@@ -110,6 +110,8 @@ void AVICTIMSPlayerController::BeginPlay()
 			else
 			{
 				bNeedToLoad = true;
+
+				ChatManagerEnable(playerName);
 			}
 		}
 

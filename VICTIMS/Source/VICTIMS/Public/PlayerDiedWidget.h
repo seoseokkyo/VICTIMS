@@ -23,6 +23,9 @@ public:
 	UPROPERTY(EditAnywhere)
 	class USoundBase* DeadSound;
 
+	UFUNCTION()
+	void DelayedRespawnEnable();
+
 protected:
 	virtual void NativeConstruct() override;
 
@@ -31,4 +34,5 @@ protected:
 
 	UFUNCTION()
 	void OnClickQuitGame();
+
 };

@@ -345,4 +345,7 @@ public:
 
 	UFUNCTION()
 	void HideWidgets();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void ChatManagerEnable(const FString& chatPlayerName);
 };
