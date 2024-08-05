@@ -367,7 +367,7 @@ void AVICTIMSPlayerController::ToggleMenu()
 {
 	if (ESlateVisibility::Visible == TabMenu->MainBorder->GetVisibility())
 	{
-		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
+		TabMenu->OnClickCloseMenuButton();
 		DisableUIMode();
 		bShowMouseCursor = false;
 		bIsShowUI = false;
