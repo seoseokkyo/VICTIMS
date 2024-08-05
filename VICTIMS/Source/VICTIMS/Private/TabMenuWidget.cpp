@@ -8,6 +8,7 @@
 #include "AVICTIMSPlayerController.h"
 #include "VICTIMSCharacter.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 
 void UTabMenuWidget::NativeConstruct()
@@ -41,6 +42,10 @@ void UTabMenuWidget::OnMouseSensivilityChanged(float Value)
 void UTabMenuWidget::OnClickQuitGameButton()
 {
 	NotificationBorder->SetVisibility(ESlateVisibility::Visible);
+	if (NotificationSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), NotificationSound);
+	}
 }
 
 void UTabMenuWidget::OnClickSaveButton()
@@ -48,6 +53,11 @@ void UTabMenuWidget::OnClickSaveButton()
 	AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	if(pc)
 	{
+		NotificationBorder->SetVisibility(ESlateVisibility::Visible);
+		if (ClickSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+		}
 		pc->SaveData();
 	}
 }
@@ -58,6 +68,10 @@ void UTabMenuWidget::OnClickCloseMenuButton()
 	AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	if (pc)
 	{
+		if (ClickSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+		}
 		pc->bShowMouseCursor = false;
 		pc->SetInputMode(FInputModeGameOnly());
 	}
@@ -68,6 +82,10 @@ void UTabMenuWidget::OnClickSettingButton()
 	AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	if (pc)
 	{
+		if (ClickSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+		}
 		float value = EditMouseSensivility->GetValue();
 		pc->CharacterReference->SetMouseSensivility(value);
 
@@ -77,10 +95,18 @@ void UTabMenuWidget::OnClickSettingButton()
 
 void UTabMenuWidget::OnClickConfirmButton()
 {
+	if (ClickSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+	}
 	UKismetSystemLibrary::QuitGame(GetWorld(), GetOwningPlayer(), EQuitPreference::Quit, true);
 }
 
 void UTabMenuWidget::OnClickCancleButton()
 {
+	if (ClickSound)
+	{
+		UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);
+	}
 	NotificationBorder->SetVisibility(ESlateVisibility::Hidden);
 }

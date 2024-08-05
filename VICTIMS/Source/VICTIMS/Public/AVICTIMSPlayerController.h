@@ -304,6 +304,9 @@ public:
     UPROPERTY(EditAnywhere, Category = "Interact Sound")
 	class USoundBase* PickUpSound;
 
+    UPROPERTY(EditAnywhere, Category = "Interact Sound")
+	class USoundBase* ToggleSound;
+
 	UPROPERTY()
 	TArray<AVICTIMSPlayerController*> otherPlayers;
 

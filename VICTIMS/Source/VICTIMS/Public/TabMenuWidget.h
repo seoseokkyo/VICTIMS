@@ -45,6 +45,12 @@ public:
 	UPROPERTY(EditAnywhere, meta=(BindWidget))
 	class UBorder* MainBorder;
 
+	UPROPERTY(EditAnywhere, Category = "Interact Sound")
+	class USoundBase* ClickSound;
+
+    UPROPERTY(EditAnywhere, Category = "Interact Sound")
+	class USoundBase* NotificationSound;
+
 	UFUNCTION()
 	void OnMouseSensivilityChanged(float Value);
 

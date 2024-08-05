@@ -367,6 +367,10 @@ void AVICTIMSPlayerController::ToggleMenu()
 {
 	if (ESlateVisibility::Visible == TabMenu->MainBorder->GetVisibility())
 	{
+		if (ToggleSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ToggleSound);
+		}
 		TabMenu->OnClickCloseMenuButton();
 		DisableUIMode();
 		bShowMouseCursor = false;
@@ -374,6 +378,10 @@ void AVICTIMSPlayerController::ToggleMenu()
 	}
 	else
 	{
+		if (ToggleSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ToggleSound);
+		}
 		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Visible);
 		EnableUIMode();
 		bShowMouseCursor = true;
