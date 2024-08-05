@@ -43,6 +43,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
     class UMediaSoundComponent* MediaSoundComponent;
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
+    class UMediaPlayList* MediaplayList;
+
     //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
     //class UMediaPlaylist* MediaPlaylist;
 
