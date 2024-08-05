@@ -186,8 +186,6 @@ public:
 //=====================================================================================================
 //  FUNCTION
 
-
-
 	UFUNCTION(meta=(OverrideNativeName="OnRep_MainChestMesh"))
 	void OnRep_MainChestMesh();
 	

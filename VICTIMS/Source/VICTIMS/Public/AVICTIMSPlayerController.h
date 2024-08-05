@@ -351,4 +351,13 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void ChatManagerEnable(const FString& chatPlayerName);
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_EnableHousingTipText(bool bEnable, bool bItem, bool bHousing, bool bHousingDel);
+
+	UPROPERTY(EditAnywhere)
+	class UHousingTutorialWidget* TutorialWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UHousingTutorialWidget> TutorialWidget_wbp;
 };

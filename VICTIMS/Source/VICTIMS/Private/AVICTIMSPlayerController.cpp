@@ -45,6 +45,8 @@
 #include "TabMenuWidget.h"
 #include "Components/Border.h"
 #include "Components/Slider.h"
+#include "HousingTutorialWidget.h"
+#include "UI/InteractText.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -134,6 +136,13 @@ void AVICTIMSPlayerController::BeginPlay()
 				TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
+
+		if (TutorialWidget_wbp)
+		{
+			TutorialWidget = Cast<UHousingTutorialWidget>(CreateWidget(GetWorld(), TutorialWidget_wbp));
+			TutorialWidget->AddToViewport();
+			TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
+		}
 	}
 
 	if (auto gi = Cast<UVictimsGameInstance>(GetGameInstance()))
@@ -221,23 +230,6 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			bInventoryInitialized = true;
 		}
 	}
-
-	// UI/Game 모드 확인용 디버그 메세지 출력 주석처리
-	// 	int viewModeCheck = GetCurrentViewMode(this);
-	// 
-	// 	if (viewModeCheck == 0)
-	// 	{
-	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
-	// 	}
-	// 	else if (viewModeCheck == 1)
-	// 	{
-	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
-	// 	}
-	// 	else if (viewModeCheck == 2)
-	// 	{
-	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
-	// 	}
-
 }
 
 int32 AVICTIMSPlayerController::UIGetPlayerGold()
@@ -544,7 +536,7 @@ void AVICTIMSPlayerController::Interact()
 			// 맵 변경(나가기)이 아니라 위젯 띄워주기
 			// CharacterReference->SetActorLocation(FVector(1850, 821, 169));
 			ShowMovingInfo();
-
+			TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 		//return;
 	}
@@ -750,7 +742,7 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		saveData->SavedItemIDs.Reset();
 		saveData->SavedItemAmounts.Reset();
 		saveData->SavedHotbarItemIDs.Reset();
-		
+
 
 		int startPoint = (int)EEquipmentSlot::Count;
 
@@ -1172,7 +1164,7 @@ void AVICTIMSPlayerController::CloseLayouts()
 		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
 		bIsShowUI = false;
 	}
-		// 	return;
+	// 	return;
 }
 
 void AVICTIMSPlayerController::ClientRPC_AddTag_Implementation(const FName& newTag)
@@ -1190,6 +1182,18 @@ void AVICTIMSPlayerController::HideWidgets()
 	HUD_Reference->HUDReference->MainLayout->Hotbar->SetVisibility(ESlateVisibility::Hidden);
 	HUD_Reference->HUDReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Hidden);
 	HUD_Reference->HUDReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void AVICTIMSPlayerController::ClientRPC_EnableHousingTipText_Implementation(bool bEnable, bool bItem, bool bHousing, bool bHousingDel)
+{
+	if (bEnable)
+	{
+		HUDLayoutReference->MainLayout->Interact->ShowInteractText(bItem, bHousing, bHousingDel);
+	}
+	else
+	{
+		HUDLayoutReference->MainLayout->Interact->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void AVICTIMSPlayerController::ServerRPC_UpdatePlayerList_Implementation()
