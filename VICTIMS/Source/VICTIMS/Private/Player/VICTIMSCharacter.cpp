@@ -44,6 +44,8 @@
 #include "CompassWedget.h"
 #include "MiniMapWidget.h"
 #include "UI/MyHUD.h"
+#include "TabMenuWidget.h"
+#include "HousingInterface.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -146,6 +148,7 @@ void AVICTIMSCharacter::BeginPlay()
 	InteractionField->OnComponentEndOverlap.AddDynamic(this, &AVICTIMSCharacter::OnEndOverlap);
 	InteractionField->ComponentTags.Add(TEXT("InteractionField"));
 
+	InteractionField->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECR_Overlap);
 	InteractionField->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel4, ECR_Ignore);
 	InteractionField->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel5, ECR_Ignore);
 
@@ -469,8 +472,8 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 	if (Controller != nullptr)
 	{
 		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerYawInput(LookAxisVector.X * MouseSensivility);
+		AddControllerPitchInput(LookAxisVector.Y * MouseSensivility);
 	}
 }
 
@@ -747,6 +750,11 @@ void AVICTIMSCharacter::OnRep_ShotgunBullets()
 	ShotgunBullets = 2;
 }
 
+void AVICTIMSCharacter::SetMouseSensivility(float NewValue)
+{
+	MouseSensivility = NewValue;
+}
+
 void AVICTIMSCharacter::Moneying()
 {
 	if (IsLocallyControlled())
@@ -826,6 +834,14 @@ void AVICTIMSCharacter::SetHeadMesh(USkeletalMesh* NewHeadMesh)
 
 void AVICTIMSCharacter::OnBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (IsLocallyControlled())
+	{
+// 		UHousingComponent* HitActor = Cast<UHousingComponent>(OtherActor);
+		if (OtherActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
+		{
+			MyPlayerController->ClientRPC_EnableHousingTipText(true, false, false, true);
+		}
+	}
 	if (IsLocallyControlled() && OverlappedComp == InteractionField)
 	{
 		if (OtherActor && (OtherActor != this) && OtherComp)
@@ -890,17 +906,23 @@ void AVICTIMSCharacter::OnBeginOverlap(class UPrimitiveComponent* OverlappedComp
 					}
 				}
 			}
-			else if (OtherComp->ComponentHasTag(TEXT("Door")))
+			if (OtherComp->ComponentHasTag(TEXT("Door")))
 			{
 				CurrentDoorComponent = OtherComp;
 			}
 		}
 	}
 }
-
-
 void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (IsLocallyControlled())
+	{
+// 		UHousingComponent* HitActor = Cast<UHousingComponent>(OtherActor);
+		if (OtherActor->GetClass()->ImplementsInterface(UHousingInterface::StaticClass()))
+		{
+			MyPlayerController->ClientRPC_EnableHousingTipText(false, false, false, false);
+		}
+	}
 	if (IsLocallyControlled() && OverlappedComp == InteractionField)
 	{
 		if (OtherActor && (OtherActor != this) && OtherComp)
@@ -957,7 +979,7 @@ void AVICTIMSCharacter::OnEndOverlap(class UPrimitiveComponent* OverlappedComp, 
 			if (OtherComp == CurrentDoorComponent)
 			{
 				CurrentDoorComponent = nullptr;
-			}
+			}			
 		}
 	}
 }

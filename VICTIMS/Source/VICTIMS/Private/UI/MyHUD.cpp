@@ -13,6 +13,8 @@
 #include "AVICTIMSPlayerController.h"
 #include "ShopLayout.h"
 #include "MovingInfoWidget.h"
+#include "Components/Border.h"
+#include "TabMenuWidget.h"
 
 AMyHUD::AMyHUD()
 {
@@ -62,6 +64,8 @@ void AMyHUD::BeginPlay()
 
 bool AMyHUD::IsAnyWidgetVisible()
 {
+	if (auto ownerCon = Cast<AVICTIMSPlayerController>(GetOwner()))
+	{
 	if (
 		HUDReference->MainLayout->Inventory->IsVisible()
 		||
@@ -72,9 +76,12 @@ bool AMyHUD::IsAnyWidgetVisible()
 		HUDReference->MainLayout->Shop->IsVisible()
 		||	
 		HUDReference->MainLayout->MovingInfo->IsVisible()
+		||
+		ownerCon->TabMenu->MainBorder->IsVisible()
 		)
-	{
-		return true;
+		{
+			return true;
+		}
 	}
 	return false;
 }

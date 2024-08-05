@@ -22,6 +22,10 @@
 #include "EquipmentComponent.h"
 
 #include "BuildSaveData.h"
+#include "UI/HUDLayout.h"
+#include "UI/MainLayout.h"
+#include "HousingTutorialWidget.h"
+#include "UI/InteractText.h"
 
 UHousingComponent::UHousingComponent()
 {
@@ -58,7 +62,7 @@ void UHousingComponent::BeginPlay()
 		// 데이터 테이블에서 행 이름 가져오기
 		/*TArray<FName> */RowNames = DB_Housing->GetRowNames();
 
-// 		UE_LOG(LogTemp, Warning, TEXT("Number of rows in the data table: %d"), RowNames.Num());
+		// 		UE_LOG(LogTemp, Warning, TEXT("Number of rows in the data table: %d"), RowNames.Num());
 
 
 		for (const FName& RowName : RowNames)
@@ -69,15 +73,15 @@ void UHousingComponent::BeginPlay()
 			// 행 데이터 Buildables 배열에 추가
 			if (RowData)
 			{
-// 				UE_LOG(LogTemp, Warning, TEXT("Found row: %s"), *RowName.ToString());
+				// 				UE_LOG(LogTemp, Warning, TEXT("Found row: %s"), *RowName.ToString());
 				Buildables.Add(*RowData);
 			}
 		}
-// 		UE_LOG(LogTemp, Warning, TEXT("Number of buildables added: %d"), Buildables.Num());
+		// 		UE_LOG(LogTemp, Warning, TEXT("Number of buildables added: %d"), Buildables.Num());
 	}
 	else
 	{
-// 		UE_LOG(LogTemp, Error, TEXT("DB_Housing is null"));
+		// 		UE_LOG(LogTemp, Error, TEXT("DB_Housing is null"));
 	}
 	if (DB_Item)
 	{
@@ -154,7 +158,7 @@ void UHousingComponent::GiveBuildColor()
 	CanBuild = bCanBuild;
 
 	UMaterialInterface* MaterialToApply = bCanBuild ? GreenMaterial : RedMaterial;
-
+	AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(PlayerRef->GetController());
 	if (MaterialToApply)
 	{
 		// 머티리얼이 많은 물체도 있을거니까 그게 다 녹색이든 빨간색이든 바뀌어야하니까 몇개 머티리얼 있는지 보고 / GetNumMaterials()로 PreviewMesh의 머티리얼 개수 가져옴
@@ -163,6 +167,17 @@ void UHousingComponent::GiveBuildColor()
 		{
 			// 지정된 인덱스에 있는 머티리얼을 새로운 머티리얼인 MaterialToApply로 설정
 			PreviewMesh->SetMaterial(Index, MaterialToApply);
+			if (PlayerController)
+			{
+				if (bCanBuild)
+				{
+					PlayerController->ClientRPC_EnableHousingTipText(true, false, true, false);
+				}
+				else
+				{
+					PlayerController->ClientRPC_EnableHousingTipText(false, false, false, false);
+				}
+			}
 		}
 
 		//CanBuild = true;
@@ -386,26 +401,29 @@ void UHousingComponent::LaunchBuildMode(FName ItemID)
 	//	}
 	//}
 	UE_LOG(LogTemp, Warning, TEXT("Launching Build Mode with Item ID: %s"), *ItemID.ToString());
-
-	if (IsBuildModeOn)
+	if (AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(PlayerRef->GetController()))
 	{
-		StopBuildMode();
-	}
-	else
-	{
-		IsBuildModeOn = true;
-
-		if (BuildID < 0 || BuildID >= Buildables.Num())
+		if (IsBuildModeOn)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Invalid BuildID: %d"), BuildID);
-			return;
+			StopBuildMode();
+			pc->TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
+
 		}
+		else
+		{
+			IsBuildModeOn = true;
+			if (BuildID < 0 || BuildID >= Buildables.Num())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Invalid BuildID: %d"), BuildID);
+				return;
+			}
+			UE_LOG(LogTemp, Warning, TEXT("Spawning Preview Mesh with BuildID: %d"), BuildID);
+			SpawnPreviewMesh();
+			BuildCycle();
 
-		UE_LOG(LogTemp, Warning, TEXT("Spawning Preview Mesh with BuildID: %d"), BuildID);
-		SpawnPreviewMesh();
-		BuildCycle();
+			pc->TutorialWidget->SetVisibility(ESlateVisibility::Visible);
 
-
+		}
 	}
 }
 
@@ -492,6 +510,12 @@ void UHousingComponent::SpawnBuild(bool Moving, AActor* Movable, const FTransfor
 		else
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Buildable Actor is null"));
+		}
+
+		AVICTIMSPlayerController* PlayerController = Cast<AVICTIMSPlayerController>(PlayerRef->GetController());
+		if (PlayerController)
+		{
+			PlayerController->ClientRPC_EnableHousingTipText(false, false, false, false);
 		}
 		StopBuildMode();
 	}

@@ -302,8 +302,17 @@ public:
 	UFUNCTION()
 	void CloseLayouts();
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UTabMenuWidget> TabMenu_wbp;
+
+	UPROPERTY()
+	UTabMenuWidget* TabMenu;
+
     UPROPERTY(EditAnywhere, Category = "Interact Sound")
 	class USoundBase* PickUpSound;
+
+    UPROPERTY(EditAnywhere, Category = "Interact Sound")
+	class USoundBase* ToggleSound;
 
 	UPROPERTY()
 	TArray<AVICTIMSPlayerController*> otherPlayers;
@@ -350,4 +359,12 @@ public:
 	UFUNCTION(BlueprintImplementableEvent)
 	void ChatManagerEnable(const FString& chatPlayerName);
 
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_EnableHousingTipText(bool bEnable, bool bItem, bool bHousing, bool bHousingDel);
+
+	UPROPERTY(EditAnywhere)
+	class UHousingTutorialWidget* TutorialWidget;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UHousingTutorialWidget> TutorialWidget_wbp;
 };

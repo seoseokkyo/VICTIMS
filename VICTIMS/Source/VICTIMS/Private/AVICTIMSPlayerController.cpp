@@ -44,6 +44,11 @@
 #include "BuildSaveData.h"
 #include "SeqPlayWidget.h"
 #include "MediaSoundComponent.h"
+#include "TabMenuWidget.h"
+#include "Components/Border.h"
+#include "Components/Slider.h"
+#include "HousingTutorialWidget.h"
+#include "UI/InteractText.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -124,6 +129,23 @@ void AVICTIMSPlayerController::BeginPlay()
 			{
 				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
 			}
+		}
+
+		if (TabMenu_wbp)
+		{
+			TabMenu = Cast<UTabMenuWidget>(CreateWidget(GetWorld(), TabMenu_wbp));
+			if (TabMenu)
+			{
+				TabMenu->AddToViewport();
+				TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+
+		if (TutorialWidget_wbp)
+		{
+			TutorialWidget = Cast<UHousingTutorialWidget>(CreateWidget(GetWorld(), TutorialWidget_wbp));
+			TutorialWidget->AddToViewport();
+			TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 	}
 
@@ -212,23 +234,6 @@ void AVICTIMSPlayerController::Tick(float DeltaTime)
 			bInventoryInitialized = true;
 		}
 	}
-
-	// UI/Game 모드 확인용 디버그 메세지 출력 주석처리
-	// 	int viewModeCheck = GetCurrentViewMode(this);
-	// 
-	// 	if (viewModeCheck == 0)
-	// 	{
-	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game And UI");
-	// 	}
-	// 	else if (viewModeCheck == 1)
-	// 	{
-	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "UI Only");
-	// 	}
-	// 	else if (viewModeCheck == 2)
-	// 	{
-	// 		GEngine->AddOnScreenDebugMessage(2, 3.f, FColor::Red, "Game Only");
-	// 	}
-
 }
 
 int32 AVICTIMSPlayerController::UIGetPlayerGold()
@@ -356,7 +361,28 @@ void AVICTIMSPlayerController::ToggleShop()
 
 void AVICTIMSPlayerController::ToggleMenu()
 {
-
+	if (ESlateVisibility::Visible == TabMenu->MainBorder->GetVisibility())
+	{
+		if (ToggleSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ToggleSound);
+		}
+		TabMenu->OnClickCloseMenuButton();
+		DisableUIMode();
+		bShowMouseCursor = false;
+		bIsShowUI = false;
+	}
+	else
+	{
+		if (ToggleSound)
+		{
+			UGameplayStatics::PlaySound2D(GetWorld(), ToggleSound);
+		}
+		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Visible);
+		EnableUIMode();
+		bShowMouseCursor = true;
+		bIsShowUI = true;
+	}
 }
 
 void AVICTIMSPlayerController::UI_PerChaseItem_Implementation(const uint8& InventorySlot)
@@ -439,7 +465,6 @@ void AVICTIMSPlayerController::DisableUIMode()
 		if (bShowMouseCursor)
 		{
 			SetInputDependingFromVisibleWidgets();
-
 		}
 	}
 }
@@ -515,7 +540,7 @@ void AVICTIMSPlayerController::Interact()
 			// 맵 변경(나가기)이 아니라 위젯 띄워주기
 			// CharacterReference->SetActorLocation(FVector(1850, 821, 169));
 			ShowMovingInfo();
-
+			TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
 		}
 		//return;
 	}
@@ -722,6 +747,7 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		saveData->SavedItemAmounts.Reset();
 		saveData->SavedHotbarItemIDs.Reset();
 
+
 		int startPoint = (int)EEquipmentSlot::Count;
 
 		uint8 NumberOfRowsInventory = InventoryManagerComponent->PlayerInventory->NumberOfRowsInventory;
@@ -745,14 +771,6 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		//=====================================================================================================================================
 		//		Save QuickSlot
 		ClientRPC_SaveHotbar(ID);
-		// 
-		// 		saveData->SavedHotbarItemIDs.Reset();
-		// 		for (uint8 i = 0; i < 5; i++)
-		// 		{
-		// 			FString TempHotbarID = InventoryManagerComponent->GetHotbarSlotItem(i).ItemStructure.ID.ToString();
-		// 			saveData->SavedHotbarItemIDs.Add(TempHotbarID);
-		// 		}
-		// 		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
 		NetMulticastRPC_SaveData();
 
 		if (auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>())
@@ -1145,6 +1163,11 @@ void AVICTIMSPlayerController::CloseLayouts()
 		HUDLayoutReference->MainLayout->DropMoneyLayout->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
+	if (ESlateVisibility::Visible == TabMenu->MainBorder->GetVisibility())
+	{
+		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
+		bIsShowUI = false;
+	}
 	// 	return;
 }
 
@@ -1163,6 +1186,18 @@ void AVICTIMSPlayerController::HideWidgets()
 	HUD_Reference->HUDReference->MainLayout->Hotbar->SetVisibility(ESlateVisibility::Hidden);
 	HUD_Reference->HUDReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Hidden);
 	HUD_Reference->HUDReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void AVICTIMSPlayerController::ClientRPC_EnableHousingTipText_Implementation(bool bEnable, bool bItem, bool bHousing, bool bHousingDel)
+{
+	if (bEnable)
+	{
+		HUDLayoutReference->MainLayout->Interact->ShowInteractText(bItem, bHousing, bHousingDel);
+	}
+	else
+	{
+		HUDLayoutReference->MainLayout->Interact->SetVisibility(ESlateVisibility::Hidden);
+	}
 }
 
 void AVICTIMSPlayerController::ServerRPC_UpdatePlayerList_Implementation()

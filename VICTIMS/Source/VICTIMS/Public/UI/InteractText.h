@@ -14,6 +14,12 @@ class VICTIMS_API UInteractText : public UUserWidget
 public:
 	UPROPERTY(meta = (BindWidget))
 	UTextBlock* InteractText;
+
+	UFUNCTION()
+	void ShowInteractText(const bool& bItem, const bool& bHousing, const bool& bHousingDel);
+
+	UFUNCTION()
+	void HideInteractText();
 	
 protected:
 	UFUNCTION()
