@@ -72,8 +72,7 @@ public:
 
 	UFUNCTION(meta=(OverrideNativeName="OnRep_ShotgunBullets"))
 	void OnRep_ShotgunBullets();
-
-
+ 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ToggleInventory;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
@@ -113,6 +112,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* MoneyingAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input | Mouse", meta = (UIMin = "0.01", UIMax = "1.99", ClampMin = "0.01", ClampMax = "1.99"))
+	float MouseSensivility = 1.0f;
+
+	UFUNCTION()
+	void SetMouseSensivility(float NewValue);
 
 	UFUNCTION()
 	void Moneying();

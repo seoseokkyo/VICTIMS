@@ -62,4 +62,7 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	int32 HouseNumber;
 
+	UPROPERTY()
+	float SavedMouseSensivility;
+
 };

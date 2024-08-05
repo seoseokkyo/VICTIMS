@@ -44,6 +44,7 @@
 #include "CompassWedget.h"
 #include "MiniMapWidget.h"
 #include "UI/MyHUD.h"
+#include "TabMenuWidget.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -469,8 +470,8 @@ void AVICTIMSCharacter::Look(const FInputActionValue& Value)
 	if (Controller != nullptr)
 	{
 		// add yaw and pitch input to controller
-		AddControllerYawInput(LookAxisVector.X);
-		AddControllerPitchInput(LookAxisVector.Y);
+		AddControllerYawInput(LookAxisVector.X * MouseSensivility);
+		AddControllerPitchInput(LookAxisVector.Y * MouseSensivility);
 	}
 }
 
@@ -739,6 +740,11 @@ void AVICTIMSCharacter::OnRep_PistolBullets()
 void AVICTIMSCharacter::OnRep_ShotgunBullets()
 {
 	ShotgunBullets = 2;
+}
+
+void AVICTIMSCharacter::SetMouseSensivility(float NewValue)
+{
+	MouseSensivility = NewValue;
 }
 
 void AVICTIMSCharacter::Moneying()

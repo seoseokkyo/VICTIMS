@@ -53,7 +53,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UEquippingWeaponWidget* EquipWeaponWidget;
 
-
 protected:
 	UFUNCTION()
 	virtual void NativeConstruct() override;

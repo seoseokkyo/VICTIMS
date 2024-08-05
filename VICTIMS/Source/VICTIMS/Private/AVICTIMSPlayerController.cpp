@@ -42,6 +42,8 @@
 #include "EquippingWeaponWidget.h"
 #include "UI/Hotbar_Slot.h"
 #include "BuildSaveData.h"
+#include "TabMenuWidget.h"
+#include "Components/Border.h"
 
 AVICTIMSPlayerController::AVICTIMSPlayerController()
 {
@@ -117,6 +119,16 @@ void AVICTIMSPlayerController::BeginPlay()
 			if (IDInValidWidget)
 			{
 				IDInValidWidget->SetVisibility(ESlateVisibility::Collapsed);
+			}
+		}
+
+		if (TabMenu_wbp)
+		{
+			TabMenu = Cast<UTabMenuWidget>(CreateWidget(GetWorld(), TabMenu_wbp));
+			if (TabMenu)
+			{
+				TabMenu->AddToViewport();
+				TabMenu->MainBorder->SetVisibility(ESlateVisibility::Hidden);
 			}
 		}
 	}
@@ -350,7 +362,9 @@ void AVICTIMSPlayerController::ToggleShop()
 
 void AVICTIMSPlayerController::ToggleMenu()
 {
-
+	TabMenu->MainBorder->SetVisibility(ESlateVisibility::Visible);
+	bShowMouseCursor = true;
+	SetInputMode(FInputModeUIOnly());
 }
 
 void AVICTIMSPlayerController::UI_PerChaseItem_Implementation(const uint8& InventorySlot)
@@ -716,6 +730,12 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		saveData->SavedItemAmounts.Reset();
 		saveData->SavedHotbarItemIDs.Reset();
 
+		//감도저장
+		if (CharacterReference)
+		{
+			saveData->SavedMouseSensivility = CharacterReference->MouseSensivility;
+		}
+
 		int startPoint = (int)EEquipmentSlot::Count;
 
 		uint8 NumberOfRowsInventory = InventoryManagerComponent->PlayerInventory->NumberOfRowsInventory;
@@ -739,14 +759,6 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		//=====================================================================================================================================
 		//		Save QuickSlot
 		ClientRPC_SaveHotbar(ID);
-		// 
-		// 		saveData->SavedHotbarItemIDs.Reset();
-		// 		for (uint8 i = 0; i < 5; i++)
-		// 		{
-		// 			FString TempHotbarID = InventoryManagerComponent->GetHotbarSlotItem(i).ItemStructure.ID.ToString();
-		// 			saveData->SavedHotbarItemIDs.Add(TempHotbarID);
-		// 		}
-		// 		UGameplayStatics::SaveGameToSlot(saveData, ID, 0);
 		NetMulticastRPC_SaveData();
 
 		if (auto gm = GetWorld()->GetAuthGameMode<AVICTIMSGameMode>())
@@ -836,6 +848,9 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			{
 				PlayerState->SetPlayerName(/*SaveGame->PlayerDataStructure.PlayerID*/ID);
 			}
+
+			// 감도 로드
+			CharacterReference->MouseSensivility = savedData->SavedMouseSensivility;
 
 			// 인벤토리 아이템 로드 
 			int itemCount = savedData->SavedItemIDs.Num() - 1;
@@ -1139,7 +1154,11 @@ void AVICTIMSPlayerController::CloseLayouts()
 		HUDLayoutReference->MainLayout->DropMoneyLayout->SetVisibility(ESlateVisibility::Hidden);
 		return;
 	}
-	// 	return;
+	if (ESlateVisibility::Visible == TabMenu->MainBorder->GetVisibility())
+	{
+		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Hidden);
+	}
+		// 	return;
 }
 
 void AVICTIMSPlayerController::ClientRPC_AddTag_Implementation(const FName& newTag)

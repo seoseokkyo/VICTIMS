@@ -295,6 +295,12 @@ public:
 	UFUNCTION()
 	void CloseLayouts();
 
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<class UTabMenuWidget> TabMenu_wbp;
+
+	UPROPERTY()
+	UTabMenuWidget* TabMenu;
+
     UPROPERTY(EditAnywhere, Category = "Interact Sound")
 	class USoundBase* PickUpSound;
 
