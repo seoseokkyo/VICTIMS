@@ -130,7 +130,7 @@ void AVICTIMSPlayerController::BeginPlay()
 			if (TabMenu)
 			{
 				TabMenu->AddToViewport();
-				TabMenu->MainBorder->SetVisibility(ESlateVisibility::Hidden);
+				TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
 			}
 		}
 	}
@@ -364,9 +364,18 @@ void AVICTIMSPlayerController::ToggleShop()
 
 void AVICTIMSPlayerController::ToggleMenu()
 {
-	TabMenu->MainBorder->SetVisibility(ESlateVisibility::Visible);
-	bShowMouseCursor = true;
-	SetInputMode(FInputModeUIOnly());
+	if (ESlateVisibility::Visible == TabMenu->MainBorder->GetVisibility())
+	{
+		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
+		DisableUIMode();
+		bShowMouseCursor = false;
+	}
+	else
+	{
+		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Visible);
+		EnableUIMode();
+		bShowMouseCursor = true;
+	}
 }
 
 void AVICTIMSPlayerController::UI_PerChaseItem_Implementation(const uint8& InventorySlot)
@@ -449,7 +458,6 @@ void AVICTIMSPlayerController::DisableUIMode()
 		if (bShowMouseCursor)
 		{
 			SetInputDependingFromVisibleWidgets();
-
 		}
 	}
 }
@@ -1158,7 +1166,7 @@ void AVICTIMSPlayerController::CloseLayouts()
 	}
 	if (ESlateVisibility::Visible == TabMenu->MainBorder->GetVisibility())
 	{
-		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Hidden);
+		TabMenu->MainBorder->SetVisibility(ESlateVisibility::Collapsed);
 	}
 		// 	return;
 }
