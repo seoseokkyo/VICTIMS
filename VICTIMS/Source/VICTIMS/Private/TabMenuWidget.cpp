@@ -53,7 +53,6 @@ void UTabMenuWidget::OnClickSaveButton()
 	AVICTIMSPlayerController* pc = Cast<AVICTIMSPlayerController>(GetGameInstance()->GetFirstLocalPlayerController());
 	if(pc)
 	{
-		NotificationBorder->SetVisibility(ESlateVisibility::Visible);
 		if (ClickSound)
 		{
 			UGameplayStatics::PlaySound2D(GetWorld(), ClickSound);

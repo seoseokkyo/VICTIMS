@@ -1249,34 +1249,18 @@ void AVICTIMSPlayerController::ClientRPC_UpdatePlayerNameList_Implementation(con
 
 void AVICTIMSPlayerController::ShowHousingNotification()
 {
-	if (!HousingNotificationWidget)
+	if (HUDLayoutReference->MainLayout->HousingTutorialWidget)
 	{
-		if (HousingNotificationWidgetClass)
-		{
-			HousingNotificationWidget = CreateWidget<UHousingNotification>(this, HousingNotificationWidgetClass);
-			if (HousingNotificationWidget)
-			{
-				HousingNotificationWidget->AddToViewport();
-			}
-		}
-	}
-
-	if (HousingNotificationWidget)
-	{
-		HousingNotificationWidget->SetVisibility(ESlateVisibility::Visible);
-
-		GetWorld()->GetTimerManager().SetTimer(HousingNotificationTimerHandle, this, &AVICTIMSPlayerController::HideHousingNotification, 1.0f, false);
+		HUDLayoutReference->MainLayout->HousingTutorialWidget->SetVisibility(ESlateVisibility::Visible);
 	}
 }
 
 void AVICTIMSPlayerController::HideHousingNotification()
 {
-	if (HousingNotificationWidget)
+	if (HUDLayoutReference->MainLayout->HousingTutorialWidget)
 	{
-		HousingNotificationWidget->SetVisibility(ESlateVisibility::Hidden);
+		HUDLayoutReference->MainLayout->HousingTutorialWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
-
-	GetWorld()->GetTimerManager().ClearTimer(HousingNotificationTimerHandle);
 }
 
 void AVICTIMSPlayerController::ServerRPC_TryReload_Implementation(FName Bullet)

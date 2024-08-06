@@ -42,6 +42,12 @@ void UGoOtherPlayerButton::MoveTo()
 		if (charCheck->IsLocallyControlled())
 		{
 			charCheck->Server_GoToOtherHouse(playerNameTextBox->GetText().ToString());
+
+			if (auto PC = Cast<AVICTIMSPlayerController>(GetOwningPlayer()))
+			{
+				PC->bIsShowUI = false;
+				PC->DisableUIMode();
+			}
 		}
 	}
 }

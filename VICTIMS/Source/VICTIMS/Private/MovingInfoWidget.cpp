@@ -103,6 +103,9 @@ void UMovingInfoWidget::OnClickedPubButton()
 		{
 			Character->SetActorLocation(FVector(1850, 821, 169));
 		}
+
+		PC->bIsShowUI = false;
+		PC->DisableUIMode();
 	}
 
 	HideWidget();
