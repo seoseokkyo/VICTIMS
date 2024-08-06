@@ -13,6 +13,7 @@
 #include "MediaPlaylist.h"
 #include "MediaSource.h"
 #include "AVICTIMSPlayerController.h"
+#include "Components/AudioComponent.h"
 
 void USeqPlayWidget::NativeConstruct()
 {
@@ -33,61 +34,65 @@ void USeqPlayWidget::NativeConstruct()
 		CloseButton->OnClicked.AddDynamic(this, &USeqPlayWidget::OnCloseButtonClicked);
 	}
 
-	//if (MediaPlayer && MediaTexture && VideoImage)
-	//{
-	//	//FSlateBrush brush;
-	//	//brush.SetResourceObject(MediaTexture);
-	//	//VideoImage->SetBrush(brush);
-	//
-	//	if (MediaMaterial)
-	//	{
-	//		UMaterialInstanceDynamic* MaterialInstance = UMaterialInstanceDynamic::Create(MediaMaterial, this);
-	//		if (MaterialInstance)
-	//		{
-	//			MaterialInstance->SetTextureParameterValue(FName("Texture"), MediaTexture);
-	//			VideoImage->SetBrushFromMaterial(MaterialInstance);
-	//		}
-	//	}
-	//
-
-	if (MediaSoundComponent == nullptr)
+	if (InitMedia())
 	{
-		//MediaSoundComponent = NewObject<UMediaSoundComponent>(this);
 		if (auto pc = Cast<AVICTIMSPlayerController>(GetOwningPlayer()))
 		{
-			MediaSoundComponent = pc->MediaSoundComponent;
+			pc->bIsShowUI = true;
+			pc->EnableUIMode();
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("InitMedia Failed"));
+	}
+}
+
+bool USeqPlayWidget::InitMedia()
+{
+	if (MediaPlayer && MediaTexture && VideoImage)
+	{
+		FSlateBrush brush;
+		brush.SetResourceObject(MediaTexture);
+		VideoImage->SetBrush(brush);
+
+		MediaPlayer->OnEndReached.AddDynamic(this, &USeqPlayWidget::OnMediaEndReached);
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool USeqPlayWidget::PlayMedia()
+{
+	if (MediaPlayer && MediaSource)
+	{
+		if (MediaPlayer->OpenSource(MediaSource))
+		{
+			if (auto pc = Cast<AVICTIMSPlayerController>(GetOwningPlayer()))
+			{
+				pc->SeqSoundComp = UGameplayStatics::CreateSound2D(GetWorld(), SeqSound);
+				pc->SeqSoundComp->Play();
+			}
+
+			if (!MediaPlayer->IsPlaying())
+			{
+				MediaPlayer->Play();
+			}
+
+			return true;
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("MediaPlayer->OpenSource Failed"));
+			return false;
 		}
 	}
 
-	if (MediaSoundComponent)
-	{
-		MediaSoundComponent->SetMediaPlayer(MediaPlayer);
-		MediaSoundComponent->RegisterComponent();
-	}
-
-	//
-	//	MediaPlayer->OnEndReached.AddDynamic(this, &USeqPlayWidget::OnMediaEndReached);
-	//}
-}
-
-void USeqPlayWidget::PlayListIndex(int32 index)
-{
-	if (MediaPlayer == nullptr)
-	{
-		return;
-	}
-
-	MediaPlayer->OpenSource(MediaSource);
-
-	//MediaPlayer->Play();
-
-	//MediaPlayer->PlayAndSeek();
-
-	//if (MediaPlaylist && MediaPlaylist->Num() > index)
-	//{
-	//    MediaPlayer->OpenPlaylistIndex(MediaPlaylist, index);
-	//
-	//}
+	return false;
 }
 
 void USeqPlayWidget::OnPlayButtonClicked()
@@ -111,6 +116,17 @@ void USeqPlayWidget::OnCloseButtonClicked()
 	if (MediaPlayer)
 	{
 		MediaPlayer->Close();
+	}
+
+	if (auto pc = Cast<AVICTIMSPlayerController>(GetOwningPlayer()))
+	{
+		pc->bIsShowUI = false;
+		pc->DisableUIMode();
+
+		if (pc->SeqSoundComp)
+		{
+			pc->SeqSoundComp->Stop();
+		}
 	}
 
 	this->RemoveFromParent();

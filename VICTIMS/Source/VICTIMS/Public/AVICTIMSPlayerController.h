@@ -25,7 +25,7 @@ class VICTIMS_API AVICTIMSPlayerController : public APlayerController, public II
 {
 	GENERATED_BODY()
 
-public: 
+public:
 
 	AVICTIMSPlayerController();
 
@@ -35,7 +35,7 @@ public:
 	// ========================================================================================================
 	// AIAIÆaAI½º 
 	// ========================================================================================================한음
-	UPROPERTY(BlueprintReadWrite,EditAnywhere)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	APawn* MocapCharCP;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
@@ -69,24 +69,21 @@ public:
 
 	int32 UIGetPlayerGold();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(Category="Inventory", OverrideNativeName="InventoryComponent"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (Category = "Inventory", OverrideNativeName = "InventoryComponent"))
 	UInventoryManagerComponent* InventoryManagerComponent;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta=(Category="Inventory", OverrideNativeName="EquipmentComponent"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (Category = "Inventory", OverrideNativeName = "EquipmentComponent"))
 	UEquipmentComponent* PlayerInventoryComponent;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class AMyHUD* HUD_Reference;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	class UHUDLayout* HUDLayoutReference;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	class UMediaSoundComponent* MediaSoundComponent;
-
 	UFUNCTION()
 	void SetupHUDReferences();
-	
+
 	UFUNCTION()
 	void CollectFromPanel(const FName& Name);
 
@@ -94,23 +91,23 @@ public:
 	bool IsContainerOpen();
 	UFUNCTION()
 	bool IsShopOpen();
-	
-	UFUNCTION(BlueprintCallable, Category="Character")
+
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	void ToggleInventory();
-	UFUNCTION(BlueprintCallable, Category="Character")
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	void ToggleProfile();
 	void SetInputDependingFromVisibleWidgets();
-	UFUNCTION(BlueprintCallable, Category="Character")
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	void ToggleContainer();
-	UFUNCTION(BlueprintCallable, Category="Character")
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	void ToggleShop();
-	
-	UFUNCTION(BlueprintCallable, Category="Character")				// 사용 안하는 중. 
-	void ToggleMenu();
+
+	UFUNCTION(BlueprintCallable, Category = "Character")				// 사용 안하는 중. 
+		void ToggleMenu();
 
 	UFUNCTION(Server, Reliable)
 	void Server_OnActorUsed(AActor* Actor);
-	
+
 	UFUNCTION()
 	UUserWidget* GenerateInteractWidget(FText Text);
 	UFUNCTION()
@@ -118,14 +115,14 @@ public:
 	UFUNCTION()
 	void SetMouseToCenterPosition();
 
-	UFUNCTION(BlueprintCallable, Category="Character")
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	void EnableUIMode();
-	UFUNCTION(BlueprintCallable, Category="Character")
+	UFUNCTION(BlueprintCallable, Category = "Character")
 	void DisableUIMode();
 
 	UFUNCTION()
 	UDataTable* GetItemDB();
-	
+
 	uint8 GetMaximumHotbarSlots() { return MaximumHotbarSlots; };
 
 	uint8 MenuAnchorIndex;
@@ -177,18 +174,18 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	
+
 private:
 	uint8 MaximumHotbarSlots = 10;
 
 
-//=========================================================================================================================
-// Save
+	//=========================================================================================================================
+	// Save
 
 public:
 
 	UPROPERTY()
-	FString PlayerID;						
+	FString PlayerID;
 
 	//UPROPERTY()
 	//class UTestSaveGame* SavedData;
@@ -270,7 +267,7 @@ public:
 
 	class AVICTIMSGameMode* GameModeReference;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite,Category = "Test")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Test")
 	bool bIsShowUI = false;
 
 	FTimerHandle HousingNotificationTimerHandle;
@@ -292,12 +289,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Test")
 	TSubclassOf<class UMovingInfoWidget> MovingInfoWidgetClass;
 
-	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
-	TSubclassOf<USeqPlayWidget> bp_SeqplayWidget;
-
 	UPROPERTY()
 	UMovingInfoWidget* MovingInfoWidget;
-//=========================================================================================================================
+	//=========================================================================================================================
 
 	UFUNCTION()
 	void CloseLayouts();
@@ -308,10 +302,10 @@ public:
 	UPROPERTY()
 	UTabMenuWidget* TabMenu;
 
-    UPROPERTY(EditAnywhere, Category = "Interact Sound")
+	UPROPERTY(EditAnywhere, Category = "Interact Sound")
 	class USoundBase* PickUpSound;
 
-    UPROPERTY(EditAnywhere, Category = "Interact Sound")
+	UPROPERTY(EditAnywhere, Category = "Interact Sound")
 	class USoundBase* ToggleSound;
 
 	UPROPERTY()
@@ -367,4 +361,20 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UHousingTutorialWidget> TutorialWidget_wbp;
+
+	UPROPERTY(EditAnywhere, Category = "SEQ Sound")
+	class UAudioComponent* SeqSoundComp;
+
+	///////////////////// SEQ /////////////////////
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
+	TSubclassOf<USeqPlayWidget> bp_SeqplayWidget;
+
+	UFUNCTION(BlueprintCallable)
+	void VicTimsSeqPlay();
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_RequsetSeqPlay();
+
+	UFUNCTION(Client, Reliable)
+	void ClientRPC_RequsetSeqPlay();
 };

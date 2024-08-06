@@ -41,16 +41,16 @@ public:
     class UMediaSource* MediaSource;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
-    class UMediaSoundComponent* MediaSoundComponent;
+    class UMediaPlaylist* bp_MediaplayList;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
-    class UMediaPlayList* MediaplayList;
-
-    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Media")
-    //class UMediaPlaylist* MediaPlaylist;
+    UFUNCTION()
+    bool InitMedia();
 
     UFUNCTION(BlueprintCallable)
-    void PlayListIndex(int32 index = 0);
+    bool PlayMedia();
+
+    UPROPERTY(EditAnywhere, Category = "SEQ Sound")
+    class USoundBase* SeqSound;
 
 protected:
     virtual void NativeConstruct() override;

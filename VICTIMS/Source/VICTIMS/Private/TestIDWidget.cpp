@@ -55,6 +55,8 @@ void UTestIDWidget::OnClickedSignInButton()
 				if (PC->BGMComp)
 				{
 					PC->BGMComp->Stop();
+
+					PC->VicTimsSeqPlay();
 				}
 
 				PC->ChatManagerEnable(strID);

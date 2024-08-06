@@ -57,8 +57,6 @@ AVICTIMSPlayerController::AVICTIMSPlayerController()
 
 	PlayerInventoryComponent = CreateDefaultSubobject<UEquipmentComponent>(TEXT("EquipmentComponent"));
 
-	MediaSoundComponent = CreateDefaultSubobject<UMediaSoundComponent>(TEXT("MediaSoundComponent"));
-
 	//che
 	//partycomponent = CreateDefaultSubobject<UPartyComponent>(TEXT("PartyComponent"));
 
@@ -1186,6 +1184,25 @@ void AVICTIMSPlayerController::HideWidgets()
 	HUD_Reference->HUDReference->MainLayout->Hotbar->SetVisibility(ESlateVisibility::Hidden);
 	HUD_Reference->HUDReference->MainLayout->Inventory->SetVisibility(ESlateVisibility::Hidden);
 	HUD_Reference->HUDReference->MainLayout->Profile->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void AVICTIMSPlayerController::VicTimsSeqPlay()
+{
+	ServerRPC_RequsetSeqPlay();
+}
+
+void AVICTIMSPlayerController::ServerRPC_RequsetSeqPlay_Implementation()
+{
+	ClientRPC_RequsetSeqPlay();
+}
+
+void AVICTIMSPlayerController::ClientRPC_RequsetSeqPlay_Implementation()
+{
+	auto SeqWidget = CreateWidget<USeqPlayWidget>(this, bp_SeqplayWidget);
+	SeqWidget->SetOwningPlayer(this);
+	SeqWidget->AddToViewport();
+
+	SeqWidget->PlayMedia();
 }
 
 void AVICTIMSPlayerController::ClientRPC_EnableHousingTipText_Implementation(bool bEnable, bool bItem, bool bHousing, bool bHousingDel)
