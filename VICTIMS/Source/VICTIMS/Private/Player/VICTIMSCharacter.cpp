@@ -511,7 +511,7 @@ void AVICTIMSCharacter::DieFunction()
 		{
 			WActor->StaticMesh->SetSimulatePhysics(true);
 			WActor->Amount = PC->InventoryManagerComponent->Gold;
-			PC->InventoryManagerComponent->AddGold(PC->InventoryManagerComponent->Gold);
+			PC->InventoryManagerComponent->AddGold(-PC->InventoryManagerComponent->Gold);
 		}
 
 		//for (int i = 0; i < PC->InventoryManagerComponent->Gold; i++)

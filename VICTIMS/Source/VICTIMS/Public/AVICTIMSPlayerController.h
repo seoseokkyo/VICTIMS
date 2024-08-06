@@ -277,6 +277,9 @@ public:
 	void ShowHousingNotification();
 	void HideHousingNotification();
 
+	UFUNCTION()
+	void EnableHousingTutorialWidget(bool bEnable);
+
 	UFUNCTION(Server, Reliable, BlueprintCallable)
 	void ServerRPC_TryReload(FName Bullet);
 
@@ -358,9 +361,6 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_EnableHousingTipText(bool bEnable, bool bItem, bool bHousing, bool bHousingDel);
-
-	UPROPERTY(EditAnywhere)
-	class UHousingTutorialWidget* TutorialWidget;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class UHousingTutorialWidget> TutorialWidget_wbp;

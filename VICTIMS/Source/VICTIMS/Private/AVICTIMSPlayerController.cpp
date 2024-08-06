@@ -139,12 +139,12 @@ void AVICTIMSPlayerController::BeginPlay()
 			}
 		}
 
-		if (TutorialWidget_wbp)
-		{
-			TutorialWidget = Cast<UHousingTutorialWidget>(CreateWidget(GetWorld(), TutorialWidget_wbp));
-			TutorialWidget->AddToViewport();
-			TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
-		}
+		//if (TutorialWidget_wbp)
+		//{
+		//	TutorialWidget = Cast<UHousingTutorialWidget>(CreateWidget(GetWorld(), TutorialWidget_wbp));
+		//	TutorialWidget->AddToViewport();
+		//	TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
+		//}
 	}
 
 	if (auto gi = Cast<UVictimsGameInstance>(GetGameInstance()))
@@ -542,7 +542,11 @@ void AVICTIMSPlayerController::Interact()
 			// ¸Ê º¯°æ(³ª°¡±â)ÀÌ ¾Æ´Ï¶ó À§Á¬ ¶ç¿öÁÖ±â
 			// CharacterReference->SetActorLocation(FVector(1850, 821, 169));
 			ShowMovingInfo();
-			TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+			if (HUDLayoutReference->MainLayout->HousingTutorialWidget)
+			{
+				HUDLayoutReference->MainLayout->HousingTutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
+			}
 		}
 		//return;
 	}
@@ -1247,19 +1251,45 @@ void AVICTIMSPlayerController::ClientRPC_UpdatePlayerNameList_Implementation(con
 	OnChangedPlayerList.ExecuteIfBound(otherPlayerNames);
 }
 
+
+
 void AVICTIMSPlayerController::ShowHousingNotification()
 {
-	if (HUDLayoutReference->MainLayout->HousingTutorialWidget)
+	if (!HousingNotificationWidget)
 	{
-		HUDLayoutReference->MainLayout->HousingTutorialWidget->SetVisibility(ESlateVisibility::Visible);
+		if (HousingNotificationWidgetClass)
+		{
+			HousingNotificationWidget = CreateWidget<UHousingNotification>(this, HousingNotificationWidgetClass);
+			if (HousingNotificationWidget)
+			{
+				HousingNotificationWidget->AddToViewport();
+			}
+		}
+	}
+
+	if (HousingNotificationWidget)
+	{
+		HousingNotificationWidget->SetVisibility(ESlateVisibility::Visible);
+
+		GetWorld()->GetTimerManager().SetTimer(HousingNotificationTimerHandle, this, &AVICTIMSPlayerController::HideHousingNotification, 1.0f, false);
 	}
 }
 
 void AVICTIMSPlayerController::HideHousingNotification()
 {
+	if (HousingNotificationWidget)
+	{
+		HousingNotificationWidget->SetVisibility(ESlateVisibility::Hidden);
+	}
+
+	GetWorld()->GetTimerManager().ClearTimer(HousingNotificationTimerHandle);
+}
+
+void AVICTIMSPlayerController::EnableHousingTutorialWidget(bool bEnable)
+{
 	if (HUDLayoutReference->MainLayout->HousingTutorialWidget)
 	{
-		HUDLayoutReference->MainLayout->HousingTutorialWidget->SetVisibility(ESlateVisibility::Hidden);
+		HUDLayoutReference->MainLayout->HousingTutorialWidget->SetVisibility(bEnable ? ESlateVisibility::Visible : ESlateVisibility::Hidden);
 	}
 }
 

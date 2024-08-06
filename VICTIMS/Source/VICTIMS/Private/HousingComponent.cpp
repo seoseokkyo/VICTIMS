@@ -406,7 +406,8 @@ void UHousingComponent::LaunchBuildMode(FName ItemID)
 		if (IsBuildModeOn)
 		{
 			StopBuildMode();
-			pc->TutorialWidget->SetVisibility(ESlateVisibility::Collapsed);
+
+			pc->EnableHousingTutorialWidget(false);
 
 		}
 		else
@@ -421,7 +422,7 @@ void UHousingComponent::LaunchBuildMode(FName ItemID)
 			SpawnPreviewMesh();
 			BuildCycle();
 
-			pc->TutorialWidget->SetVisibility(ESlateVisibility::Visible);
+			pc->EnableHousingTutorialWidget(true);
 
 		}
 	}
