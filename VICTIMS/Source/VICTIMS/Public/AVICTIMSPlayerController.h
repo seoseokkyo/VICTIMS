@@ -184,6 +184,9 @@ private:
 
 public:
 
+	UFUNCTION()
+	void HandleEscapeKey();
+
 	UPROPERTY()
 	FString PlayerID;
 

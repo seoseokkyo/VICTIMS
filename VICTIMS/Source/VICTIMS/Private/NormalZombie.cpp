@@ -57,8 +57,6 @@ void ANormalZombie::BeginPlay()
 	combatComponent_Additional->bCombatEnable = true;
 
 	OnEndAttackEvent.BindUFunction(this, FName("EndAttackEvent"));
-
-	stateComp->ServerRPC_EnableReady(true);
 }
 
 void ANormalZombie::Tick(float DeltaTime)
@@ -153,15 +151,25 @@ void ANormalZombie::ServerRPC_DieFunction_Implementation()
 
 void ANormalZombie::NetMulticastRPC_DieFunction_Implementation()
 {
+	GetWorldTimerManager().ClearTimer(DieTimerHandler);
+	GetWorldTimerManager().SetTimer(DieTimerHandler, [&]() {
 
-	FTimerHandle hnd;
-	GetWorldTimerManager().SetTimer(hnd, [&]() {
+		if (false == DieTimerHandler.IsValid())
+		{
+			return;
+		}
+
+		if (false == IsValid(this))
+		{
+			return;
+		}
 
 		if (IsValid(this))
 		{
 			EnableRagdoll();
 		}
-		//GetController<ANormalZombieController>()->UnPossess();
+
+		GetWorldTimerManager().ClearTimer(DieTimerHandler);
 
 		}, 2.0f, false);
 
@@ -221,10 +229,10 @@ void ANormalZombie::PrintInfo()
 
 void ANormalZombie::EndAttackEvent(float delayTime)
 {
-	FTimerHandle handler;
-	GetWorldTimerManager().SetTimer(handler, [&]() {		
+	ClearAttackTimerHandler();
+	GetWorldTimerManager().SetTimer(AttackTimerHandler, [&]() {
 		
-		if (false == handler.IsValid())
+		if (false == AttackTimerHandler.IsValid())
 		{
 			return;	
 		}
@@ -241,9 +249,19 @@ void ANormalZombie::EndAttackEvent(float delayTime)
 
 		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("EndAttackEvent")));
 
-		GetWorldTimerManager().ClearTimer(handler);
+		GetWorldTimerManager().ClearTimer(AttackTimerHandler);
 
 		}, 1.0f, false, delayTime);
+}
+
+void ANormalZombie::ClearAttackTimerHandler()
+{
+	GetWorldTimerManager().ClearTimer(AttackTimerHandler);
+}
+
+void ANormalZombie::ClearDieTimerHandler()
+{
+	GetWorldTimerManager().ClearTimer(DieTimerHandler);
 }
 
 void ANormalZombie::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

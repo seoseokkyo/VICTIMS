@@ -115,4 +115,16 @@ private:
 
 	UFUNCTION()
 	void EndAttackEvent(float delayTime);
+
+	UPROPERTY()
+	FTimerHandle AttackTimerHandler;
+
+	UPROPERTY()
+	FTimerHandle DieTimerHandler;
+
+	UFUNCTION()
+	void ClearAttackTimerHandler();
+
+	UFUNCTION()
+	void ClearDieTimerHandler();
 };

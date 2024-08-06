@@ -42,8 +42,6 @@ void ATravelActor::ServerRPC_TravelRequest_Implementation(APlayerController* Con
 
 		if (auto playerctrl = Cast<AVICTIMSPlayerController>(Controller))
 		{
-			playerctrl->CharacterReference->stateComp->ServerRPC_EnableReady(false);
-
 			playerctrl->RequestClientTravel(URL, FString());
 		}
 	}

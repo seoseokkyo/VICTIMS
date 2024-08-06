@@ -284,9 +284,6 @@ void AVICTIMSCharacter::BeginPlay()
 		}
 		//>>
 
-		stateComp->ServerRPC_EnableReady(true);
-
-
 		}, 0.5f, false);
 }
 
@@ -433,6 +430,8 @@ void AVICTIMSCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 			EnhancedInputComponent->BindAction(UserHotbar5, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::UseHotbarSlot5);
 			EnhancedInputComponent->BindAction(CloseLayoutAction, ETriggerEvent::Started, MyPlayerController, &AVICTIMSPlayerController::CloseLayouts);
 			EnhancedInputComponent->BindAction(MoneyingAction, ETriggerEvent::Started, this, &AVICTIMSCharacter::Moneying);
+
+			MyPlayerController->InputComponent->BindAction("ESC", IE_Pressed, MyPlayerController, &AVICTIMSPlayerController::HandleEscapeKey);
 		}
 	}
 	else
@@ -538,8 +537,6 @@ void AVICTIMSCharacter::DieFunction()
 		if (PC)
 		{
 			stateComp->ServerRPC_SetStatePoint(HP, stateComp->runningStat.MaxHP);  // HP max 로 채워주고 바로 자동 저장
-
-			stateComp->ServerRPC_EnableReady(false);
 
 			//PC->SaveData();
 

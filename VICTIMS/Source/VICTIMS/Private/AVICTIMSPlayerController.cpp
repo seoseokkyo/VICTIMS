@@ -157,6 +157,10 @@ void AVICTIMSPlayerController::BeginPlay()
 	}
 }
 
+void AVICTIMSPlayerController::HandleEscapeKey()
+{
+}
+
 int AVICTIMSPlayerController::GetCurrentViewMode(const APlayerController* PlayerController)
 {
 	if (IsValid(PlayerController))
