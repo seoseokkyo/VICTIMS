@@ -1196,7 +1196,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 		// 				playerReference->UsePistol();
 	}
 	//=======================================================================================================NO USE
-	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
+	else if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Rifle")) && bEquipRifle == true)
 	{
 		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 		{
@@ -1208,7 +1208,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 		// 				playerReference->UseRifle();
 	}
 	//==============================================================================================================
-	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
+	else if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Knife")) && bEquipKnife == true)
 	{
 		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectOneHandedAxe")))
 		{
@@ -1222,7 +1222,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 		}
 		// 				playerReference->UseKnife();
 	}
-	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
+	else if (LocalInventoryItem.ItemStructure.ID == (FName("ID_Axe")) && bEquipAxe == true)
 	{
 		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectTwoHandedAxe")))
 		{
@@ -1236,7 +1236,7 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 		}
 		// 				playerReference->UseAxe();
 	}
-	if (LocalInventoryItem.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
+	else if (LocalInventoryItem.ItemStructure.ID == (FName("ID_ShotGun")) && bEquipShotGun == true)
 	{
 		if (UFunction* TriggerFunction = GetPlayerRef()->FindFunction(TEXT("MocapSelectRifle")))
 		{
@@ -1250,6 +1250,8 @@ void UInventoryManagerComponent::UnEquipItem(UInventoryComponent* FromInventory,
 		}
 		// 				playerReference->UsePistol();
 	}
+	OnChangeCloath(LocalInventoryItem.ItemStructure.EquipmentSlot);
+
 	UpdateEquippedStats();
 	Server_UpdateTooltips();
 }
@@ -3349,6 +3351,37 @@ void UInventoryManagerComponent::OnRep_EquipKnife(bool Equiped)
 void UInventoryManagerComponent::OnRep_EquipAxe(bool Equiped)
 {
 	bEquipAxe = Equiped;
+}
+
+void UInventoryManagerComponent::OnChangeCloath(EEquipmentSlot equipslot)
+{
+	auto* charTemp = GetPlayerRef();
+
+	switch (equipslot)
+	{
+	case EEquipmentSlot::Undefined:
+		break;
+	case EEquipmentSlot::Weapon:
+		break;
+	case EEquipmentSlot::Chest:
+		charTemp->SetChsetMesh(charTemp->DefaultChestMesh);
+		break;
+	case EEquipmentSlot::Feet:
+		charTemp->SetFeetMesh(charTemp->DefaultFeetMesh);
+		break;
+	case EEquipmentSlot::Hands:
+		break;
+	case EEquipmentSlot::Legs:
+		charTemp->SetLegsMesh(charTemp->DefaultLegsMesh);
+		break;
+	case EEquipmentSlot::Head:
+		charTemp->SetHeadMesh(charTemp->DefaultHeadMesh);
+		break;
+	case EEquipmentSlot::Count:
+		break;
+	default:
+		break;
+	}
 }
 
 void UInventoryManagerComponent::Client_ClearHotbarWeapon_Implementation(const FSlotStructure& HotbarSlot)

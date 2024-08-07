@@ -127,6 +127,8 @@ void USeqPlayWidget::OnCloseButtonClicked()
 		{
 			pc->SeqSoundComp->Stop();
 		}
+
+		pc->SetSeqPlayingState(false);
 	}
 
 	this->RemoveFromParent();

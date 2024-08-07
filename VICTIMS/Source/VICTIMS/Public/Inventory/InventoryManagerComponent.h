@@ -572,5 +572,7 @@ public:
 
 	UPROPERTY(Replicated)
 	bool bEquipRifle;
-
+	
+	UFUNCTION()
+	void OnChangeCloath(EEquipmentSlot equipslot);
 };

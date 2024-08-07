@@ -171,11 +171,11 @@ void UHousingComponent::GiveBuildColor()
 			{
 				if (bCanBuild)
 				{
-					PlayerController->ClientRPC_EnableHousingTipText(true, false, true, false);
+					//PlayerController->ClientRPC_EnableHousingTipText(true, false, true, false);
 				}
 				else
 				{
-					PlayerController->ClientRPC_EnableHousingTipText(false, false, false, false);
+					//PlayerController->ClientRPC_EnableHousingTipText(false, false, false, false);
 				}
 			}
 		}

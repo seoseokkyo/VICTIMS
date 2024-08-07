@@ -54,7 +54,7 @@ void UEquipmentComponent::UpdateEquippedMeshes(uint8 InventorySlot)
 		else
 		{
 			ServerRPC_UpdateEquippedMeshes(InventorySlot);
-		}
+		}		
 
 		//ServerRPC_UpdateEquippedMeshes(InventorySlot);
 	}

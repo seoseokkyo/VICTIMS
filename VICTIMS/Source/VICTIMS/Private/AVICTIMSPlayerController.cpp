@@ -1199,6 +1199,22 @@ void AVICTIMSPlayerController::VicTimsSeqPlay()
 	ServerRPC_RequsetSeqPlay();
 }
 
+void AVICTIMSPlayerController::SetSeqPlayingState(bool bOn)
+{
+	ServerRPC_SetSeqPlayingState(bOn);
+}
+
+void AVICTIMSPlayerController::ServerRPC_SetSeqPlayingState_Implementation(bool bOn)
+{
+	bSeqIsPlaying = bOn;
+	ClientRPC_SetSeqPlayingState(bSeqIsPlaying);
+}
+
+void AVICTIMSPlayerController::ClientRPC_SetSeqPlayingState_Implementation(bool bOn)
+{
+	bSeqIsPlaying = bOn;
+}
+
 void AVICTIMSPlayerController::ServerRPC_RequsetSeqPlay_Implementation()
 {
 	ClientRPC_RequsetSeqPlay();

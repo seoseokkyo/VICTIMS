@@ -380,4 +380,16 @@ public:
 
 	UFUNCTION(Client, Reliable)
 	void ClientRPC_RequsetSeqPlay();
+
+	UPROPERTY(EditAnyWhere, BlueprintReadWrite)
+	bool bSeqIsPlaying = false;
+
+	UFUNCTION(BlueprintCallable)
+	void SetSeqPlayingState(bool bOn);
+
+	UFUNCTION(Server, Reliable, BlueprintCallable)
+	void ServerRPC_SetSeqPlayingState(bool bOn);
+
+	UFUNCTION(Client, Reliable, BlueprintCallable)
+	void ClientRPC_SetSeqPlayingState(bool bOn);
 };
