@@ -140,11 +140,11 @@
   <tr>
     <td style="width: 50%; vertical-align: top; text-align: center; padding: 10px;">
       <img src="./images/common/BlackBoard.jpg" alt="BlackBoard" style="width: 100%;">
-      <img src="./images/common/TravelActor.jpg" alt="TravelActor" style="width: 100%; margin-top: 10px;">
+      <img src="./images/common/TravelFunction.jpg" alt="TravelFunction" style="width: 100%; margin-top: 10px;">
     </td>
     <td style="width: 50%; vertical-align: top; text-align: center; padding: 10px;">
+	  <img src="./images/common/TravelActor.jpg" alt="TravelActor" style="width: 100%; margin-top: 10px;">
       <img src="./images/common/TravelActorFunction.jpg" alt="TravelActorFunction" style="width: 100%;">
-      <img src="./images/common/TravelFunction.jpg" alt="TravelFunction" style="width: 100%; margin-top: 10px;">
     </td>
   </tr>
   <tr>
