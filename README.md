@@ -136,23 +136,23 @@
 </table>
 
 ### 2-9. 블랙보드[런처 to 런처 / 맵 to 맵] 및 Travel Actor 구현
-<table>
+<table style="width: 100%; border-spacing: 0;">
   <tr>
-    <td style="width: 30%; vertical-align: top;">
+    <td style="width: 50%; vertical-align: top; text-align: center; padding: 10px;">
       <img src="./images/common/BlackBoard.jpg" alt="BlackBoard" style="width: 100%;">
-	  <img src="./images/common/TravelActor.jpg" alt="TravelActor" style="width: 100%;">
+      <img src="./images/common/TravelActor.jpg" alt="TravelActor" style="width: 100%; margin-top: 10px;">
     </td>
-	    <td style="width: 30%; vertical-align: bottom;">
+    <td style="width: 50%; vertical-align: top; text-align: center; padding: 10px;">
       <img src="./images/common/TravelActorFunction.jpg" alt="TravelActorFunction" style="width: 100%;">
-	  <img src="./images/common/TravelFunction.jpg" alt="TravelFunction" style="width: 100%;">
+      <img src="./images/common/TravelFunction.jpg" alt="TravelFunction" style="width: 100%; margin-top: 10px;">
     </td>
   </tr>
   <tr>
-    <td style="width: 70%; vertical-align: top; text-align: left;">
+    <td colspan="2" style="text-align: left; padding: 10px; vertical-align: top;">
       <ul>
-			<li>맵간 이동에 사용하는 공통기능으로 파생된 2개의 액터</li>
-			<li>HomeTown->House 또는 HomeTown->Field로 이동하는 블랙보드</li>
-			<li>Field->HomeTown으로 이동하는 TravelActor</li>			
+        <li>맵간 이동에 사용하는 공통기능으로 파생된 2개의 액터</li>
+        <li>HomeTown->House 또는 HomeTown->Field로 이동하는 블랙보드</li>
+        <li>Field->HomeTown으로 이동하는 TravelActor</li>
       </ul>
     </td>
   </tr>
