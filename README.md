@@ -17,7 +17,7 @@
 <table>
   <tr>
     <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/ProgramData.jpg" alt="" style="width: 100%;">
+      <img src="./images/common/PostApocalypse.jpg" alt="PostApocalypse" style="width: 100%;">
     </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <h3>프로젝트 개요/동기</h3>
