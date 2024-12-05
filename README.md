@@ -23,7 +23,7 @@
       <h3>프로젝트 개요/동기</h3>
       <ul>
         <li>7주간 5인으로 진행한 프로젝트</li>
-		<li>데디케이트 서버를 활용한 루트슈터 장르</li>
+		<li>데디케이트 서버를 활용한 포스트 아포칼립스 분위기의 루트슈터 장르</li>
 		<li>하우징 기능</li>
 		<li>필드 맵으로 나가서 아이템을 획득하고 홈타운으로 돌아와서 획득한 아이템을 팔아서 재화를 얻는 플로우</li>
       </ul>
@@ -224,7 +224,7 @@
 <table>
   <tr>
     <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
+      <img src="./images/common/LoadingUI.jpg" alt="LoadingUI" style="width: 100%;">
     </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
