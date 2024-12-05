@@ -1,0 +1,162 @@
+# Educational Project Final
+
+<p align="center">
+  <br>
+  <img src="./images/common/Thumbnail.jpg">
+  <br>
+</p>
+
+목차
+
+1. 프로젝트 개요
+2. 진행한 작업
+3. 느낀점
+
+## 1. 프로젝트 소개
+
+<table>
+  <tr>
+    <td style="width: 30%; vertical-align: top;">
+      <img src="./images/common/ProgramData.jpg" alt="" style="width: 100%;">
+    </td>
+    <td style="width: 70%; vertical-align: top; text-align: left;">
+      <h3>프로젝트 개요/동기</h3>
+      <ul>
+        <li></li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+## 기술 스택
+
+|	GitHub	|UnrealEngine|	Blender		|
+| :------: 	| 	:------: |	:------: 	|
+| ![github]	| 	![ue]	 |		![bd]	|
+
+<br>
+
+## 2. 진행한 작업
+
+전체적인 시스템 구현 및 디버깅
+
+플레이어 기본 기능 구성
+캐릭터 베이스 작성
+캐릭터 베이스 -> 플레이어 캐릭터 -> 모캡 캐릭터
+캐릭터 베이스 -> 에너미 캐릭터
+
+기존에 사용하던 기본기능들 해당 프로젝트에 맞게 변경
+캐릭터 기능 관련 디버깅 진행
+	모캡 애니메이션 디버깅 진행
+	기존 작업해놓은 기능들이 새로운 기능과 충돌날 경우 수정
+	일부 기능과 기능의 초기화 타이밍문제 디버깅
+	
+인벤토리 기능 디버깅 지원	
+	퀵슬롯 기능 미작동
+	장착한 장비와 매쉬가 다르게 나오는 현상
+	Load시 상이한 아이템을 장착한 현상
+	
+네트워크 기능이 부족하거나 이상현상이 있는 점 디버그 / 수정
+	
+좀비 에너미 및 좀비 AI 구현
+시야와 청각을 이용하는 AI 구현
+시각, 청각에 노이즈가 많이 쌓일수록 더 빠른 속도로 이동
+짧은 시야를 갖고 있지만 한번 시야에 들어온 플레이어를 놓치게 되기까지는 오랜 시간이 필요하게 구성
+주변에서 발소리가 들리면 서서히 발소리 위치로 이동을 시작
+총기류를 너무 쉽게 사용하지 못하게 하기위해 상당히 먼 거리의 총소리도 들을 수 있으며 소리의 발원지로 이동
+발원지로 이동하는 중 추가적인 소리가 감지되지 않으면 점점 이동속도가 줄어듦
+
+데디케이트 서버 구현
+작업분량 중 서버구현 관련이 상당량을 차지하게 될 걸 예상하였으나 여의치 않아 최대한 손 가지 않는 방식으로 구현
+정석이라면 각 서버마다 세션을 열고, 클라이언트는 해당 세션을 찾아 들어가게 구성이 되어야 하겠지만 
+세이프존 레벨과 필드 레벨을 고정포트로 설정하여 실행시키고 
+클라이언트쪽에선 설정파일에 서버의 IP주소를 입력하여 url로 들어가는 방식으로 구현
+맵에서 맵 이동또한 마찬가지로 설정된 고정포트의 url로 Travel진행
+맵간 이동시 데이터는 소켓통신으로 넘기려 하였으나 세이브/로드파일로 구현이 가능하다 판단되어 드랍
+
+블랙보드[런처 to 런처 / 맵 to 맵] 구현
+
+세이브, 로드기능
+클라이언트에서는 Save/Load가 필요할 때 마다 서버에 요청을 하고 서버에서 요청자의 이름으로 된 Save파일의 데이터를 전달
+
+하우징
+다른 팀원이 진행하던 하우징 기능 마무리작업
+하우징 기능 중 플레이어별 하우스 소유권 관리기능 컨셉 변경
+소유한 하우스로 이동하는 기능 변경
+Place하는 기능 일부 수정
+에셋 피벗이 틀어져있는것들 정리
+
+파티 기능
+파티 시스템을 완전히 구현한 단계까지는 작업을 하지 못하였으나 전투 시스템에서 파티원간의 공격이 불가능하게 처리
+HomeTown[MainServer]에서는 플레이어간 공격이 불가하게 동일한 파티 태그로 묶어서 처리
+Enemy간에는 동일한 파티 태그로 묶여있어 서로 공격이 불가능
+에너미의 종류 확장 시 서로 다른 소속의 에너미간 공격이 가능하게 할 예정이었음
+
+UI
+게임 시작 / 맵이동간 로딩화면
+HomeTown으로 갈 때 / 필드로 나갈 때 서로 다른 이미지가 출력되게 작업
+
+아이템 스포너, 에너미 스포너 구현
+많은수의 루트 컨테이너와 에너미가 있어 스포너를 이용하여 객체관리
+에너미가 죽을경우 Destroy를 시키지 않고 일정시간 후 모든 초기화 필요 데이터를 초기화 후 재 배치
+스포너의 경우 일정시간마다 빈 컨테이너를 감지하여 랜덤 아이템 부여
+
+HP 위젯 및 기능 작업
+
+시퀀스 플레이어 위젯 및 기능 작업
+
+깃 작업
+여러 브랜치에서 수시로 동시수정 파일이 올라오게 되어 BeyondCompare라는 텍스트 컴페어툴로 작업관리 진행
+
+### 2-1. 
+<table>
+  <tr>
+    <td style="width: 30%; vertical-align: top;">
+      <img src="./images/common/Constructor_Destructor.jpg" alt="Constructor_Destructor" style="width: 100%;">
+    </td>
+    <td style="width: 70%; vertical-align: top; text-align: left;">
+      <ul>
+        <li></li>
+        <li></li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+### 2-n. 
+<table>
+  <tr>
+    <td style="width: 30%; vertical-align: top;">
+      <img src="./images/common/Git.jpg" alt="Git" style="width: 100%;">
+    </td>
+    <td style="width: 70%; vertical-align: top; text-align: left;">
+      <ul>
+        <li>2차 프로젝트에서의 깃 관리 실패로 인해 얻은 교훈으로 디렉토리 관리를 철저히 하고싶었으나 자유로운 디렉토리 사용이 아쉬움이 있는 프로젝트</li>
+		<li>그래도 게임 개발 프로젝트 관리를 좀 해보며 얻은 경험으로 시작과 끝까지 깃과 함께 할 수 있었던 프로젝트</li>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+<br>
+
+## 3. 느낀점
+
+<p align="justify">
+
+</p>
+
+<br>
+
+## 라이센스
+
+MIT &copy; [NoHack](mailto:lbjp114@gmail.com)
+
+<!-- Stack Icon Refernces -->
+
+[git]: /images/stack/Git.svg
+[github]: /images/stack/GithubDesktop.svg
+[ue]: /images/stack/UnrealEngine.svg
+[bd]: /images/stack/Blender.svg
+[c++]: /images/stack/C++.svg
+[mfc]: /images/stack/Microsoft_Foundation_Class.svg
