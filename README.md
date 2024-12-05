@@ -162,7 +162,8 @@
 <table>
   <tr>
     <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
+      <img src="./images/common/Save.jpg" alt="Save" style="width: 100%;">
+	  <img src="./images/common/Load.jpg" alt="Load" style="width: 100%;">
     </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
@@ -194,7 +195,7 @@
 <table>
   <tr>
     <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
+      <img src="./images/common/TeamCheck.jpg" alt="TeamCheck" style="width: 100%;">
     </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
@@ -208,15 +209,20 @@
 </table>
 
 ### 2-13. 아이템 스포너, 에너미 스포너 구현
-<table>
+<table style="width: 100%; border-spacing: 0;">
   <tr>
-    <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
+    <td style="width: 50%; vertical-align: top; text-align: center; padding: 10px;">
+      <img src="./images/common/LootActorManager.jpg" alt="LootActorManager" style="width: 100%;">
     </td>
-    <td style="width: 70%; vertical-align: top; text-align: left;">
+    <td style="width: 50%; vertical-align: top; text-align: center; padding: 10px;">
+	  <img src="./images/common/EnemyManager.jpg" alt="EnemyManager" style="width: 100%; margin-top: 10px;">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" style="text-align: left; padding: 10px; vertical-align: top;">
       <ul>
 			<li>많은수의 루트 컨테이너와 에너미가 있어 스포너를 이용하여 객체관리</li>
-			<li>에너미가 죽을경우 Destroy를 시키지 않고 일정시간 후 모든 초기화 필요 데이터를 초기화 후 재 배치</li>
+			<li>에너미가 죽을경우 일정시간 후 Destroy시킨뒤 다시 스폰하는 방식으로 구현</li>
 			<li>스포너의 경우 일정시간마다 빈 컨테이너를 감지하여 랜덤 아이템 부여</li>
       </ul>
     </td>
