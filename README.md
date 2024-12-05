@@ -120,7 +120,7 @@
 <table>
   <tr>
     <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
+      <img src="./images/common/ServerLauncher.jpg" alt="ServerLauncher" style="width: 100%;">
     </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
