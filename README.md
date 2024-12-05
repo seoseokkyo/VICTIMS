@@ -46,9 +46,6 @@
 ### 2-2. 플레이어 기본 기능 구성
 <table>
   <tr>
-    <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
-    </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
 			<li>캐릭터 베이스 작성</li>
@@ -64,9 +61,6 @@
 ### 2-4. 캐릭터 기능 관련 디버깅 진행
 <table>
   <tr>
-    <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
-    </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
 			<li>모캡 애니메이션 디버깅 진행</li>
@@ -80,9 +74,6 @@
 ### 2-5. 인벤토리 기능 디버깅 지원
 <table>
   <tr>
-    <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
-    </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
 			<li>퀵슬롯 기능 미작동</li>
