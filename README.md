@@ -101,7 +101,7 @@
     <td style="width: 100%; vertical-align: top;">
       <img src="./images/common/Zombie.jpg" alt="Zombie" style="width: 100%;">
     </td>
-    <td style="width: 70%; vertical-align: top; text-align: left;">
+    <td style="width: 70%; vertical-align: top; text-align: bottom;">
       <ul>
 			<li>시야와 청각을 이용하는 AI 구현</li>
 			<li>시각, 청각에 노이즈가 많이 쌓일수록 더 빠른 속도로 이동</li>
