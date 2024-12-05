@@ -58,22 +58,6 @@
 
 ### 2-3. 기존에 사용하던 기본기능들 해당 프로젝트에 맞게 변경
 
-### 2-4. 플레이어 기본 기능 구성
-<table>
-  <tr>
-    <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
-    </td>
-    <td style="width: 70%; vertical-align: top; text-align: left;">
-      <ul>
-			<li>캐릭터 베이스 작성</li>
-			<li>캐릭터 베이스 -> 플레이어 캐릭터 -> 모캡 캐릭터</li>
-			<li>캐릭터 베이스 -> 에너미 캐릭터</li>
-      </ul>
-    </td>
-  </tr>
-</table>
-
 ### 2-4. 캐릭터 기능 관련 디버깅 진행
 <table>
   <tr>
