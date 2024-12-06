@@ -168,7 +168,8 @@
 <table>
   <tr>
     <td style="width: 30%; vertical-align: top;">
-      <img src="./images/common/.jpg" alt="" style="width: 100%;">
+      <img src="./images/common/Housing_1.gif" alt="Housing_1" style="width: 100%;">
+	  <img src="./images/common/Housing_2.gif" alt="Housing_2" style="width: 100%;">
     </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
