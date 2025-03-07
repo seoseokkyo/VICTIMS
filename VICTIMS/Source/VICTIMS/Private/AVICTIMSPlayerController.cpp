@@ -290,8 +290,6 @@ bool AVICTIMSPlayerController::IsContainerOpen()
 
 void AVICTIMSPlayerController::ToggleInventory()
 {
-	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleInventory Pressed"));
-
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Inventory);
@@ -301,8 +299,6 @@ void AVICTIMSPlayerController::ToggleInventory()
 
 void AVICTIMSPlayerController::ToggleProfile()
 {
-	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleProfile Pressed"));
-
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Equipment);
@@ -337,8 +333,6 @@ void AVICTIMSPlayerController::SetInputDependingFromVisibleWidgets()
 
 void AVICTIMSPlayerController::ToggleContainer()
 {
-	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleContainer Pressed"));
-
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Container);
@@ -352,8 +346,6 @@ bool AVICTIMSPlayerController::IsShopOpen()
 }
 void AVICTIMSPlayerController::ToggleShop()
 {
-	// 	UKismetSystemLibrary::PrintString(GetWorld(), TEXT("ToggleShop Pressed"));
-
 	if (IsValid(HUD_Reference))
 	{
 		HUD_Reference->ToggleWindow(ELayout::Shop);
@@ -753,19 +745,23 @@ void AVICTIMSPlayerController::ServerRPC_SaveData_Implementation()
 		saveData->SavedItemAmounts.Reset();
 		saveData->SavedHotbarItemIDs.Reset();
 
-
+		// 장비슬롯 이후 인덱스 = 인벤토리 첫번째 슬롯 인덱스
 		int startPoint = (int)EEquipmentSlot::Count;
-
+		
+		// 인벤토리 슬롯 열,행 각각 총 개수
 		uint8 NumberOfRowsInventory = InventoryManagerComponent->PlayerInventory->NumberOfRowsInventory;
 		uint8 SlotsPerRowInventory = InventoryManagerComponent->PlayerInventory->SlotsPerRowInventory;
 
+		// 인벤토리 슬롯 총 개수 계산
 		int inventorySize = NumberOfRowsInventory * SlotsPerRowInventory;
 
 		for (int i = 0; i < startPoint + inventorySize; i++)
 		{
+			// 해당 인덱스 슬롯의 아이템 ID (아이템 없으면 Empty ID) 배열에 저장
 			FString TempItemID = InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).ItemStructure.ID.ToString();
 			saveData->SavedItemIDs.Add(TempItemID);
 
+			// 해당 인덱스 슬롯의 아이템 수 (아이템 없으면 Empty ID 의 수 : 0) 배열에 저장
 			uint8 TempItemAmount = InventoryManagerComponent->PlayerInventory->GetInventoryItem(i).Amount;
 			saveData->SavedItemAmounts.Add(TempItemAmount);
 		}
@@ -868,29 +864,35 @@ void AVICTIMSPlayerController::ServerRPC_LoadData_Implementation(const FString& 
 			}
 
 			// 인벤토리 아이템 로드 
+			
 			int itemCount = savedData->SavedItemIDs.Num() - 1;
+			
+			// 인벤토리 첫번째 슬롯 인덱스
 			int startPoint = (int)EEquipmentSlot::Count;
 
-			for (int i = 0; i < itemCount; i++)
+			for (int i = 0; i < savedData->SavedItemIDs.Num() - 1; i++)
 			{
+				// 아이템이 없는 슬롯이면 넘어가기
 				if (savedData->SavedItemIDs[i].Contains(TEXT("ID_Empty")))
 				{
 					continue;
 				}
 
+				// 아이템 데이터 테이블에서 ID 로 아이템 정보 가져오기
 				FSlotStructure TempSlot = InventoryManagerComponent->GetItemFromItemDB(FName(*savedData->SavedItemIDs[i]));
 
+				// 아이템이 없는 슬롯(Undefined == Empty)이면 넘어가기_ 2차 예외처리
 				if (TempSlot.ItemStructure.ItemType == EItemType::Undefined)
 				{
 					continue;
 				}
 
+				// 슬롯당 저장되어 있던 아이템 개수
 				TempSlot.Amount = savedData->SavedItemAmounts[i];
 
 				bool bOutSuccess = false;
 
-				//InventoryManagerComponent->AddItem(InventoryManagerComponent->PlayerInventory, i, TempSlot);
-
+				// 아이템 정보 + 개수 맞춰서 인벤토리에 추가
 				InventoryManagerComponent->TryToAddItemToInventory(InventoryManagerComponent->PlayerInventory, TempSlot, bOutSuccess);
 				ClientRPC_LoadHotbar(ID, TempSlot, savedData->SavedHotbarItemIDs);
 

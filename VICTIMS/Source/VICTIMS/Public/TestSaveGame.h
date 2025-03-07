@@ -36,16 +36,11 @@ public:
 
 	FPlayerSaveData PlayerDataStructure;
 
-	UPROPERTY()
+	UPROPERTY()					
 	float SavedHP;
+
 	UPROPERTY()
 	uint8 SavedGold;
-
-	UPROPERTY()
-	FString ItemID;
-
-	UPROPERTY()
-	uint8 SavedItemAmount;
 
 	UPROPERTY()
 	uint8 SavedItemSlot;
@@ -61,6 +56,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	int32 HouseNumber;
+
+	UPROPERTY()
+	FString ItemID;
+
+	UPROPERTY()
+	uint8 SavedItemAmount;
 
 	UPROPERTY()
 	float SavedMouseSensivility;

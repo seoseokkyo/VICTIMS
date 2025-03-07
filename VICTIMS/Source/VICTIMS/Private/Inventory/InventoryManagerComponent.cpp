@@ -930,6 +930,7 @@ void UInventoryManagerComponent::RemoveFromItemAmount(FSlotStructure& InventoryI
 void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, uint8 FromInventorySlot, UInventoryComponent* ToInventory, uint8 ToInventorySlot)
 {
 
+
 	if (FromInventory == ToInventory && FromInventorySlot == ToInventorySlot)
 	{
 		return;
@@ -968,6 +969,7 @@ void UInventoryManagerComponent::EquipItem(UInventoryComponent* FromInventory, u
 					uint8* ParamsBuffer = static_cast<uint8*>(FMemory_Alloca(TriggerFunction->ParmsSize));
 					FMemory::Memzero(ParamsBuffer, TriggerFunction->ParmsSize);
 					GetPlayerRef()->ProcessEvent(TriggerFunction, ParamsBuffer);
+
 					bEquipPistol = true;
 					bEquipRifle = false;
 					bEquipShotGun = false;
@@ -2069,6 +2071,7 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 	}
 
 	// 	playerReference->HousingComponent->LaunchBuildMode();
+
 	if (GetPlayerRef() && GetPlayerRef()->HousingComponent)
 	{
 
@@ -2078,7 +2081,6 @@ void UInventoryManagerComponent::ClientRPC_UseFurnitureItem_Implementation(FName
 		for (int32 i = 0; i < housingComponent->Buildables.Num(); i++)
 		{
 			FName BuildableID = housingComponent->Buildables[i].ID;
-			//UE_LOG(LogTemp, Warning, TEXT("Comparing Item ID: %s with Buildable ID: %s"), *ItemID.ToString(), *BuildableID.ToString());
 
 			if (BuildableID == ItemID)
 			{
